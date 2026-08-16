@@ -5,6 +5,14 @@ Target: ESP32-P4 JC1060 1024x600 panel.
 This application will validate the Brick MIPI-DSI display adapter and GT911
 touchscreen adapter without ESPHome.
 
+Brick headers are resolved from the repository submodule by a PlatformIO
+pre-script, so the project remains portable when cloned elsewhere.
+
+The application source and Brick API compile on ESP32-P4. The current
+PlatformIO `esp32-p4-evboard` profile still fails at final linking because its
+generated ESP-IDF memory layout does not declare `sram_low`/`sram_high`; this is
+a board profile/toolchain issue, not a display or touchscreen API error.
+
 ## Hardware profile
 
 - display: 1024x600 MIPI-DSI, 2 lanes, 600 Mbps, 40 MHz pixel clock;
