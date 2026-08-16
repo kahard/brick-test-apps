@@ -8,10 +8,10 @@ touchscreen adapter without ESPHome.
 Brick headers are resolved from the repository submodule by a PlatformIO
 pre-script, so the project remains portable when cloned elsewhere.
 
-The application source and Brick API compile on ESP32-P4. The current
-The test uses the `esp32-p4_r3-evboard` profile because the older ES profile
-generates an incompatible ESP-IDF memory layout. This is a linker/profile
-compatibility detail; it does not affect the Brick display or touchscreen API.
+The application source and Brick API compile on ESP32-P4. The test uses a
+local ECO2-compatible `esp32-p4-eco2-evboard` profile. Its local
+`sdkconfig.defaults` matches the working ESPHome configuration: 16 MB flash,
+HEX PSRAM, 80 MHz DIO flash and ESP32-P4 revision 0.
 
 ## Hardware profile
 
@@ -20,7 +20,7 @@ compatibility detail; it does not affect the Brick display or touchscreen API.
 - GT911 SDA: GPIO7;
 - GT911 SCL: GPIO8;
 - GT911 default address: `0x5D`;
-- ESP32-P4 board definition: `esp32-p4_r3-evboard`.
+- ESP32-P4 board definition: `esp32-p4-eco2-evboard` (ESP32-P4 ECO2).
 
 ## Test behavior
 
