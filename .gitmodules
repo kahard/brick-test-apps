@@ -1,0 +1,3 @@
+[submodule "libs/brick"]
+	path = libs/brick
+	url = https://github.com/kahard/brick-framework.git

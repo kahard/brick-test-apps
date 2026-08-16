@@ -1,0 +1,5 @@
+**/.pio/
+**/.pytest_cache/
+**/sdkconfig*
+**/CMakeLists.txt
+**/CMakeListsPrivate.txt
