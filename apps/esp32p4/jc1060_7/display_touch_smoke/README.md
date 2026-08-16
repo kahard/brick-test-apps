@@ -9,9 +9,9 @@ Brick headers are resolved from the repository submodule by a PlatformIO
 pre-script, so the project remains portable when cloned elsewhere.
 
 The application source and Brick API compile on ESP32-P4. The current
-PlatformIO `esp32-p4-evboard` profile still fails at final linking because its
-generated ESP-IDF memory layout does not declare `sram_low`/`sram_high`; this is
-a board profile/toolchain issue, not a display or touchscreen API error.
+The test uses the `esp32-p4_r3-evboard` profile because the older ES profile
+generates an incompatible ESP-IDF memory layout. This is a linker/profile
+compatibility detail; it does not affect the Brick display or touchscreen API.
 
 ## Hardware profile
 
@@ -20,7 +20,7 @@ a board profile/toolchain issue, not a display or touchscreen API error.
 - GT911 SDA: GPIO7;
 - GT911 SCL: GPIO8;
 - GT911 default address: `0x5D`;
-- ESP32-P4 board definition: `esp32-p4-evboard`.
+- ESP32-P4 board definition: `esp32-p4_r3-evboard`.
 
 ## Test behavior
 
