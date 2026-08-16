@@ -27,3 +27,17 @@ a board profile/toolchain issue, not a display or touchscreen API error.
 - initialize the display and show a color test pattern;
 - initialize GT911 and print touch coordinates and state to the serial log;
 - draw a marker at the last reported touch position.
+
+## Build commands
+
+Run these commands from this directory:
+
+```text
+make clean    # remove the PlatformIO build output
+make compile  # compile the application
+make upload   # compile if needed and upload to the board
+make monitor  # open the serial monitor
+```
+
+The `PIO` and `ENV` variables can be overridden when needed, for example:
+`make compile PIO=pio ENV=jc1060_7_display_touch_smoke`.
