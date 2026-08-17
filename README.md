@@ -11,7 +11,7 @@ brick_test_apps/
 │   │   └── jc1060_7/
 │   ├── esp32s3/
 │   │   └── panel_480/
-│   └── esp32/
+│   └── esp32wroom32/
 │       └── cyd/
 └── README.md
 ```
