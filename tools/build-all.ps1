@@ -7,6 +7,23 @@ $ErrorActionPreference = "Continue"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot ".."))
 $appRoot = Join-Path $repoRoot "apps"
 
+# ESP-IDF refuses to install its tools when it detects a Git Bash/MSYS2
+# environment. The script may itself be started from such a shell, so keep
+# the repository build independent from those inherited variables.
+@(
+    "MSYSTEM",
+    "MSYSTEM_CARCH",
+    "MSYSTEM_CHOST",
+    "MSYSTEM_PREFIX",
+    "MINGW_CHOST",
+    "MINGW_PACKAGE_PREFIX",
+    "MINGW_PREFIX",
+    "SHELL",
+    "EXEPATH"
+) | ForEach-Object {
+    Remove-Item -Path "Env:$_" -ErrorAction SilentlyContinue
+}
+
 $makefiles = Get-ChildItem -LiteralPath $appRoot -Recurse -Filter "Makefile" -File |
     Where-Object { $_.FullName -notmatch "\\(\.git|\.pio)\\" } |
     Sort-Object FullName
