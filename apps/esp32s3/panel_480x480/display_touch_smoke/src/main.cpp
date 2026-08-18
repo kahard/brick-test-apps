@@ -1,8 +1,8 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.hpp"
-#include "brick/platform/esp32/s3/profiles/st7701s_gt911.hpp"
+#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
+#include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

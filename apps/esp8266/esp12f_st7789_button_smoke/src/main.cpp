@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp8266/profiles/esp12f_st7789_240x240_ttp223.hpp"
+#include "brick/platform/esp8266/profiles/esp12f_st7789_240x240_ttp223.h"
 
 namespace {
 constexpr std::uint16_t kWidth = 240;
