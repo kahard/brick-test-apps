@@ -1,8 +1,8 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.hpp"
-#include "brick/platform/esp32/p4/profiles/jc1060_gt911.hpp"
+#include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.h"
+#include "brick/platform/esp32/p4/profiles/jc1060_gt911.h"
 
 #include "driver/gpio.h"
 #include "esp_log.h"
