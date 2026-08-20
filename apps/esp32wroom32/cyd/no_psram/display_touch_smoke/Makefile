@@ -1,6 +1,6 @@
 PIO ?= platformio
 ENV ?= cyd_display_touch_smoke
-PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
+PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../../tools/platformio.ps1)"
 
 .PHONY: clean compile upload monitor
 

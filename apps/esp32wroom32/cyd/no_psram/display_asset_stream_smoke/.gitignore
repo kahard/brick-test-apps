@@ -1,0 +1,4 @@
+.pio
+assets/generated
+src/generated_assets.h
+sdkconfig.*
