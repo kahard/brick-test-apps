@@ -1,4 +1,6 @@
 **/.pio/
+**/assets/generated/
+**/generated_assets.h
 **/.pytest_cache/
 **/sdkconfig*
 **/CMakeLists.txt

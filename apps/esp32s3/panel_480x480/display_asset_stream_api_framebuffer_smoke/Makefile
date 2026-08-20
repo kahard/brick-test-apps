@@ -1,4 +1,5 @@
 PIO ?= platformio
+PORT ?= COM23
 ENV ?= esp32s3_480_display_asset_stream_api_framebuffer_smoke
 PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
 
@@ -7,11 +8,12 @@ PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../.
 clean:
 	$(PIO_RUN) run -e $(ENV) -t clean
 
-compile:
+compile: assets
 	$(PIO_RUN) run -e $(ENV)
 
-upload:
+upload: assets
 	$(PIO_RUN) run -e $(ENV) -t upload
+	python -m esptool --chip esp32s3 --port $(PORT) --baud 460800 write_flash 0x310000 assets/generated/assets.bin
 
 monitor:
 	$(PIO) device monitor -e $(ENV)
