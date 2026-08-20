@@ -17,9 +17,10 @@ reported. PlatformIO commands use the repository wrapper to avoid inherited
 Git Bash/MSYS variables during tool installation.
 # ESP-12F ST7789 asset streaming smoke test
 
-This is a separate low-RAM streaming test for the ESP-12F and 240x240 ST7789.
-Two RGB565 images are stored as `const` assets in flash and are sent to the
-display in 20-row stripes. The runtime stripe buffer is only 9,600 bytes;
+This is a low-RAM asset test for the ESP-12F and 240x240 ST7789. Two RGB565
+images are packed into one bundle and stored as a single `PROGMEM` array. The
+generated manifest supplies names, offsets and dimensions; `ProgmemAssetSource`
+maps those descriptors to flash. The runtime stripe buffer is only 9,600 bytes;
 there is no full-screen framebuffer in RAM.
 
 ```text
@@ -29,4 +30,8 @@ make upload
 make monitor
 ```
 
-The benchmark reports the number of frames, elapsed time, and effective FPS.
+GPIO4 is connected to the TTP223/button input. The first image is shown after
+startup; each new button press toggles between the two images, while releasing
+the button has no effect. The serial monitor reports each toggle. This test
+intentionally does not measure FPS because the ESP8266 has no RAM for a
+full-screen framebuffer.

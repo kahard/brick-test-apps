@@ -6,13 +6,14 @@ PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../.
 .PHONY: clean assets compile upload monitor
 
 assets:
-	python "../../../../brick_framework/tools/assets/generate_image_asset.py" --input "../../esp32s3/panel_480x480/display_lvgl_asset_smoke/assets/joy_tears.png" --output src/assets/joy_tears_240_rgb565.c --symbol brick_joy_tears_240 --format rgb565 --resize 240x240 --progmem
-	python "../../../../brick_framework/tools/assets/generate_image_asset.py" --input "../../esp32s3/panel_480x480/display_lvgl_asset_smoke/assets/sweat_smile.png" --output src/assets/sweat_smile_240_rgb565.c --symbol brick_sweat_smile_240 --format rgb565 --resize 240x240 --progmem
+	python "../../../../brick_framework/tools/assets/generate_image_asset.py" --input "../../esp32s3/panel_480x480/display_lvgl_asset_smoke/assets/joy_tears.png" --output assets/generated/joy_tears_240_rgb565.c --symbol brick_joy_tears_240 --format rgb565 --resize 240x240 --binary assets/generated/joy_tears_240_rgb565.bin --progmem
+	python "../../../../brick_framework/tools/assets/generate_image_asset.py" --input "../../esp32s3/panel_480x480/display_lvgl_asset_smoke/assets/sweat_smile.png" --output assets/generated/sweat_smile_240_rgb565.c --symbol brick_sweat_smile_240 --format rgb565 --resize 240x240 --binary assets/generated/sweat_smile_240_rgb565.bin --progmem
+	python "../../../../brick_framework/tools/assets/bundle_assets.py" --output assets/generated/bundle.bin --header src/generated_assets.h --manifest assets/generated/bundle.tsv --c-source src/bundle.cpp --c-symbol brick_asset_bundle --asset joy_tears=assets/generated/joy_tears_240_rgb565.bin,240x240,rgb565 --asset sweat_smile=assets/generated/sweat_smile_240_rgb565.bin,240x240,rgb565
 
 clean:
 	$(PIO_RUN) run -e $(ENV) -t clean
 
-compile:
+compile: assets
 	$(PIO_RUN) run -e $(ENV)
 
 upload:
