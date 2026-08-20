@@ -1,16 +1,17 @@
 PIO ?= platformio
 ENV ?= jc1060_7_display_touch_smoke
+PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
 
 .PHONY: clean compile upload monitor
 
 clean:
-	$(PIO) run -e $(ENV) -t clean
+	$(PIO_RUN) run -e $(ENV) -t clean
 
 compile:
-	$(PIO) run -e $(ENV)
+	$(PIO_RUN) run -e $(ENV)
 
 upload:
-	$(PIO) run -e $(ENV) -t upload
+	$(PIO_RUN) run -e $(ENV) -t upload
 
 monitor:
 	$(PIO) device monitor -e $(ENV)

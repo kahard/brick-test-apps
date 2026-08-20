@@ -22,8 +22,10 @@ void fill_rows(std::uint16_t y, std::uint16_t height, std::uint16_t color) {
     pixels[index * 2] = static_cast<std::uint8_t>(color >> 8);
     pixels[index * 2 + 1] = static_cast<std::uint8_t>(color);
   }
-  display.draw_pixels(0, y, kWidth, height, pixels.data(),
-                      static_cast<std::size_t>(kWidth) * height * 2);
+  const brick::interfaces::display::PixelBuffer buffer{
+      pixels.data(), kWidth, height, static_cast<std::size_t>(kWidth) * 2,
+      brick::interfaces::display::PixelFormat::rgb565, false};
+  display.draw_buffer({0, y, kWidth, height}, buffer);
 }
 
 void draw_test_pattern() {

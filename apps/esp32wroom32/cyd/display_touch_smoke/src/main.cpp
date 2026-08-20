@@ -28,9 +28,11 @@ void draw_test_pattern() {
       stripe[pixel * 2] = static_cast<std::uint8_t>(color >> 8);
       stripe[pixel * 2 + 1] = static_cast<std::uint8_t>(color);
     }
-    if (!display.draw_pixels(0, index * kStripeHeight, kWidth, kStripeHeight,
-                             reinterpret_cast<const std::uint8_t*>(stripe.data()),
-                             stripe.size())) {
+    const brick::interfaces::display::PixelBuffer buffer{
+        reinterpret_cast<const std::uint8_t*>(stripe.data()), kWidth, kStripeHeight,
+        static_cast<std::size_t>(kWidth) * sizeof(std::uint16_t),
+        brick::interfaces::display::PixelFormat::rgb565, false};
+    if (!display.draw_buffer({0, index * kStripeHeight, kWidth, kStripeHeight}, buffer)) {
       ESP_LOGE(TAG, "draw failed for stripe %u", index);
     }
   }
