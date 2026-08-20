@@ -1,6 +1,8 @@
 #include <array>
 #include <cstdint>
 
+#include "generated_assets.h"
+#include "brick/core/image/AssetBundle.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/interfaces/display/ITouchscreen.h"
@@ -16,14 +18,8 @@ constexpr std::uint16_t kHeight = 480;
 constexpr std::uint16_t kStripeHeight = 20;
 constexpr std::size_t kScratchBytes = static_cast<std::size_t>(kWidth) * kStripeHeight * 2;
 
-extern const std::uint8_t joy_tears_start[] asm("_binary_joy_tears_stream_rgb565_bin_start");
-extern const std::uint8_t joy_tears_end[] asm("_binary_joy_tears_stream_rgb565_bin_end");
-extern const std::uint8_t sweat_smile_start[] asm("_binary_sweat_smile_stream_rgb565_bin_start");
-extern const std::uint8_t sweat_smile_end[] asm("_binary_sweat_smile_stream_rgb565_bin_end");
-extern const std::uint8_t red_background_start[] asm("_binary_red_background_rgb565_bin_start");
-extern const std::uint8_t red_background_end[] asm("_binary_red_background_rgb565_bin_end");
-extern const std::uint8_t blue_background_start[] asm("_binary_blue_background_rgb565_bin_start");
-extern const std::uint8_t blue_background_end[] asm("_binary_blue_background_rgb565_bin_end");
+extern const std::uint8_t assets_start[] asm("_binary_assets_bin_start");
+extern const std::uint8_t assets_end[] asm("_binary_assets_bin_end");
 
 auto panel_config() {
     auto config = brick::platform::esp32::s3::profiles::st7701s_480x480();
@@ -49,14 +45,15 @@ public:
     }
 };
 
+brick::core::image::AssetBundle bundle(
+    assets_start, static_cast<std::size_t>(assets_end - assets_start),
+    generated_assets::entries, generated_assets::entry_count);
+
 EmbeddedAssetReader reader;
 brick::core::image::AssetStreamer streamer(display, reader);
 
-brick::interfaces::display::ImageAsset make_asset(const std::uint8_t* start,
-                                                  const std::uint8_t* end) {
-    return {start, kWidth, kHeight, static_cast<std::size_t>(kWidth) * 2,
-            static_cast<std::size_t>(end - start),
-            brick::interfaces::display::PixelFormat::rgb565};
+brick::interfaces::display::ImageAsset make_asset(generated_assets::Id id) {
+    return bundle.image(static_cast<brick::interfaces::display::AssetId>(id));
 }
 }  // namespace
 
@@ -85,7 +82,7 @@ extern "C" void app_main() {
         return;
     }
 
-    const auto first = make_asset(joy_tears_start, joy_tears_end);
+    const auto first = make_asset(generated_assets::Id::joy_tears);
     if (!streamer.stream_to_buffer(first, framebuffer[0], scratch.data(), scratch.size()) ||
         !streamer.stream_to_buffer(first, framebuffer[1], scratch.data(), scratch.size()) ||
         !framebuffers.present_frame_buffer(0)) {
@@ -119,10 +116,10 @@ extern "C" void app_main() {
 
         const bool use_second = (frame & 1U) != 0U;
         const auto asset = background_mode
-            ? (use_second ? make_asset(blue_background_start, blue_background_end)
-                          : make_asset(red_background_start, red_background_end))
-            : (use_second ? make_asset(sweat_smile_start, sweat_smile_end)
-                          : make_asset(joy_tears_start, joy_tears_end));
+            ? (use_second ? make_asset(generated_assets::Id::blue_background)
+                          : make_asset(generated_assets::Id::red_background))
+            : (use_second ? make_asset(generated_assets::Id::sweat_smile)
+                          : make_asset(generated_assets::Id::joy_tears));
 
         if (!streamer.stream_to_buffer(asset, framebuffer[back], scratch.data(), scratch.size()) ||
             !display.wait_for_vsync(100) || !framebuffers.present_frame_buffer(back)) {
