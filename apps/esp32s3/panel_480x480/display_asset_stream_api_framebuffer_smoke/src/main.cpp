@@ -2,13 +2,13 @@
 #include <cstdint>
 
 #include "generated_assets.h"
+#include "PartitionAssetSource.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "esp_log.h"
-#include "esp_partition.h"
 #include "esp_timer.h"
 
 namespace {
@@ -30,27 +30,7 @@ brick::platform::esp32::touch::Gt911Touchscreen touch(
     brick::platform::esp32::s3::profiles::st7701s_gt911());
 std::array<std::uint8_t, kScratchBytes> scratch{};
 
-class PartitionAssetSource final : public brick::interfaces::display::IAssetSource {
-public:
-    bool begin() {
-        partition_ = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
-                                               ESP_PARTITION_SUBTYPE_ANY, "assets");
-        return partition_ != nullptr;
-    }
-
-    bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
-              std::uint8_t* destination, std::size_t bytes) override {
-        if (partition_ == nullptr || destination == nullptr || offset + bytes > asset.size ||
-            asset.offset + offset + bytes > partition_->size)
-            return false;
-        return esp_partition_read(partition_, asset.offset + offset, destination, bytes) == ESP_OK;
-    }
-
-private:
-    const esp_partition_t* partition_ = nullptr;
-};
-
-PartitionAssetSource asset_source;
+PartitionAssetSource asset_source("assets");
 brick::core::image::AssetStreamer streamer(display);
 }  // namespace
 
