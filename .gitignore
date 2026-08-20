@@ -3,6 +3,7 @@
 **/generated_assets.h
 **/.pytest_cache/
 **/sdkconfig*
+!apps/esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/sdkconfig.defaults
 **/CMakeLists.txt
 **/CMakeListsPrivate.txt
 .vscode/
