@@ -2,13 +2,13 @@
 #include <cstdint>
 
 #include "generated_assets.h"
-#include "brick/core/image/AssetBundle.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "esp_log.h"
+#include "esp_partition.h"
 #include "esp_timer.h"
 
 namespace {
@@ -17,9 +17,6 @@ constexpr std::uint16_t kWidth = 480;
 constexpr std::uint16_t kHeight = 480;
 constexpr std::uint16_t kStripeHeight = 20;
 constexpr std::size_t kScratchBytes = static_cast<std::size_t>(kWidth) * kStripeHeight * 2;
-
-extern const std::uint8_t assets_start[] asm("_binary_assets_bin_start");
-extern const std::uint8_t assets_end[] asm("_binary_assets_bin_end");
 
 auto panel_config() {
     auto config = brick::platform::esp32::s3::profiles::st7701s_480x480();
@@ -33,28 +30,28 @@ brick::platform::esp32::touch::Gt911Touchscreen touch(
     brick::platform::esp32::s3::profiles::st7701s_gt911());
 std::array<std::uint8_t, kScratchBytes> scratch{};
 
-class EmbeddedAssetReader final : public brick::interfaces::display::IAssetReader {
+class PartitionAssetSource final : public brick::interfaces::display::IAssetSource {
 public:
-    bool read(const brick::interfaces::display::ImageAsset& asset, std::size_t offset,
-              std::uint8_t* destination, std::size_t bytes) override {
-        if (destination == nullptr || asset.data == nullptr || offset + bytes > asset.data_size)
-            return false;
-        for (std::size_t i = 0; i < bytes; ++i)
-            destination[i] = asset.data[offset + i];
-        return true;
+    bool begin() {
+        partition_ = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
+                                               ESP_PARTITION_SUBTYPE_ANY, "assets");
+        return partition_ != nullptr;
     }
+
+    bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
+              std::uint8_t* destination, std::size_t bytes) override {
+        if (partition_ == nullptr || destination == nullptr || offset + bytes > asset.size ||
+            asset.offset + offset + bytes > partition_->size)
+            return false;
+        return esp_partition_read(partition_, asset.offset + offset, destination, bytes) == ESP_OK;
+    }
+
+private:
+    const esp_partition_t* partition_ = nullptr;
 };
 
-brick::core::image::AssetBundle bundle(
-    assets_start, static_cast<std::size_t>(assets_end - assets_start),
-    generated_assets::entries, generated_assets::entry_count);
-
-EmbeddedAssetReader reader;
-brick::core::image::AssetStreamer streamer(display, reader);
-
-brick::interfaces::display::ImageAsset make_asset(generated_assets::Id id) {
-    return bundle.image(static_cast<brick::interfaces::display::AssetId>(id));
-}
+PartitionAssetSource asset_source;
+brick::core::image::AssetStreamer streamer(display);
 }  // namespace
 
 extern "C" void app_main() {
@@ -62,6 +59,10 @@ extern "C" void app_main() {
              kWidth, kHeight);
     if (!display.begin()) {
         ESP_LOGE(TAG, "ST7701S RGB display initialization failed");
+        return;
+    }
+    if (!asset_source.begin()) {
+        ESP_LOGE(TAG, "Assets partition not found");
         return;
     }
     if (!touch.begin()) {
@@ -82,9 +83,10 @@ extern "C" void app_main() {
         return;
     }
 
-    const auto first = make_asset(generated_assets::Id::joy_tears);
-    if (!streamer.stream_to_buffer(first, framebuffer[0], scratch.data(), scratch.size()) ||
-        !streamer.stream_to_buffer(first, framebuffer[1], scratch.data(), scratch.size()) ||
+    const auto* first = generated_assets::find(generated_assets::Id::joy_tears);
+    if (first == nullptr ||
+        !streamer.stream_to_buffer(*first, asset_source, framebuffer[0], scratch.data(), scratch.size()) ||
+        !streamer.stream_to_buffer(*first, asset_source, framebuffer[1], scratch.data(), scratch.size()) ||
         !framebuffers.present_frame_buffer(0)) {
         ESP_LOGE(TAG, "Unable to initialize framebuffer page flip");
         return;
@@ -97,7 +99,7 @@ extern "C" void app_main() {
     bool background_mode = false;
     bool touch_down = false;
     ESP_LOGI(TAG, "AssetStreamer framebuffer page flip active: asset_bytes=%u scratch_bytes=%u touch=GT911",
-             static_cast<unsigned>(first.data_size), static_cast<unsigned>(kScratchBytes));
+             static_cast<unsigned>(first->size), static_cast<unsigned>(kScratchBytes));
 
     while (true) {
         const auto frame_started = esp_timer_get_time();
@@ -115,13 +117,14 @@ extern "C" void app_main() {
         touch_down = has_touch;
 
         const bool use_second = (frame & 1U) != 0U;
-        const auto asset = background_mode
-            ? (use_second ? make_asset(generated_assets::Id::blue_background)
-                          : make_asset(generated_assets::Id::red_background))
-            : (use_second ? make_asset(generated_assets::Id::sweat_smile)
-                          : make_asset(generated_assets::Id::joy_tears));
+        const auto* asset = background_mode
+            ? (use_second ? generated_assets::find(generated_assets::Id::blue_background)
+                          : generated_assets::find(generated_assets::Id::red_background))
+            : (use_second ? generated_assets::find(generated_assets::Id::sweat_smile)
+                          : generated_assets::find(generated_assets::Id::joy_tears));
 
-        if (!streamer.stream_to_buffer(asset, framebuffer[back], scratch.data(), scratch.size()) ||
+        if (asset == nullptr ||
+            !streamer.stream_to_buffer(*asset, asset_source, framebuffer[back], scratch.data(), scratch.size()) ||
             !display.wait_for_vsync(100) || !framebuffers.present_frame_buffer(back)) {
             ESP_LOGE(TAG, "AssetStreamer framebuffer page flip failed at frame=%u",
                      static_cast<unsigned>(frame));
