@@ -11,3 +11,7 @@ edges over the serial monitor. The bottom status stripe changes color while
 GPIO4 is active.
 
 The application uses the Brick ESP8266 adapters from `libs/brick`.
+
+Verified on hardware: the ST7789 display works and button state changes are
+reported. PlatformIO commands use the repository wrapper to avoid inherited
+Git Bash/MSYS variables during tool installation.

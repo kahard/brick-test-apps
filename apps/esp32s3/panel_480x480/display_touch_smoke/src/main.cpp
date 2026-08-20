@@ -23,9 +23,11 @@ void draw_test_pattern() {
                                       0xFFE0, 0xF81F, 0x07FF};
   for (std::uint16_t index = 0; index < 6; ++index) {
     stripe.fill(colors[index]);
-    display.draw_pixels(0, index * kStripeHeight, kWidth, kStripeHeight,
-                        reinterpret_cast<const std::uint8_t*>(stripe.data()),
-                        stripe.size() * sizeof(std::uint16_t));
+    const brick::interfaces::display::PixelBuffer buffer{
+        reinterpret_cast<const std::uint8_t*>(stripe.data()), kWidth, kStripeHeight,
+        static_cast<std::size_t>(kWidth) * sizeof(std::uint16_t),
+        brick::interfaces::display::PixelFormat::rgb565, false};
+    display.draw_buffer({0, index * kStripeHeight, kWidth, kStripeHeight}, buffer);
   }
 }
 }  // namespace

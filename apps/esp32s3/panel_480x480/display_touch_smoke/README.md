@@ -9,3 +9,7 @@ make compile
 make upload
 make monitor
 ```
+
+Zweryfikowano sprzętowo: obraz ST7701S 480x480 oraz dotyk GT911 działają.
+Polecenia `compile` i `upload` korzystają z wrappera, który izoluje PlatformIO
+od zmiennych środowiskowych Git Bash/MSYS.
