@@ -1,4 +1,9 @@
 ENV ?= esp32s3_480_display_lvgl_asset_framebuffer_touch_smoke
+
+.PHONY: clean compile upload monitor
+
+clean:
+	platformio run -e $(ENV) -t clean
 PYTHON ?= python
 ASSET_TOOLS ?= ../../../../../brick_framework/tools/assets
 FONT_SOURCE ?= assets/Roboto-Regular.ttf
