@@ -29,7 +29,10 @@ void draw_test_pattern() {
         reinterpret_cast<const std::uint8_t*>(stripe.data()), width, stripe_height,
         static_cast<std::size_t>(width) * sizeof(std::uint16_t),
         brick::interfaces::display::PixelFormat::rgb565, false};
-    display.draw_buffer({0, stripe_index * stripe_height, width, stripe_height}, buffer);
+    const bool submitted = display.draw_buffer({0, stripe_index * stripe_height, width, stripe_height}, buffer);
+    ESP_LOGI(TAG, "stripe=%u submitted=%d", stripe_index, submitted);
+    if (submitted)
+      display.wait_for_transfer_complete(1000);
   }
 }
 }  // namespace
@@ -48,6 +51,8 @@ extern "C" void app_main() {
     ESP_LOGE(TAG, "GT911 initialization failed");
     return;
   }
+  ESP_LOGI(TAG, "Display and touch ready; drawing test pattern in 2 seconds");
+  vTaskDelay(pdMS_TO_TICKS(2000));
   draw_test_pattern();
 
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
