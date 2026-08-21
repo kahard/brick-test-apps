@@ -1,0 +1,6 @@
+.pio/
+src/fonts/
+src/images/
+sdkconfig.*
+src/generated_assets.h
+assets/generated/
