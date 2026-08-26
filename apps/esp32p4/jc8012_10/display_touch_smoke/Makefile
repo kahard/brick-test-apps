@@ -1,9 +1,19 @@
 PIO ?= platformio
 ENV ?= jc8012_10_display_touch_smoke_r0
 PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
-.PHONY: compile compile-all compile-0 compile-90 compile-180 compile-270 upload upload-0 upload-90 upload-180 upload-270 monitor
+.PHONY: clean compile compile-all compile-0 compile-90 compile-180 compile-270 upload upload-0 upload-90 upload-180 upload-270 monitor
+clean: clean-all
+clean-all: clean-0 clean-90 clean-180 clean-270
+clean-0:
+	$(PIO_RUN) run -e jc8012_10_display_touch_smoke_r0 -t clean
+clean-90:
+	$(PIO_RUN) run -e jc8012_10_display_touch_smoke_r90 -t clean
+clean-180:
+	$(PIO_RUN) run -e jc8012_10_display_touch_smoke_r180 -t clean
+clean-270:
+	$(PIO_RUN) run -e jc8012_10_display_touch_smoke_r270 -t clean
 compile:
-	$(PIO_RUN) run -e $(ENV)
+	$(MAKE) compile-all
 compile-all: compile-0 compile-90 compile-180 compile-270
 compile-0:
 	$(PIO_RUN) run -e jc8012_10_display_touch_smoke_r0

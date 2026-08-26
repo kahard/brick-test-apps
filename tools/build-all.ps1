@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$MakeCommand = "make"
+    [string]$MakeCommand = "make",
+    [int]$CompileAttempts = 2
 )
 
 $ErrorActionPreference = "Continue"
@@ -55,9 +56,18 @@ foreach ($makefile in $makefiles) {
             Write-Host "clean: FAILED (exit $LASTEXITCODE)" -ForegroundColor Red
         }
 
-        Write-Host "> $MakeCommand compile" -ForegroundColor DarkGray
-        & $MakeCommand compile
-        $compileOk = ($LASTEXITCODE -eq 0)
+        for ($attempt = 1; $attempt -le [Math]::Max(1, $CompileAttempts); $attempt++) {
+            if ($attempt -gt 1) {
+                Write-Host "Ponowienie kompilacji ($attempt/$CompileAttempts) po błędzie przejściowym." -ForegroundColor Yellow
+            } else {
+                Write-Host "> $MakeCommand compile" -ForegroundColor DarkGray
+            }
+
+            & $MakeCommand compile
+            $compileOk = ($LASTEXITCODE -eq 0)
+            if ($compileOk) { break }
+        }
+
         if ($compileOk) {
             Write-Host "compile: OK" -ForegroundColor Green
         } else {

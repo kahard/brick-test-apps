@@ -13,8 +13,7 @@ images:
 	$(PYTHON) $(ASSET_TOOLS)/generate_image_asset.py --input ../../../esp32s3/panel_480x480/display_lvgl_asset_smoke/assets/sweat_smile.png --symbol brick_sweat_smile --format rgb565 --resize 100x100 --binary assets/generated/sweat_smile_rgb565.bin
 	$(PYTHON) $(ASSET_TOOLS)/bundle_assets.py --output assets/generated/assets.bin --header src/generated_assets.h --manifest assets/generated/assets.tsv --asset joy_tears=assets/generated/joy_tears_rgb565.bin,100x100,rgb565 --asset sweat_smile=assets/generated/sweat_smile_rgb565.bin,100x100,rgb565
 assets: images
-compile: assets
-	$(PIO_RUN) run -e $(ENV)
+compile: compile-all
 compile-0: assets
 	$(PIO_RUN) run -e jc8012_10_display_lvgl_asset_framebuffer_smoke_r0
 compile-90: assets
@@ -23,7 +22,7 @@ compile-180: assets
 	$(PIO_RUN) run -e jc8012_10_display_lvgl_asset_framebuffer_smoke_r180
 compile-270: assets
 	$(PIO_RUN) run -e jc8012_10_display_lvgl_asset_framebuffer_smoke_r270
-compile-all: compile-0 compile-90 compile-180 compile-270
+compile-all: compile-0 compile-90 compile-180 compile-270 compile-touch-all compile-fps-color compile-fps-asset
 compile-touch-0: assets
 	$(PIO_RUN) run -e jc8012_10_display_lvgl_asset_framebuffer_smoke_touch_r0
 compile-touch-90: assets
