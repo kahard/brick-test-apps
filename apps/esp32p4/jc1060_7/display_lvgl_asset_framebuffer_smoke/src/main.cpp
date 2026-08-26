@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstdint>
-#include "brick/interfaces/display/TouchscreenTypes.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
+#include "brick/platform/esp32/LvglTouchAdapter.h"
 #include "brick/platform/esp32/p4/MipiDsiDisplay.h"
 #include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.h"
 #include "brick/platform/esp32/p4/profiles/jc1060_gt911.h"
@@ -34,12 +34,6 @@ bool load_asset(generated_assets::Id id) {
     const auto* asset = generated_assets::find(id);
     return assets_partition && image_pixels && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK;
 }
-void read_touch(lv_indev_t*, lv_indev_data_t* data) {
-    brick::interfaces::display::TouchPoint point{}; std::size_t count = 0;
-    if (touch.read(&point, 1, count) && count && point.state != brick::interfaces::display::TouchState::released) {
-        data->point = {point.x, point.y}; data->state = LV_INDEV_STATE_PRESSED;
-    } else data->state = LV_INDEV_STATE_RELEASED;
-}
 void clicked(lv_event_t*) {
     ++touches;
     showing_joy_tears = !showing_joy_tears;
@@ -65,7 +59,8 @@ extern "C" void app_main() {
     image_dsc = {.header = {.cf = LV_COLOR_FORMAT_RGB565, .w = 100, .h = 100, .stride = 200}, .data_size = kImageBytes, .data = image_pixels};
     lv_init(); brick::platform::esp32::LvglDisplayAdapter adapter(display);
     if (!adapter.create(LV_DISPLAY_RENDER_MODE_FULL, first, second, kFrameBytes)) { ESP_LOGE(TAG, "LVGL display creation failed"); return; }
-    auto* indev = lv_indev_create(); lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); lv_indev_set_read_cb(indev, read_touch);
+    brick::platform::esp32::LvglTouchAdapter touch_adapter(touch);
+    if (touch_adapter.create() == nullptr) { ESP_LOGE(TAG, "LVGL touch input creation failed"); return; }
     auto* screen = lv_screen_active(); lv_obj_set_style_bg_color(screen, lv_color_hex(0x202040), 0);
     auto* title = lv_label_create(screen); lv_label_set_text(title, "JC1060 LVGL ASSET"); lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 24);
     image_widget = lv_image_create(screen); lv_image_set_src(image_widget, &image_dsc); lv_obj_align(image_widget, LV_ALIGN_CENTER, 0, -40);

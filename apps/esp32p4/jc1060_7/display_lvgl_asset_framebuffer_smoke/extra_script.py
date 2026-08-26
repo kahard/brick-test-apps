@@ -11,3 +11,4 @@ env.BuildSources(str(brick_build_dir / "core"), str(brick_root / "libs" / "core"
 env.BuildSources(str(brick_build_dir / "touch"), str(brick_root / "platforms" / "esp32" / "src"), "+<Gt911Touchscreen.cpp>")
 env.BuildSources(str(brick_build_dir / "display"), str(brick_root / "platforms" / "esp32" / "src"), "+<MipiDsiDisplay.cpp>")
 env.BuildSources(str(brick_build_dir / "lvgl"), str(brick_root / "platforms" / "esp32" / "src"), "+<LvglDisplayAdapter.cpp>")
+env.BuildSources(str(brick_build_dir / "lvgl"), str(brick_root / "platforms" / "esp32" / "src"), "+<LvglTouchAdapter.cpp>")

@@ -161,6 +161,15 @@ extern "C" void app_main() {
         ESP_LOGE(kTag, "display or asset initialization failed");
         return;
     }
+    const auto capabilities = display.capabilities();
+    if (!capabilities.dma || !capabilities.vsync || !capabilities.scanout_buffers || capabilities.max_buffer_count < 2) {
+        ESP_LOGE(kTag, "DMA scanout capability check failed: dma=%d vsync=%d scanout=%d buffers=%u",
+                 capabilities.dma, capabilities.vsync, capabilities.scanout_buffers, capabilities.max_buffer_count);
+        return;
+    }
+    ESP_LOGI(kTag, "DMA scanout ready: dma=%d dma_alignment=%u buffers=%u vsync=%d dma2d=1",
+             capabilities.dma, static_cast<unsigned>(capabilities.dma_alignment_bytes),
+             capabilities.max_buffer_count, capabilities.vsync);
     gpio_set_level(GPIO_NUM_23, 1);
 #ifdef BRICK_STREAM_TEST
     PartitionAssetSource source(assets_partition);
@@ -232,8 +241,13 @@ extern "C" void app_main() {
         ++fps_frames;
         if (fps_frames == 60) {
             const auto elapsed = esp_timer_get_time() - fps_start;
-            ESP_LOGI(kTag, "fps benchmark: frames=%u elapsed=%lldus fps=%.2f",
-                     static_cast<unsigned>(fps_frames), static_cast<long long>(elapsed),
+            ESP_LOGI(kTag, "fps benchmark: mode=%s rotation=%d frames=%u elapsed=%lldus fps=%.2f",
+#ifdef BRICK_COLOR_ONLY
+                     "color",
+#else
+                     "asset",
+#endif
+                     BRICK_PANEL_ROTATION, static_cast<unsigned>(fps_frames), static_cast<long long>(elapsed),
                      static_cast<double>(fps_frames) * 1000000.0 / static_cast<double>(elapsed));
             fps_frames = 0;
             fps_start = esp_timer_get_time();

@@ -8,3 +8,11 @@
 **/CMakeLists.txt
 **/CMakeListsPrivate.txt
 .vscode/
+
+# These ESP-IDF application descriptors are source files, not generated output.
+!apps/esp32s3/panel_480x480/display_lvgl_asset_framebuffer_touch_smoke/CMakeLists.txt
+!apps/esp32s3/panel_480x480/display_lvgl_asset_framebuffer_touch_smoke/src/CMakeLists.txt
+!apps/esp32s3/panel_480x480/display_lvgl_asset_smoke/CMakeLists.txt
+!apps/esp32s3/panel_480x480/display_lvgl_asset_smoke/src/CMakeLists.txt
+!apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/CMakeLists.txt
+!apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/src/CMakeLists.txt

@@ -28,7 +28,9 @@ constexpr std::uint16_t kStripeHeight = 100;
 #error "BRICK_PANEL_ROTATION must be 0, 90, 180 or 270"
 #endif
 
-constexpr std::uint16_t kLineThickness = 3;
+constexpr std::uint16_t kMarkerSize = 100;
+constexpr std::uint16_t kMarkerArm = 20;
+constexpr std::uint16_t kMarkerBorder = 4;
 constexpr std::array<std::uint16_t, 8> kStripeColors = {
     0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF, 0x0000, 0xFFFF};
 
@@ -62,23 +64,24 @@ void fill_background(std::uint16_t* frame) {
 void paint_crosshair(std::uint16_t* frame,
                      const brick::interfaces::display::TouchPoint& point,
                      bool active) {
-    const auto line_color = [](std::uint16_t background) {
-        return (background == 0x0000 || background == 0x001F) ? 0xFFFF : 0x0000;
-    };
-    const std::int16_t x0 = point.x == 0 ? 0 : point.x - 1;
-    const std::int16_t y0 = point.y == 0 ? 0 : point.y - 1;
-    const std::uint16_t x_thickness = point.x + 1 >= kWidth ? 2 : kLineThickness;
-    const std::uint16_t y_thickness = point.y + 1 >= kHeight ? 2 : kLineThickness;
-
-    for (std::uint16_t row = 0; row < y_thickness; ++row) {
-        const auto color = active ? line_color(background_color(y0 + row)) : background_color(y0 + row);
-        for (std::uint16_t x = 0; x < kWidth; ++x)
-            frame[static_cast<std::size_t>(y0 + row) * kWidth + x] = color;
-    }
-    for (std::uint16_t y = 0; y < kHeight; ++y) {
-        const auto color = active ? line_color(background_color(y)) : background_color(y);
-        for (std::uint16_t column = 0; column < x_thickness; ++column)
-            frame[static_cast<std::size_t>(y) * kWidth + x0 + column] = color;
+    const auto left = point.x < kMarkerSize / 2 ? 0 : point.x - kMarkerSize / 2;
+    const auto top = point.y < kMarkerSize / 2 ? 0 : point.y - kMarkerSize / 2;
+    const auto x0 = left + kMarkerSize > kWidth ? kWidth - kMarkerSize : left;
+    const auto y0 = top + kMarkerSize > kHeight ? kHeight - kMarkerSize : top;
+    const auto half = kMarkerSize / 2;
+    const auto arm = kMarkerArm / 2;
+    const auto border = kMarkerBorder;
+    for (std::uint16_t y = 0; y < kMarkerSize; ++y) {
+        for (std::uint16_t x = 0; x < kMarkerSize; ++x) {
+            const bool inner = (x >= half - arm && x < half + arm) ||
+                               (y >= half - arm && y < half + arm);
+            const bool outer = (x >= half - arm - border && x < half + arm + border) ||
+                               (y >= half - arm - border && y < half + arm + border);
+            if (active && outer)
+                frame[static_cast<std::size_t>(y0 + y) * kWidth + x0 + x] = inner ? 0x0000 : 0xFFFF;
+            else
+                frame[static_cast<std::size_t>(y0 + y) * kWidth + x0 + x] = background_color(y0 + y);
+        }
     }
 }
 
@@ -117,13 +120,19 @@ extern "C" void app_main() {
             for (std::size_t i = 0; i < count; ++i) {
                 const auto& point = points[i];
                 if (point.id >= marker_visible.size()) continue;
-                if (marker_visible[point.id]) {
-                    paint_crosshair(frame, marker_points[point.id], false);
-                    frame_dirty = true;
-                }
-                if (point.state == brick::interfaces::display::TouchState::released) {
+                const bool active = point.state != brick::interfaces::display::TouchState::released;
+                const bool moved = active && (!marker_visible[point.id] || marker_points[point.id].x != point.x || marker_points[point.id].y != point.y);
+                if (!active) {
+                    if (marker_visible[point.id]) {
+                        paint_crosshair(frame, marker_points[point.id], false);
+                        frame_dirty = true;
+                    }
                     marker_visible[point.id] = false;
-                } else {
+                } else if (moved) {
+                    if (marker_visible[point.id]) {
+                        paint_crosshair(frame, marker_points[point.id], false);
+                        frame_dirty = true;
+                    }
                     marker_points[point.id] = point;
                     marker_visible[point.id] = true;
                     frame_dirty = true;

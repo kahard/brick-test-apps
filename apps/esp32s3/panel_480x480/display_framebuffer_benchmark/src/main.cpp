@@ -36,7 +36,9 @@ bool render_frame(brick::interfaces::display::IFrameBufferDisplay& framebuffers,
     pixels[pixel] = static_cast<std::uint16_t>(color);
   render_us = esp_timer_get_time() - start_us;
 
-  return framebuffers.present_frame_buffer(index) && display.wait_for_vsync(1000);
+  return framebuffers.present_frame_buffer(index) &&
+         display.wait_for_transfer_complete(1000) &&
+         display.wait_for_vsync(1000);
 }
 }  // namespace
 
@@ -48,8 +50,17 @@ extern "C" void app_main() {
   }
 
   auto& framebuffers = static_cast<brick::interfaces::display::IFrameBufferDisplay&>(display);
+  const auto capabilities = display.capabilities();
+  if (!capabilities.dma || !capabilities.vsync || !capabilities.scanout_buffers || capabilities.max_buffer_count < 2) {
+    ESP_LOGE(TAG, "DMA scanout capability check failed: dma=%d vsync=%d scanout=%d buffers=%u",
+             capabilities.dma, capabilities.vsync, capabilities.scanout_buffers, capabilities.max_buffer_count);
+    return;
+  }
   ESP_LOGI(TAG, "Display initialized, framebuffer count=%u",
            framebuffers.frame_buffer_count());
+  ESP_LOGI(TAG, "DMA scanout ready: dma=%d dma_alignment=%u buffers=%u vsync=%d",
+           capabilities.dma, static_cast<unsigned>(capabilities.dma_alignment_bytes),
+           capabilities.max_buffer_count, capabilities.vsync);
   if (framebuffers.frame_buffer_count() < 2) {
     ESP_LOGE(TAG, "Two framebuffers are required for this benchmark");
     return;

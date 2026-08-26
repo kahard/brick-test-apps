@@ -2,6 +2,7 @@
 
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
+#include "brick/platform/esp32/LvglTouchAdapter.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "images/sweat_smile_rgb565.h"
@@ -55,18 +56,6 @@ const lv_image_dsc_t binary_image_dsc = {
     .data = joy_tears_start,
 };
 
-void read_touch(lv_indev_t*, lv_indev_data_t* data) {
-  brick::interfaces::display::TouchPoint point{};
-  std::size_t count = 0;
-  if (touch.read(&point, 1, count) && count > 0 &&
-      point.state != brick::interfaces::display::TouchState::released) {
-    data->point.x = point.x;
-    data->point.y = point.y;
-    data->state = LV_INDEV_STATE_PRESSED;
-    return;
-  }
-  data->state = LV_INDEV_STATE_RELEASED;
-}
 }
 
 extern "C" void app_main() {
@@ -88,9 +77,11 @@ extern "C" void app_main() {
     ESP_LOGE(TAG, "Unable to create LVGL direct framebuffer display");
     return;
   }
-  auto* indev = lv_indev_create();
-  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-  lv_indev_set_read_cb(indev, read_touch);
+  brick::platform::esp32::LvglTouchAdapter touch_adapter(touch);
+  if (touch_adapter.create() == nullptr) {
+    ESP_LOGE(TAG, "Unable to create LVGL touch input");
+    return;
+  }
 
   auto* screen = lv_screen_active();
   lv_obj_set_style_bg_color(screen, lv_color_hex(0x102040), 0);
