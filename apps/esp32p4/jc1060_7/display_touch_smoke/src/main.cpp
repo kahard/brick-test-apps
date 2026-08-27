@@ -1,7 +1,7 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/p4/Jc1060Board.h"
+#include "brick/boards/esp32/p4/Jc1060Board.h"
 
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/platform/esp32/LvglTouchAdapter.h"
-#include "brick/platform/esp32/p4/Jc1060Board.h"
+#include "brick/boards/esp32/p4/Jc1060Board.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "esp_partition.h"

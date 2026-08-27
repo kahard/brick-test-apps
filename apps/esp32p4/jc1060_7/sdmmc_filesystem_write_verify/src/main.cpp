@@ -3,7 +3,7 @@
 #include <cstdio>
 
 #include "brick/core/storage/StorageWriteVerify.h"
-#include "brick/platform/esp32/p4/Jc1060Board.h"
+#include "brick/boards/esp32/p4/Jc1060Board.h"
 
 #if !BRICK_JC1060_ENABLE_SDMMC
 #error "sdmmc_filesystem_write_verify requires BRICK_JC1060_ENABLE_SDMMC=1"
