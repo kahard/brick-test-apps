@@ -40,4 +40,12 @@ extern "C" void app_main()
                                                         "/sdcard/brick_write_verify.bin",
                                                         pattern.data(), pattern.size());
     std::printf("%s\n", ok ? "WRITE READ OK" : "WRITE READ FAIL");
+    if (!ok)
+    {
+        auto diagnostic = file_system.open("/sdcard/brick_write_verify.bin", "r");
+        std::array<std::uint8_t, 256> readback{};
+        const std::size_t read_count = diagnostic == nullptr ? 0U : diagnostic->read(readback.data(), 1U, readback.size());
+        std::printf("DIAG open=%d read=%u first=%02X expected=%02X\n",
+                    diagnostic != nullptr, static_cast<unsigned>(read_count), readback[0], pattern[0]);
+    }
 }
