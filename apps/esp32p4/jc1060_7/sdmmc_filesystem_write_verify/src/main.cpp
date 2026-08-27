@@ -36,13 +36,14 @@ extern "C" void app_main()
     std::array<std::uint8_t, 256> pattern{};
     for (std::size_t i = 0; i < pattern.size(); ++i)
         pattern[i] = static_cast<std::uint8_t>(i ^ 0x5AU);
+    constexpr const char* kTestPath = "/sdcard/BRICK.BIN";
     const bool ok = brick::core::storage::write_verify(file_system,
-                                                        "/sdcard/brick_write_verify.bin",
+                                                        kTestPath,
                                                         pattern.data(), pattern.size());
     std::printf("%s\n", ok ? "WRITE READ OK" : "WRITE READ FAIL");
     if (!ok)
     {
-        auto diagnostic = file_system.open("/sdcard/brick_write_verify.bin", "r");
+        auto diagnostic = file_system.open(kTestPath, "r");
         std::array<std::uint8_t, 256> readback{};
         const std::size_t read_count = diagnostic == nullptr ? 0U : diagnostic->read(readback.data(), 1U, readback.size());
         std::printf("DIAG open=%d read=%u first=%02X expected=%02X\n",
