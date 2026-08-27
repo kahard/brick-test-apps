@@ -13,6 +13,7 @@ extern "C" void app_main()
         return;
     }
     std::printf("BOARD READY\n");
+#if BRICK_JC1060_ENABLE_SDMMC
     auto& file_system = board.sdmmc();
     std::printf("SDMMC WRITE/READ VERIFY\n");
     if (!file_system.mount())
@@ -35,5 +36,8 @@ extern "C" void app_main()
         const std::size_t read_count = diagnostic == nullptr ? 0U : diagnostic->read(readback.data(), 1U, readback.size());
         std::printf("DIAG open=%d read=%u first=%02X expected=%02X\n",
                     diagnostic != nullptr, static_cast<unsigned>(read_count), readback[0], pattern[0]);
-    }
+#else
+    std::printf("SDMMC DISABLED\n");
+#endif
+}
 }
