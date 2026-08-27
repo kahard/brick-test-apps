@@ -2,11 +2,7 @@
 #include <cstdint>
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/platform/esp32/LvglTouchAdapter.h"
-#include "brick/platform/esp32/p4/MipiDsiDisplay.h"
-#include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.h"
-#include "brick/platform/esp32/p4/profiles/jc1060_gt911.h"
-#include "brick/platform/esp32/touch/Gt911Touchscreen.h"
-#include "driver/gpio.h"
+#include "brick/platform/esp32/p4/Jc1060Board.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "esp_partition.h"
@@ -20,8 +16,9 @@ constexpr char TAG[] = "brick_jc1060_lvgl";
 constexpr std::size_t kWidth = 1024, kHeight = 600;
 constexpr std::size_t kFrameBytes = kWidth * kHeight * 2;
 constexpr std::size_t kImageBytes = 100 * 100 * 2;
-brick::platform::esp32::p4::MipiDsiDisplay display(brick::platform::esp32::p4::profiles::guition_jc1060p470c_i_w());
-brick::platform::esp32::touch::Gt911Touchscreen touch(brick::platform::esp32::p4::profiles::jc1060_gt911());
+brick::platform::esp32::p4::Jc1060Board board;
+auto& display = board.display();
+auto& touch = board.touch();
 const esp_partition_t* assets_partition = nullptr;
 std::uint8_t* image_pixels = nullptr;
 lv_obj_t* status_label = nullptr;
@@ -53,9 +50,7 @@ extern "C" void app_main() {
     auto* first = heap_caps_malloc(kFrameBytes, kDmaPsramCaps);
     auto* second = heap_caps_malloc(kFrameBytes, kDmaPsramCaps);
     if (!assets_partition || !image_pixels || !first || !second) { ESP_LOGE(TAG, "asset partition or PSRAM allocation failed"); return; }
-    if (!display.begin() || !touch.begin() || !load_asset(generated_assets::Id::joy_tears)) { ESP_LOGE(TAG, "display, touch or asset initialization failed"); return; }
-    gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
-    gpio_set_level(GPIO_NUM_23, 1);
+    if (!board.begin() || !load_asset(generated_assets::Id::joy_tears)) { ESP_LOGE(TAG, "board or asset initialization failed"); return; }
     image_dsc = {.header = {.cf = LV_COLOR_FORMAT_RGB565, .w = 100, .h = 100, .stride = 200}, .data_size = kImageBytes, .data = image_pixels};
     lv_init(); brick::platform::esp32::LvglDisplayAdapter adapter(display);
     if (!adapter.create(LV_DISPLAY_RENDER_MODE_FULL, first, second, kFrameBytes)) { ESP_LOGE(TAG, "LVGL display creation failed"); return; }

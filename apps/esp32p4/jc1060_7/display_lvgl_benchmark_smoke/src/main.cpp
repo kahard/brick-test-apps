@@ -1,9 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
-#include "brick/platform/esp32/p4/MipiDsiDisplay.h"
-#include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.h"
-#include "driver/gpio.h"
+#include "brick/platform/esp32/p4/Jc1060Board.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "esp_partition.h"
@@ -16,7 +14,8 @@
 namespace {
 constexpr char TAG[] = "brick_jc1060_lvgl_benchmark";
 constexpr std::size_t W = 1024, H = 600, FRAME_BYTES = W * H * 2, IMAGE_BYTES = 100 * 100 * 2;
-brick::platform::esp32::p4::MipiDsiDisplay display(brick::platform::esp32::p4::profiles::guition_jc1060p470c_i_w());
+brick::platform::esp32::p4::Jc1060Board board;
+auto& display = board.display();
 const esp_partition_t* assets = nullptr;
 std::uint8_t* image_joy_tears = nullptr;
 std::uint8_t* image_sweat_smile = nullptr;
@@ -60,7 +59,7 @@ extern "C" void app_main() {
     image_sweat_smile = static_cast<std::uint8_t*>(heap_caps_malloc(IMAGE_BYTES, caps));
     auto* first = heap_caps_malloc(FRAME_BYTES, caps);
     auto* second = heap_caps_malloc(FRAME_BYTES, caps);
-    if (!assets || !image_joy_tears || !image_sweat_smile || !first || !second || !display.begin()) { ESP_LOGE(TAG, "initialization failed"); return; }
+    if (!assets || !image_joy_tears || !image_sweat_smile || !first || !second || !board.begin()) { ESP_LOGE(TAG, "initialization failed"); return; }
     const auto capabilities = display.capabilities();
     if (!capabilities.dma || !capabilities.vsync || !capabilities.scanout_buffers || capabilities.max_buffer_count < 2) {
         ESP_LOGE(TAG, "DMA scanout capability check failed: dma=%d vsync=%d scanout=%d buffers=%u",
