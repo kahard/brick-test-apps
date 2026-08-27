@@ -1,5 +1,6 @@
 PIO ?= platformio
 ENV ?= jc1060_7_sdmmc_filesystem_write_verify
+PORT ?=
 
 .PHONY: clean compile upload monitor
 clean:
@@ -9,5 +10,4 @@ compile:
 upload:
 	$(PIO) run -e $(ENV) -t upload
 monitor:
-	$(PIO) device monitor -e $(ENV)
-
+	$(PIO) device monitor -e $(ENV) $(if $(PORT),-p $(PORT),)

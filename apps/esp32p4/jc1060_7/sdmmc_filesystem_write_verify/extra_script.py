@@ -11,4 +11,4 @@ env.Append(CPPPATH=[
 ])
 brick_build_dir = Path(env.subst("$BUILD_DIR")) / "brick"
 env.BuildSources(str(brick_build_dir / "platform"), str(brick_root / "platforms" / "esp32" / "src"), "+<SdmmcFileSystem.cpp>")
-
+env.BuildSources(str(brick_build_dir / "display"), str(brick_root / "platforms" / "esp32" / "src"), "+<MipiDsiDisplay.cpp>")
