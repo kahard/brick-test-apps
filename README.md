@@ -5,7 +5,8 @@ Test applications are grouped by MCU family and board variant:
 ```text
 brick_test_apps/
 ├── libs/
-│   └── brick/         BRICK Framework submodule under test
+│   ├── brick/         BRICK Framework submodule under test
+│   └── brick-boards/  Public board definitions submodule
 ├── apps/
 │   ├── esp32p4/
 │   │   └── jc1060_7/
@@ -44,3 +45,4 @@ git submodule update --init --recursive
 
 The submodule is pinned to a specific BRICK commit so test results remain
 reproducible. Update it deliberately when a new framework version is ready.
+Board-specific headers are supplied by `libs/brick-boards`.
