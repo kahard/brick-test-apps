@@ -5,6 +5,10 @@
 #include "brick/core/storage/StorageWriteVerify.h"
 #include "brick/platform/esp32/p4/Jc1060Board.h"
 
+#if !BRICK_JC1060_ENABLE_SDMMC
+#error "sdmmc_filesystem_write_verify requires BRICK_JC1060_ENABLE_SDMMC=1"
+#endif
+
 extern "C" void app_main()
 {
     brick::platform::esp32::p4::Jc1060Board board;
@@ -13,7 +17,6 @@ extern "C" void app_main()
         return;
     }
     std::printf("BOARD READY\n");
-#if BRICK_JC1060_ENABLE_SDMMC
     auto& file_system = board.sdmmc();
     std::printf("SDMMC WRITE/READ VERIFY\n");
     if (!file_system.mount())
@@ -37,7 +40,4 @@ extern "C" void app_main()
         std::printf("DIAG open=%d read=%u first=%02X expected=%02X\n",
                     diagnostic != nullptr, static_cast<unsigned>(read_count), readback[0], pattern[0]);
     }
-#else
-    std::printf("SDMMC DISABLED\n");
-#endif
 }
