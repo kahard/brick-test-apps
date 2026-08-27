@@ -1,10 +1,8 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/p4/profiles/guition_jc1060p470c_i_w.h"
-#include "brick/platform/esp32/p4/profiles/jc1060_gt911.h"
+#include "brick/platform/esp32/p4/Jc1060Board.h"
 
-#include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -18,10 +16,9 @@ constexpr std::uint16_t kMarkerSize = 100;
 constexpr std::uint16_t kMarkerArm = 20;
 constexpr std::uint16_t kMarkerBorder = 4;
 
-brick::platform::esp32::p4::MipiDsiDisplay display(
-    brick::platform::esp32::p4::profiles::guition_jc1060p470c_i_w());
-brick::platform::esp32::touch::Gt911Touchscreen touch(
-    brick::platform::esp32::p4::profiles::jc1060_gt911());
+brick::platform::esp32::p4::Jc1060Board board;
+auto& display = board.display();
+auto& touch = board.touch();
 
 void draw_test_pattern() {
   static std::array<std::uint16_t, kWidth * kStripeHeight> stripe{};
@@ -71,16 +68,8 @@ bool draw_marker(const brick::interfaces::display::TouchPoint& point, bool activ
 
 extern "C" void app_main() {
   ESP_LOGI(TAG, "Starting JC1060 display/touch smoke test");
-  gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
-  gpio_set_level(GPIO_NUM_23, 0);
-  if (!display.begin()) {
-    ESP_LOGE(TAG, "MIPI-DSI display initialization failed");
-    return;
-  }
-  gpio_set_level(GPIO_NUM_23, 1);
-  ESP_LOGI(TAG, "Display initialized and backlight enabled");
-  if (!touch.begin()) {
-    ESP_LOGE(TAG, "GT911 initialization failed");
+  if (!board.begin()) {
+    ESP_LOGE(TAG, "JC1060 board initialization failed");
     return;
   }
   ESP_LOGI(TAG, "Display and touch ready; drawing test pattern in 2 seconds");
