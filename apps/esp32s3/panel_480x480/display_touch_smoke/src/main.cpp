@@ -1,8 +1,7 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -16,10 +15,9 @@ constexpr std::uint16_t kMarkerSize = 100;
 constexpr std::uint16_t kMarkerArm = 20;
 constexpr std::uint16_t kMarkerBorder = 4;
 
-brick::platform::esp32::s3::St7701sRgbDisplay display(
-    brick::platform::esp32::s3::profiles::st7701s_480x480());
-brick::platform::esp32::touch::Gt911Touchscreen touch(
-    brick::platform::esp32::s3::profiles::st7701s_gt911());
+brick::platform::esp32::s3::Panel480Board board;
+auto& display = board.display();
+auto& touch = board.touch();
 
 void draw_test_pattern() {
   static std::array<std::uint16_t, kWidth * kStripeHeight> stripe{};
@@ -67,15 +65,11 @@ bool draw_marker(const brick::interfaces::display::TouchPoint& point, bool activ
 
 extern "C" void app_main() {
   ESP_LOGI(TAG, "Starting ESP32-S3 ST7701S/GT911 smoke test");
-  if (!display.begin()) {
+  if (!board.begin()) {
     ESP_LOGE(TAG, "ST7701S RGB display initialization failed");
     return;
   }
-  ESP_LOGI(TAG, "Display initialized");
-  if (!touch.begin()) {
-    ESP_LOGE(TAG, "GT911 initialization failed");
-    return;
-  }
+  ESP_LOGI(TAG, "Display and touch initialized");
   ESP_LOGI(TAG, "Touch initialized");
   draw_test_pattern();
 
