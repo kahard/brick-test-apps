@@ -1,9 +1,7 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/p4/profiles/jc8012_gsl3680.h"
-#include "brick/platform/esp32/p4/profiles/jd9365_800x1280.h"
-#include "brick/platform/esp32/touch/Gsl3680Touchscreen.h"
+#include "brick/boards/esp32/p4/Jc8012Board.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_heap_caps.h"
@@ -44,10 +42,9 @@ constexpr auto kRotation = brick::interfaces::display::Rotation::rotate_180;
 constexpr auto kRotation = brick::interfaces::display::Rotation::rotate_270;
 #endif
 
-brick::platform::esp32::p4::MipiDsiDisplay display(
-    brick::platform::esp32::p4::profiles::jd9365_800x1280(kRotation));
-brick::platform::esp32::touch::Gsl3680Touchscreen touch(
-    brick::platform::esp32::p4::profiles::jc8012_gsl3680(kRotation));
+brick::platform::esp32::p4::Jc8012Board board(kRotation);
+auto& display = board.display();
+auto& touch = board.touch();
 
 std::uint16_t background_color(std::uint16_t y) {
     return kStripeColors[y / kStripeHeight];
@@ -99,7 +96,7 @@ extern "C" void app_main() {
     ESP_LOGI(TAG, "Starting JC8012 GSL3680 touch smoke test: logical=%ux%u rotation=%d", kWidth, kHeight, BRICK_PANEL_ROTATION);
     gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIO_NUM_23, 0);
-    if (!display.begin() || !touch.begin()) { ESP_LOGE(TAG, "display or GSL3680 initialization failed"); return; }
+    if (!board.begin()) { ESP_LOGE(TAG, "display or GSL3680 initialization failed"); return; }
     gpio_set_level(GPIO_NUM_23, 1);
     auto* frame = static_cast<std::uint16_t*>(heap_caps_malloc(
         static_cast<std::size_t>(kWidth) * kHeight * sizeof(std::uint16_t),

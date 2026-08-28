@@ -5,11 +5,8 @@
 #include "brick/core/image/AssetStreamer.h"
 #ifdef BRICK_LVGL_TOUCH
 #include "brick/platform/esp32/LvglTouchAdapter.h"
-#include "brick/platform/esp32/p4/profiles/jc8012_gsl3680.h"
-#include "brick/platform/esp32/touch/Gsl3680Touchscreen.h"
+#include "brick/boards/esp32/p4/Jc8012Board.h"
 #endif
-#include "brick/platform/esp32/p4/MipiDsiDisplay.h"
-#include "brick/platform/esp32/p4/profiles/jd9365_800x1280.h"
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
@@ -44,11 +41,10 @@ constexpr std::uint16_t kWidth = 1280, kHeight = 800;
 
 constexpr std::size_t kFrameBytes = static_cast<std::size_t>(kWidth) * kHeight * 2;
 constexpr std::size_t kImageBytes = 100 * 100 * 2;
-brick::platform::esp32::p4::MipiDsiDisplay display(
-    brick::platform::esp32::p4::profiles::jd9365_800x1280(kRotation));
+brick::platform::esp32::p4::Jc8012Board board(kRotation);
+auto& display = board.display();
 #ifdef BRICK_LVGL_TOUCH
-brick::platform::esp32::touch::Gsl3680Touchscreen touch(
-    brick::platform::esp32::p4::profiles::jc8012_gsl3680(kRotation));
+auto& touch = board.touch();
 #endif
 const esp_partition_t* assets_partition = nullptr;
 std::uint8_t* image_pixels[2] = {};
@@ -153,9 +149,8 @@ extern "C" void app_main() {
 #ifndef BRICK_STREAM_TEST
         || !load_asset(generated_assets::Id::sweat_smile, image_pixels[1])
 #endif
-        || !display.begin()
+        || !board.begin()
 #ifdef BRICK_LVGL_TOUCH
-        || !touch.begin()
 #endif
     ) {
         ESP_LOGE(kTag, "display or asset initialization failed");

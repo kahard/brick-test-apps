@@ -1,7 +1,7 @@
 #include <array>
 #include <cstdint>
 
-#include "brick/platform/esp32/p4/profiles/jd9365_800x1280.h"
+#include "brick/boards/esp32/p4/Jc8012Board.h"
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
@@ -39,9 +39,8 @@ constexpr std::uint16_t kLogicalHeight =
     (BRICK_PANEL_ROTATION == 90 || BRICK_PANEL_ROTATION == 270) ? 800 : 1280;
 constexpr std::uint16_t kMarkerSize = 120;
 
-brick::platform::esp32::p4::MipiDsiDisplay display(
-    brick::platform::esp32::p4::profiles::jd9365_800x1280(
-        kRotation));
+brick::platform::esp32::p4::Jc8012Board board(kRotation);
+auto& display = board.display();
 
 void draw_test_pattern() {
 #if BRICK_PANEL_ROTATION != 0
@@ -115,7 +114,7 @@ extern "C" void app_main() {
            kWidth, kLogicalHeight, BRICK_PANEL_ROTATION);
   gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
   gpio_set_level(GPIO_NUM_23, 0);
-  if (!display.begin()) {
+  if (!board.begin()) {
     ESP_LOGE(TAG, "MIPI-DSI display initialization failed");
     return;
   }
