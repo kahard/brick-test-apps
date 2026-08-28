@@ -5,9 +5,8 @@ Import("env")
 project_dir = Path(env.subst("$PROJECT_DIR"))
 brick_root = project_dir.parents[3] / "libs" / "brick"
 lvgl_root = project_dir / ".pio" / "libdeps" / env.subst("$PIOENV") / "lvgl"
-touch_project = project_dir.parent / "display_touch_smoke"
-touch_core = touch_project / "managed_components" / "espressif__esp_lcd_touch"
-touch_gsl = touch_project / "components" / "esp_lcd_touch_gsl3680"
+touch_core = project_dir / "managed_components" / "espressif__esp_lcd_touch"
+touch_gsl = project_dir / "components" / "esp_lcd_touch_gsl3680"
 touch_enabled = (
     "BRICK_LVGL_TOUCH" in env.subst("$BUILD_FLAGS")
     or any("BRICK_LVGL_TOUCH" in str(define) for define in env.get("CPPDEFINES", []))
