@@ -3,9 +3,9 @@
 
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/core/image/AssetStreamer.h"
+#include "brick/boards/esp32/p4/Jc8012Board.h"
 #ifdef BRICK_LVGL_TOUCH
 #include "brick/platform/esp32/LvglTouchAdapter.h"
-#include "brick/boards/esp32/p4/Jc8012Board.h"
 #endif
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
