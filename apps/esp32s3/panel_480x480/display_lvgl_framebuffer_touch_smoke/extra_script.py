@@ -11,5 +11,6 @@ env.Append(
         str(brick_root / "libs" / "interfaces" / "include"),
         str(brick_root / "libs" / "core" / "include"),
         str(brick_root / "platforms" / "esp32" / "include"),
+        str(project_dir.parents[3] / "libs" / "brick-boards" / "include"),
     ]
 )
