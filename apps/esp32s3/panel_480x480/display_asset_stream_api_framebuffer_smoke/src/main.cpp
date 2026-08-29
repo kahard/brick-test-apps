@@ -63,7 +63,7 @@ extern "C" void app_main() {
         return;
     }
 
-    const auto* initial_asset = generated_assets::find(generated_assets::Id::joy_tears);
+    const auto* initial_asset = generated_assets::get(generated_assets::Id::joy_tears);
     if (initial_asset == nullptr ||
         !streamer.stream_to_buffer(*initial_asset, asset_source, framebuffer[0],
                                    scratch.data(), scratch.size()) ||
@@ -103,7 +103,7 @@ extern "C" void app_main() {
                             : generated_assets::Id::red_background)
             : (second_asset ? generated_assets::Id::sweat_smile
                             : generated_assets::Id::joy_tears);
-        const auto* asset = generated_assets::find(selected_id);
+        const auto* asset = generated_assets::get(selected_id);
         if (asset == nullptr ||
             !streamer.stream_to_buffer(*asset, asset_source, framebuffer[back],
                                        scratch.data(), scratch.size()) ||
