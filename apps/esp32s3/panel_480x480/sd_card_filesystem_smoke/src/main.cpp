@@ -14,7 +14,9 @@
 namespace {
 constexpr char kTag[] = "brick_sd_card_smoke";
 constexpr char kMountPoint[] = "/sdcard";
-constexpr char kTestPath[] = "/sdcard/brick_sd_test.bin";
+// Keep the filename in FAT 8.3 form; this panel's FAT configuration does not
+// accept long filenames.
+constexpr char kTestPath[] = "/sdcard/BRICKTST.BIN";
 
 // ESP32-S3 4" panel wiring from the vendor demo.
 constexpr gpio_num_t kSdCs = GPIO_NUM_42;
