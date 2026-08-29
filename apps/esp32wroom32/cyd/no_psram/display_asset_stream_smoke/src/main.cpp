@@ -35,7 +35,7 @@ generated_assets::Id selected = generated_assets::Id::joy_tears;
 
 bool show(generated_assets::Id id)
 {
-    const auto* asset = generated_assets::find(id);
+    const auto* asset = generated_assets::get(id);
     if (asset == nullptr)
         return false;
     const auto started = esp_timer_get_time();

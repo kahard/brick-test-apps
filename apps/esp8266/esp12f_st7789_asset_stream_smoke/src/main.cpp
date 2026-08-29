@@ -24,7 +24,7 @@ ProgmemAssetSource asset_source(brick_asset_bundle, generated_assets::bundle_siz
 brick::core::image::AssetStreamer streamer(display);
 
 bool show_asset(generated_assets::Id id, unsigned long& elapsed_us) {
-  const auto* asset = generated_assets::find(id);
+  const auto* asset = generated_assets::get(id);
   if (asset == nullptr)
     return false;
   const auto started = micros();

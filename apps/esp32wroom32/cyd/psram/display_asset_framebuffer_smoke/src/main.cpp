@@ -37,7 +37,7 @@ std::uint8_t* stripe = nullptr;
 
 bool load_asset(generated_assets::Id id, std::uint8_t* destination)
 {
-    const auto* asset = generated_assets::find(id);
+    const auto* asset = generated_assets::get(id);
     if (asset == nullptr)
         return false;
     const brick::interfaces::display::WritablePixelBuffer buffer{

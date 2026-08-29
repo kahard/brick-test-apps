@@ -28,7 +28,7 @@ lv_image_dsc_t image_dsc{
     .data = image_pixels,
 };
 generated_assets::Id selected = generated_assets::Id::joy_tears; std::uint32_t counter = 0;
-bool load_asset(generated_assets::Id id) { const auto* asset = generated_assets::find(id); return assets_partition && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK; }
+bool load_asset(generated_assets::Id id) { const auto* asset = generated_assets::get(id); return assets_partition && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK; }
 void clicked(lv_event_t*) { selected = selected == generated_assets::Id::joy_tears ? generated_assets::Id::sweat_smile : generated_assets::Id::joy_tears; if (load_asset(selected)) { ++counter; lv_image_set_src(image, &image_dsc); lv_label_set_text_fmt(counter_label, "Zmiana: %u", static_cast<unsigned>(counter)); ESP_LOGI(TAG, "partition asset switched"); } }
 }
 extern "C" void app_main() {

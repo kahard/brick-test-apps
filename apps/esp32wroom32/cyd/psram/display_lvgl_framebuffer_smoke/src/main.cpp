@@ -18,7 +18,7 @@ namespace {
 constexpr char TAG[] = "brick_cyd_lvgl_fb"; constexpr std::size_t kImageBytes = 100U * 100U * 2U; constexpr std::size_t kFrameBytes = 320U * 240U * 2U;
 brick::platform::esp32::Ili9341SpiDisplay display(brick::platform::esp32::profiles::cyd_ili9341_320x240()); brick::platform::esp32::touch::Xpt2046Touchscreen touch(brick::platform::esp32::profiles::cyd_xpt2046());
 const esp_partition_t* assets_partition = nullptr; std::uint8_t* image_pixels = nullptr; lv_obj_t* image = nullptr; lv_obj_t* counter_label = nullptr; lv_image_dsc_t image_dsc{}; generated_assets::Id selected = generated_assets::Id::joy_tears; std::uint32_t counter = 0;
-bool load_asset(generated_assets::Id id) { const auto* asset = generated_assets::find(id); return assets_partition && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK; }
+bool load_asset(generated_assets::Id id) { const auto* asset = generated_assets::get(id); return assets_partition && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK; }
 void clicked(lv_event_t*) { selected = selected == generated_assets::Id::joy_tears ? generated_assets::Id::sweat_smile : generated_assets::Id::joy_tears; if (load_asset(selected)) { ++counter; lv_image_set_src(image, &image_dsc); lv_label_set_text_fmt(counter_label, "Zmiana: %u", static_cast<unsigned>(counter)); ESP_LOGI(TAG, "partition asset switched"); } }
 }
 extern "C" void app_main() {

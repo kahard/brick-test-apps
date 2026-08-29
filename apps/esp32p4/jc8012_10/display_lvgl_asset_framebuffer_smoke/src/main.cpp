@@ -90,7 +90,7 @@ brick::core::image::AssetStreamer* asset_streamer = nullptr;
 #endif
 
 bool load_asset(generated_assets::Id id, std::uint8_t* target) {
-    const auto* asset = generated_assets::find(id);
+    const auto* asset = generated_assets::get(id);
     return assets_partition && target && asset && asset->size == kImageBytes &&
            esp_partition_read(assets_partition, asset->offset, target,
                               asset->size) == ESP_OK;
@@ -108,7 +108,7 @@ void set_asset(generated_assets::Id id) {
 #ifdef BRICK_STREAM_TEST
 bool prefetch_asset(generated_assets::Id id) {
     const auto index = id == generated_assets::Id::joy_tears ? 0U : 1U;
-    const auto* descriptor = generated_assets::find(id);
+    const auto* descriptor = generated_assets::get(id);
     if (descriptor == nullptr || asset_source == nullptr || asset_streamer == nullptr ||
         !asset_streamer->stream_to_buffer(
             *descriptor, *asset_source,
