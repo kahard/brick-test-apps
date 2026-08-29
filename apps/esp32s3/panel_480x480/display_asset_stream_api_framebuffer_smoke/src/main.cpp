@@ -24,7 +24,7 @@ constexpr std::size_t kScratchBytes = static_cast<std::size_t>(kWidth) * kStripe
 
 auto panel_config() {
     auto config = brick::platform::esp32::s3::profiles::st7701s_480x480();
-    config.pixel_clock_hz = 12'000'000;
+    config.pixel_clock_hz = 16'000'000;
     config.frame_buffer_count = 2;
     return config;
 }
@@ -97,7 +97,7 @@ bool copy_to_psram() {
 }  // namespace
 
 extern "C" void app_main() {
-    ESP_LOGI(TAG, "Starting ESP32-S3 partition AssetStreamer framebuffer test: %ux%u pclk=12MHz",
+    ESP_LOGI(TAG, "Starting ESP32-S3 partition AssetStreamer framebuffer test: %ux%u pclk=16MHz",
              kWidth, kHeight);
     if (!display.begin()) {
         ESP_LOGE(TAG, "ST7701S RGB display initialization failed");
