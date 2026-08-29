@@ -40,11 +40,23 @@ bool g_mounted = false;
 brick::platform::esp32::s3::St7701sRgbDisplay g_display(brick::platform::esp32::s3::profiles::st7701s_480x480());
 brick::platform::esp32::touch::Gt911Touchscreen g_touch(brick::platform::esp32::s3::profiles::st7701s_gt911());
 
-void show_status(std::uint16_t color) {
-  static std::uint16_t pixels[480 * 40];
-  std::fill(std::begin(pixels), std::end(pixels), color);
+void show_status(std::uint16_t color, const char* message) {
+  static std::uint16_t pixels[480 * 80];
+  std::fill(std::begin(pixels), std::end(pixels), 0x0000);
+  std::uint16_t x = 8;
+  for (const char* c = message; *c && x < 472; ++c) {
+    std::size_t index = 0;
+    while (index < brick_roboto_20_count && brick_roboto_20_chars[index] != *c) ++index;
+    if (index >= brick_roboto_20_count) continue;
+    const BrickBitmapGlyph& glyph = brick_roboto_20_glyphs[index];
+    for (std::uint16_t y = 0; y < glyph.height && y < 80; ++y)
+      for (std::uint16_t col = 0; col < glyph.width && x + col < 480; ++col)
+        if (glyph.data[y * glyph.stride + col / 8] & (0x80u >> (col & 7)))
+          pixels[y * 480 + x + col] = color;
+    x = static_cast<std::uint16_t>(x + glyph.width + 1);
+  }
   const brick::interfaces::display::PixelBuffer buffer{
-      reinterpret_cast<const std::uint8_t*>(pixels), 480, 40, 960,
+      reinterpret_cast<const std::uint8_t*>(pixels), 480, 80, 960,
       brick::interfaces::display::PixelFormat::rgb565, false};
   g_display.draw_buffer({0, 0, 480, 40}, buffer);
 }
@@ -123,18 +135,18 @@ void list_root() {
 extern "C" void app_main() {
   ESP_LOGI(kTag, "ESP32-S3 4\" SD card filesystem smoke");
   if (!g_display.begin() || !g_touch.begin()) { ESP_LOGE(kTag, "Display/touch init failed"); return; }
-  show_status(0x001F);
+  show_status(0x001F, "SD INIT");
   ESP_LOGI(kTag, "Pins CS=%d SCK=%d MOSI=%d MISO=%d", kSdCs, kSdSck, kSdMosi, kSdMiso);
-  if (!mount_card()) { show_status(0xF800); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
+  if (!mount_card()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
   list_root();
-  if (!write_read_verify()) { show_status(0xF800); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
-  else show_status(0x07E0);
+  if (!write_read_verify()) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
+  else show_status(0x07E0, "SD READY");
   ESP_LOGI(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
   while (true) {
     std::size_t count = 0;
     if (g_touch.read(points.data(), points.size(), count) && count > 0) {
-      if (write_read_verify()) show_status(0x07E0); else show_status(0xF800);
+      if (write_read_verify()) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
       vTaskDelay(pdMS_TO_TICKS(500));
     }
     vTaskDelay(pdMS_TO_TICKS(30));
