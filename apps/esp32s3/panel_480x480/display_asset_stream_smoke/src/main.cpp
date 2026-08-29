@@ -29,7 +29,7 @@ brick::platform::esp32::s3::St7701sRgbDisplay display(
 bool stream_frame(const brick::interfaces::display::ImageAsset& image,
                   std::uint8_t* stripe) {
   const std::uint8_t* image_start = image.data;
-  const std::size_t image_size = image.size;
+  const std::size_t image_size = image.data_size;
   if (image_size != kWidth * kHeight * kBytesPerPixel) {
     ESP_LOGE(TAG, "Unexpected image size: %u", static_cast<unsigned>(image_size));
     return false;
@@ -81,7 +81,7 @@ extern "C" void app_main() {
       ++successful_frames;
       ESP_LOGI(TAG, "streamed frame=%u asset=%s bytes=%u elapsed=%lldus",
                static_cast<unsigned>(frame), use_sweat_smile ? "sweat_smile" : "joy_tears",
-               static_cast<unsigned>(image.size), elapsed);
+               static_cast<unsigned>(image.data_size), elapsed);
       if (successful_frames == 60) {
         const auto window_elapsed = esp_timer_get_time() - window_started;
         ESP_LOGI(TAG, "stream benchmark: frames=%u elapsed=%lldus fps=%.2f",

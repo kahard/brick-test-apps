@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <cstring>
 
+#include "generated_assets.h"
+#include "brick/core/image/AssetBundle.h"
+
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
@@ -18,19 +21,16 @@ constexpr std::uint16_t kStripeHeight = 20;
 constexpr std::size_t kBytesPerPixel = 2;
 constexpr std::size_t kStripeBytes = kWidth * kStripeHeight * kBytesPerPixel;
 
-extern const std::uint8_t joy_tears_start[] asm("_binary_joy_tears_stream_rgb565_bin_start");
-extern const std::uint8_t joy_tears_end[] asm("_binary_joy_tears_stream_rgb565_bin_end");
-extern const std::uint8_t sweat_smile_start[] asm("_binary_sweat_smile_stream_rgb565_bin_start");
-extern const std::uint8_t sweat_smile_end[] asm("_binary_sweat_smile_stream_rgb565_bin_end");
+brick::core::image::AssetBundle assets = generated_assets::bundle();
 
 brick::platform::esp32::s3::St7701sRgbDisplay display(
     brick::platform::esp32::s3::profiles::st7701s_480x480());
 
-bool stream_frame(const std::uint8_t* image_start,
-                  const std::uint8_t* image_end,
+bool stream_frame(const brick::interfaces::display::ImageAsset& image,
                   std::uint8_t* stripe_a,
                   std::uint8_t* stripe_b) {
-  const auto image_size = static_cast<std::size_t>(image_end - image_start);
+  const std::uint8_t* image_start = image.data;
+  const auto image_size = image.data_size;
   if (image_size != kWidth * kHeight * kBytesPerPixel) {
     ESP_LOGE(TAG, "Unexpected image size: %u", static_cast<unsigned>(image_size));
     return false;
@@ -86,15 +86,15 @@ extern "C" void app_main() {
   while (true) {
     const auto started = esp_timer_get_time();
     const bool use_sweat_smile = (frame & 1U) != 0U;
-    const auto* image_start = use_sweat_smile ? sweat_smile_start : joy_tears_start;
-    const auto* image_end = use_sweat_smile ? sweat_smile_end : joy_tears_end;
-    if (stream_frame(image_start, image_end, stripe_a, stripe_b)) {
+    const generated_assets::Id id = use_sweat_smile ? generated_assets::Id::sweat_smile : generated_assets::Id::joy_tears;
+    const brick::interfaces::display::ImageAsset image = assets.image(static_cast<std::size_t>(id));
+    if (stream_frame(image, stripe_a, stripe_b)) {
       const auto elapsed = esp_timer_get_time() - started;
       ++frame;
       ++successful_frames;
       ESP_LOGI(TAG, "streamed frame=%u asset=%s bytes=%u elapsed=%lldus",
                static_cast<unsigned>(frame), use_sweat_smile ? "sweat_smile" : "joy_tears",
-               static_cast<unsigned>(image_end - image_start), elapsed);
+               static_cast<unsigned>(image.data_size), elapsed);
       if (successful_frames == 60) {
         const auto window_elapsed = esp_timer_get_time() - window_started;
         ESP_LOGI(TAG, "stream benchmark: frames=%u elapsed=%lldus fps=%.2f",
