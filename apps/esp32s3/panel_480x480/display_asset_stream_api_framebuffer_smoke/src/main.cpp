@@ -187,10 +187,21 @@ extern "C" void app_main() {
                                    : brick::interfaces::display::AssetStorage::usb_or_sd));
         brick::interfaces::display::IAssetSource* selected_source = repository.source();
         const brick::interfaces::display::AssetDescriptor* asset = generated_assets::get(selected_id);
-        if (asset == nullptr ||
-            selected_source == nullptr ||
-            !streamer.stream_to_buffer(*asset, *selected_source, framebuffer[back],
-                                       scratch.data(), scratch.size()) ||
+        bool frame_ok = asset != nullptr && selected_source != nullptr &&
+                        streamer.stream_to_buffer(*asset, *selected_source, framebuffer[back],
+                                                  scratch.data(), scratch.size());
+        if (!frame_ok && storage_mode == 2U) {
+            ESP_LOGW(TAG, "SD asset read failed; falling back to flash");
+            sd_filesystem.unmount();
+            sd_ready = false;
+            storage_mode = 0U;
+            repository.set_storage(brick::interfaces::display::AssetStorage::flash_partition);
+            selected_source = repository.source();
+            frame_ok = asset != nullptr && selected_source != nullptr &&
+                       streamer.stream_to_buffer(*asset, *selected_source, framebuffer[back],
+                                                 scratch.data(), scratch.size());
+        }
+        if (!frame_ok ||
             !display.wait_for_vsync(100) ||
             !framebuffers.present_frame_buffer(back)) {
             ESP_LOGE(TAG, "Asset framebuffer page flip failed at frame=%u",
