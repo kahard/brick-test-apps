@@ -1,11 +1,13 @@
 #include <cstdint>
 
+#include "generated_assets.h"
+#include "brick/core/image/AssetBundle.h"
+
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/platform/esp32/LvglTouchAdapter.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
-#include "images/sweat_smile_rgb565.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -41,28 +43,24 @@ brick::platform::esp32::s3::St7701sRgbDisplay display(panel_config());
 brick::platform::esp32::touch::Gt911Touchscreen touch(
     brick::platform::esp32::s3::profiles::st7701s_gt911());
 
+brick::core::image::AssetBundle assets = generated_assets::bundle();
+
 const lv_image_dsc_t image_dsc = {
     .header = {.cf = LV_COLOR_FORMAT_RGB565, .w = 100, .h = 100, .stride = 200},
     .data_size = 20000,
-    .data = brick_sweat_smile.data,
+    .data = assets.image(static_cast<std::size_t>(generated_assets::Id::sweat_smile)).data,
 };
-
-extern const uint8_t joy_tears_start[] asm("_binary_joy_tears_rgb565_bin_start");
-extern const uint8_t joy_tears_end[] asm("_binary_joy_tears_rgb565_bin_end");
-
-extern const uint8_t full_background_start[] asm("_binary_joy_tears_stream_rgb565_bin_start");
-extern const uint8_t full_background_end[] asm("_binary_joy_tears_stream_rgb565_bin_end");
 
 const lv_image_dsc_t binary_image_dsc = {
     .header = {.cf = LV_COLOR_FORMAT_RGB565, .w = 100, .h = 100, .stride = 200},
-    .data_size = static_cast<uint32_t>(joy_tears_end - joy_tears_start),
-    .data = joy_tears_start,
+    .data_size = static_cast<uint32_t>(assets.image(static_cast<std::size_t>(generated_assets::Id::joy_tears)).data_size),
+    .data = assets.image(static_cast<std::size_t>(generated_assets::Id::joy_tears)).data,
 };
 
 const lv_image_dsc_t full_background_dsc = {
     .header = {.cf = LV_COLOR_FORMAT_RGB565, .w = 480, .h = 480, .stride = 960},
-    .data_size = static_cast<uint32_t>(full_background_end - full_background_start),
-    .data = full_background_start,
+    .data_size = static_cast<uint32_t>(assets.image(static_cast<std::size_t>(generated_assets::Id::full_background)).data_size),
+    .data = assets.image(static_cast<std::size_t>(generated_assets::Id::full_background)).data,
 };
 
 }

@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+#ifndef BRICK_IMAGE_ASSET_TYPES_DEFINED
+#define BRICK_IMAGE_ASSET_TYPES_DEFINED
+
 typedef enum {
     BRICK_IMAGE_FORMAT_RGB565_LE = 1,
     BRICK_IMAGE_FORMAT_RGBA8888 = 2,
@@ -15,5 +18,7 @@ typedef struct {
     uint32_t data_size;
     const uint8_t* data;
 } brick_image_asset_t;
+
+#endif
 
 extern const brick_image_asset_t brick_sweat_smile;

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 24 px
  * Bpp: 4
- * Opts: --font D:\work\brick_test_apps\apps\esp32s3\panel_480x480\display_lvgl_asset_smoke\assets\Roboto-Regular.ttf --size 24 --bpp 4 --range 0x20-0x7F --range 0xA0-0xFF --range 0x0100-0x017F --format lvgl -o D:\work\brick_test_apps\apps\esp32s3\panel_480x480\display_lvgl_asset_smoke\src\fonts\brick_roboto_24.c --lv-font-name brick_roboto_24 --lv-include lvgl.h --no-compress --no-prefilter --force-fast-kern-format
+ * Opts: --font D:\work\brick_test_apps\apps\esp32s3\panel_480x480\display_lvgl_asset_framebuffer_touch_smoke\assets\Roboto-Regular.ttf --size 24 --bpp 4 --range 0x20-0x7F --range 0xA0-0xFF --range 0x0100-0x017F --format lvgl -o D:\work\brick_test_apps\apps\esp32s3\panel_480x480\display_lvgl_asset_framebuffer_touch_smoke\src\fonts\brick_roboto_24.c --lv-font-name brick_roboto_24 --lv-include lvgl.h --no-compress --no-prefilter --force-fast-kern-format
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
