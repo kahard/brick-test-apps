@@ -2,7 +2,7 @@ PIO ?= platformio
 ENV ?= esp32s3_480_display_asset_stream_smoke
 PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
 
-.PHONY: clean compile upload monitor
+.PHONY: clean compile upload monitor assets
 
 clean:
 	$(PIO_RUN) run -e $(ENV) -t clean
@@ -10,7 +10,7 @@ clean:
 compile: assets
 	$(PIO_RUN) run -e $(ENV)
 
-upload:
+upload: assets
 	$(PIO_RUN) run -e $(ENV) -t upload
 
 monitor:
