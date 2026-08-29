@@ -147,7 +147,6 @@ extern "C" void app_main() {
     ESP_LOGI(TAG, "Partition AssetStreamer page-flip test active: touch toggles images/backgrounds");
 
     while (true) {
-        const auto frame_started = esp_timer_get_time();
         const std::uint8_t back = active ^ 1U;
         const bool second_asset = (frame & 1U) != 0U;
         brick::interfaces::display::TouchPoint point{};
@@ -212,11 +211,12 @@ extern "C" void app_main() {
         active = back;
         ++frame;
         ++benchmark_frames;
-        ESP_LOGI(TAG, "presented frame=%u asset=%u storage=%u mode=%s flip=%lldus",
-                 static_cast<unsigned>(frame), static_cast<unsigned>(selected_id),
-                 static_cast<unsigned>(storage_mode),
-                 background_mode ? "backgrounds" : "smiles",
-                 esp_timer_get_time() - frame_started);
+        // Detailed per-frame diagnostic (disabled to keep the UART readable):
+        // ESP_LOGI(TAG, "presented frame=%u asset=%u storage=%u mode=%s flip=%lldus",
+        //          static_cast<unsigned>(frame), static_cast<unsigned>(selected_id),
+        //          static_cast<unsigned>(storage_mode),
+        //          background_mode ? "backgrounds" : "smiles",
+        //          esp_timer_get_time() - frame_started);
         if (benchmark_frames == 60) {
             const auto elapsed = esp_timer_get_time() - benchmark_started;
             ESP_LOGI(TAG, "asset framebuffer benchmark: frames=60 elapsed=%lldus fps=%.2f",
