@@ -23,7 +23,7 @@ lv_image_dsc_t image_dsc{};
 lv_obj_t* image_widget = nullptr;
 
 bool load(generated_assets::Id id, std::uint8_t* target) {
-    const auto* a = generated_assets::find(id);
+    const auto* a = generated_assets::get(id);
     return assets && target && a && a->size == IMAGE_BYTES && esp_partition_read(assets, a->offset, target, a->size) == ESP_OK;
 }
 

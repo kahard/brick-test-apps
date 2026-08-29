@@ -28,7 +28,7 @@ std::uint32_t touches = 0;
 bool showing_joy_tears = true;
 
 bool load_asset(generated_assets::Id id) {
-    const auto* asset = generated_assets::find(id);
+    const auto* asset = generated_assets::get(id);
     return assets_partition && image_pixels && asset && asset->size == kImageBytes && esp_partition_read(assets_partition, asset->offset, image_pixels, asset->size) == ESP_OK;
 }
 void clicked(lv_event_t*) {
