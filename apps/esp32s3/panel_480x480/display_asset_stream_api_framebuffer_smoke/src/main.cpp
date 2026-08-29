@@ -1,14 +1,18 @@
 #include <array>
 #include <cstdint>
+#include <cstring>
 
 #include "generated_assets.h"
 #include "PartitionAssetSource.h"
 #include "brick/core/image/AssetStreamer.h"
+#include "brick/core/image/AssetRepository.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/interfaces/display/ITouchscreen.h"
+#include "brick/platform/esp32/SdSpiFileSystem.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "esp_log.h"
+#include "esp_heap_caps.h"
 #include "esp_timer.h"
 
 namespace {
@@ -32,6 +36,64 @@ std::array<std::uint8_t, kScratchBytes> scratch{};
 
 PartitionAssetSource asset_source("assets");
 brick::core::image::AssetStreamer streamer(display);
+
+class RamAssetSource final : public brick::interfaces::display::IAssetSource {
+public:
+    explicit RamAssetSource(std::uint8_t* data) : data_(data) {}
+    bool read(const brick::interfaces::display::AssetDescriptor& asset,
+              std::size_t offset, std::uint8_t* destination, std::size_t bytes) override {
+        if (data_ == nullptr || destination == nullptr || offset > asset.size ||
+            bytes > asset.size - offset) return false;
+        std::memcpy(destination, data_ + asset.offset + offset, bytes);
+        return true;
+    }
+private:
+    std::uint8_t* data_;
+};
+
+class SdAssetSource final : public brick::interfaces::display::IAssetSource {
+public:
+    SdAssetSource(brick::interfaces::storage::IFileSystem& filesystem, const char* path)
+        : filesystem_(filesystem), path_(path) {}
+    bool read(const brick::interfaces::display::AssetDescriptor& asset,
+              std::size_t offset, std::uint8_t* destination, std::size_t bytes) override {
+        if (destination == nullptr || offset > asset.size || bytes > asset.size - offset) return false;
+        std::unique_ptr<brick::interfaces::storage::IFile> file = filesystem_.open(path_, "rb");
+        if (!file || !file->seek(static_cast<long>(asset.offset + offset), SEEK_SET)) return false;
+        return file->read(destination, 1, bytes) == bytes;
+    }
+private:
+    brick::interfaces::storage::IFileSystem& filesystem_;
+    const char* path_;
+};
+
+std::uint8_t* psram_bundle = nullptr;
+RamAssetSource psram_source(nullptr);
+brick::platform::esp32::SdSpiFileSystem sd_filesystem(
+    brick::platform::esp32::SdSpiFileSystemConfig{GPIO_NUM_42, GPIO_NUM_48, GPIO_NUM_47, GPIO_NUM_41});
+SdAssetSource sd_source(sd_filesystem, "/sdcard/ASSETS.BIN");
+brick::core::image::AssetRepository repository(&asset_source, &psram_source, &sd_source);
+
+bool copy_to_psram() {
+    static bool copied = false;
+    if (copied) return true;
+    if (psram_bundle == nullptr) {
+        psram_bundle = static_cast<std::uint8_t*>(
+            heap_caps_malloc(generated_assets::bundle_size, MALLOC_CAP_SPIRAM));
+        if (psram_bundle == nullptr) {
+            ESP_LOGE(TAG, "Unable to allocate %u bytes in PSRAM",
+                     static_cast<unsigned>(generated_assets::bundle_size));
+            return false;
+        }
+        psram_source = RamAssetSource(psram_bundle);
+    }
+    for (std::size_t index = 0; index < generated_assets::entry_count; ++index) {
+        const brick::interfaces::display::AssetDescriptor& asset = generated_assets::entries[index];
+        if (!asset_source.read(asset, 0, psram_bundle + asset.offset, asset.size)) return false;
+    }
+    copied = true;
+    return true;
+}
 }  // namespace
 
 extern "C" void app_main() {
@@ -79,6 +141,8 @@ extern "C" void app_main() {
     std::uint32_t benchmark_frames = 0;
     std::int64_t benchmark_started = esp_timer_get_time();
     bool background_mode = false;
+    std::uint8_t storage_mode = 0;
+    bool sd_ready = false;
     bool touch_down = false;
     ESP_LOGI(TAG, "Partition AssetStreamer page-flip test active: touch toggles images/backgrounds");
 
@@ -91,10 +155,24 @@ extern "C" void app_main() {
         const bool has_touch = touch.read(&point, 1, touch_count) && touch_count > 0 &&
                                point.state != brick::interfaces::display::TouchState::released;
         if (has_touch && !touch_down) {
-            background_mode = !background_mode;
-            ESP_LOGI(TAG, "touch toggled asset set=%s at x=%d y=%d",
-                     background_mode ? "solid backgrounds" : "smile images",
-                     point.x, point.y);
+            const std::uint8_t state = static_cast<std::uint8_t>((storage_mode * 2U) + (background_mode ? 1U : 0U));
+            const std::uint8_t next_state = static_cast<std::uint8_t>((state + 1U) % 6U);
+            storage_mode = static_cast<std::uint8_t>(next_state / 2U);
+            background_mode = (next_state & 1U) != 0U;
+            if (storage_mode == 1U && !copy_to_psram()) {
+                storage_mode = 0U;
+                ESP_LOGW(TAG, "PSRAM asset copy failed; falling back to flash");
+            }
+            if (storage_mode == 2U && !sd_ready) {
+                sd_ready = sd_filesystem.mount();
+                if (!sd_ready) {
+                    storage_mode = 0U;
+                    ESP_LOGW(TAG, "SD asset bundle unavailable; falling back to flash");
+                }
+            }
+            const char* storage_name = storage_mode == 0U ? "flash" : (storage_mode == 1U ? "psram" : "sd");
+            ESP_LOGI(TAG, "touch: storage=%s mode=%s x=%d y=%d",
+                     storage_name, background_mode ? "R/B" : "smiles", point.x, point.y);
         }
         touch_down = has_touch;
 
@@ -103,9 +181,15 @@ extern "C" void app_main() {
                             : generated_assets::Id::red_background)
             : (second_asset ? generated_assets::Id::sweat_smile
                             : generated_assets::Id::joy_tears);
-        const auto* asset = generated_assets::get(selected_id);
+        repository.set_storage(storage_mode == 0U
+            ? brick::interfaces::display::AssetStorage::flash_partition
+            : (storage_mode == 1U ? brick::interfaces::display::AssetStorage::psram_cache
+                                   : brick::interfaces::display::AssetStorage::usb_or_sd));
+        brick::interfaces::display::IAssetSource* selected_source = repository.source();
+        const brick::interfaces::display::AssetDescriptor* asset = generated_assets::get(selected_id);
         if (asset == nullptr ||
-            !streamer.stream_to_buffer(*asset, asset_source, framebuffer[back],
+            selected_source == nullptr ||
+            !streamer.stream_to_buffer(*asset, *selected_source, framebuffer[back],
                                        scratch.data(), scratch.size()) ||
             !display.wait_for_vsync(100) ||
             !framebuffers.present_frame_buffer(back)) {
@@ -117,8 +201,9 @@ extern "C" void app_main() {
         active = back;
         ++frame;
         ++benchmark_frames;
-        ESP_LOGI(TAG, "presented frame=%u asset=%u mode=%s partition-stream+flip=%lldus",
+        ESP_LOGI(TAG, "presented frame=%u asset=%u storage=%u mode=%s flip=%lldus",
                  static_cast<unsigned>(frame), static_cast<unsigned>(selected_id),
+                 static_cast<unsigned>(storage_mode),
                  background_mode ? "backgrounds" : "smiles",
                  esp_timer_get_time() - frame_started);
         if (benchmark_frames == 60) {
