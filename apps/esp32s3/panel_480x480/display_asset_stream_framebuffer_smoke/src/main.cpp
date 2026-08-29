@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <cstring>
 
+#include "generated_assets.h"
+#include "brick/core/image/AssetBundle.h"
+
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "esp_log.h"
@@ -12,10 +15,7 @@ constexpr std::uint16_t kWidth = 480;
 constexpr std::uint16_t kHeight = 480;
 constexpr std::size_t kFrameBytes = kWidth * kHeight * 2;
 
-extern const std::uint8_t joy_tears_start[] asm("_binary_joy_tears_stream_rgb565_bin_start");
-extern const std::uint8_t joy_tears_end[] asm("_binary_joy_tears_stream_rgb565_bin_end");
-extern const std::uint8_t sweat_smile_start[] asm("_binary_sweat_smile_stream_rgb565_bin_start");
-extern const std::uint8_t sweat_smile_end[] asm("_binary_sweat_smile_stream_rgb565_bin_end");
+brick::core::image::AssetBundle assets = generated_assets::bundle();
 
 auto panel_config() {
   auto config = brick::platform::esp32::s3::profiles::st7701s_480x480();
@@ -26,14 +26,14 @@ auto panel_config() {
 
 brick::platform::esp32::s3::St7701sRgbDisplay display(panel_config());
 
-bool copy_asset(const std::uint8_t* start, const std::uint8_t* end,
+bool copy_asset(const brick::interfaces::display::ImageAsset& image,
                 brick::interfaces::display::WritablePixelBuffer& target) {
-  if (static_cast<std::size_t>(end - start) != kFrameBytes || target.data == nullptr ||
+  if (image.data_size != kFrameBytes || target.data == nullptr ||
       target.stride_bytes != kWidth * 2 || target.width != kWidth || target.height != kHeight) {
     ESP_LOGE(TAG, "Invalid asset or framebuffer description");
     return false;
   }
-  std::memcpy(target.data, start, kFrameBytes);
+  std::memcpy(target.data, image.data, kFrameBytes);
   return true;
 }
 }  // namespace
@@ -59,8 +59,9 @@ extern "C" void app_main() {
     return;
   }
 
-  if (!copy_asset(joy_tears_start, joy_tears_end, framebuffer[0]) ||
-      !copy_asset(joy_tears_start, joy_tears_end, framebuffer[1]) ||
+  const brick::interfaces::display::ImageAsset joy_tears = assets.image(static_cast<std::size_t>(generated_assets::Id::joy_tears));
+  if (!copy_asset(joy_tears, framebuffer[0]) ||
+      !copy_asset(joy_tears, framebuffer[1]) ||
       !framebuffers.present_frame_buffer(0)) {
     ESP_LOGE(TAG, "Unable to initialize framebuffer page flip");
     return;
@@ -77,10 +78,10 @@ extern "C" void app_main() {
     const auto frame_started = esp_timer_get_time();
     const std::uint8_t back = active ^ 1U;
     const bool use_sweat_smile = (frame & 1U) != 0U;
-    const auto* asset_start = use_sweat_smile ? sweat_smile_start : joy_tears_start;
-    const auto* asset_end = use_sweat_smile ? sweat_smile_end : joy_tears_end;
+    const generated_assets::Id asset_id = use_sweat_smile ? generated_assets::Id::sweat_smile : generated_assets::Id::joy_tears;
+    const brick::interfaces::display::ImageAsset asset = assets.image(static_cast<std::size_t>(asset_id));
 
-    if (!copy_asset(asset_start, asset_end, framebuffer[back]) ||
+    if (!copy_asset(asset, framebuffer[back]) ||
         !display.wait_for_vsync(100) || !framebuffers.present_frame_buffer(back)) {
       ESP_LOGE(TAG, "Framebuffer page flip failed at frame=%u",
                static_cast<unsigned>(frame));
