@@ -1,5 +1,5 @@
 PIO ?= platformio
-ENV ?= esp32s3_480_sd_card_filesystem_smoke
+ENV ?= esp32s3_480_sd_card_filesystem_touch_smoke
 PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
 
 .PHONY: clean compile upload monitor
@@ -15,4 +15,3 @@ upload:
 
 monitor:
 	$(PIO) device monitor -e $(ENV)
-
