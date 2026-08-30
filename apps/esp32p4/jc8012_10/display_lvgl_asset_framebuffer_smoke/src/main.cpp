@@ -4,6 +4,7 @@
 #include "brick/boards/esp32/p4/Jc8012Board.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
+#include "brick/platform/esp32/PartitionAssetSource.h"
 #ifdef BRICK_LVGL_TOUCH
 #    include "brick/platform/esp32/LvglTouchAdapter.h"
 #endif
@@ -70,23 +71,7 @@ void touch_asset_event(lv_event_t*)
 #endif
 
 #ifdef BRICK_STREAM_TEST
-class PartitionAssetSource final : public brick::interfaces::display::IAssetSource
-{
-public:
-    explicit PartitionAssetSource(const esp_partition_t* partition) : partition_(partition) {}
-
-    bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset, std::uint8_t* destination,
-              std::size_t bytes) override
-    {
-        return partition_ != nullptr && destination != nullptr && offset <= asset.size && bytes <= asset.size - offset
-               && esp_partition_read(partition_, asset.offset + offset, destination, bytes) == ESP_OK;
-    }
-
-private:
-    const esp_partition_t* partition_ = nullptr;
-};
-
-PartitionAssetSource*              asset_source   = nullptr;
+brick::platform::esp32::PartitionAssetSource* asset_source = nullptr;
 brick::core::image::AssetStreamer* asset_streamer = nullptr;
 #endif
 
