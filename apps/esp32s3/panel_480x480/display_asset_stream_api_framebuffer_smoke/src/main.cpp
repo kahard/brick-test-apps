@@ -7,33 +7,22 @@
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/interfaces/display/ITouchscreen.h"
-#include "brick/platform/esp32/EspIdfLogger.h"
-#include "brick/platform/esp32/SdSpiFileSystem.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
 #include "esp_heap_caps.h"
-#include "esp_timer.h"
 #include "generated_assets.h"
 
 namespace
 {
 constexpr char                       TAG[] = "brick_st7701s_asset_api_fb";
-brick::platform::esp32::EspIdfLogger logger;
 constexpr std::uint16_t              kWidth        = 480;
 constexpr std::uint16_t              kHeight       = 480;
 constexpr std::uint16_t              kStripeHeight = 20;
 constexpr std::size_t                kScratchBytes = static_cast<std::size_t>(kWidth) * kStripeHeight * 2;
 
-auto panel_config()
-{
-    auto config               = brick::platform::esp32::s3::profiles::st7701s_480x480();
-    config.pixel_clock_hz     = 12'000'000;
-    config.frame_buffer_count = 2;
-    return config;
-}
-
-brick::platform::esp32::s3::St7701sRgbDisplay   display(panel_config());
-brick::platform::esp32::touch::Gt911Touchscreen touch(brick::platform::esp32::s3::profiles::st7701s_gt911());
+brick::platform::esp32::s3::Panel480Board board(
+    brick::platform::esp32::s3::Panel480Board::double_buffered_config());
+auto& display = board.display();
+auto& touch = board.touch();
 std::array<std::uint8_t, kScratchBytes>         scratch{};
 
 PartitionAssetSource              asset_source("assets");
@@ -81,9 +70,7 @@ private:
 
 std::uint8_t*                           psram_bundle = nullptr;
 RamAssetSource                          psram_source(nullptr);
-brick::platform::esp32::SdSpiFileSystem sd_filesystem(brick::platform::esp32::SdSpiFileSystemConfig{
-    GPIO_NUM_42, GPIO_NUM_48, GPIO_NUM_47, GPIO_NUM_41 });
-SdAssetSource                           sd_source(sd_filesystem, "/sdcard/ASSETS.BIN");
+SdAssetSource                           sd_source(board.sd_card(), "/sdcard/ASSETS.BIN");
 brick::core::image::AssetRepository     repository(&asset_source, &psram_source, &sd_source);
 
 bool copy_to_psram()
@@ -96,7 +83,7 @@ bool copy_to_psram()
         psram_bundle = static_cast<std::uint8_t*>(heap_caps_malloc(generated_assets::bundle_size, MALLOC_CAP_SPIRAM));
         if (psram_bundle == nullptr)
         {
-            logger.error(TAG, "Unable to allocate %u bytes in PSRAM",
+            board.logger().error(TAG, "Unable to allocate %u bytes in PSRAM",
                          static_cast<unsigned>(generated_assets::bundle_size));
             return false;
         }
@@ -115,34 +102,34 @@ bool copy_to_psram()
 
 extern "C" void app_main()
 {
-    logger.info(TAG, "Starting ESP32-S3 partition AssetStreamer framebuffer test: %ux%u pclk=12MHz", kWidth, kHeight);
+    board.logger().info(TAG, "Starting ESP32-S3 partition AssetStreamer framebuffer test: %ux%u pclk=12MHz", kWidth, kHeight);
     if (!display.begin())
     {
-        logger.error(TAG, "ST7701S RGB display initialization failed");
+        board.logger().error(TAG, "ST7701S RGB display initialization failed");
         return;
     }
     if (!asset_source.begin())
     {
-        logger.error(TAG, "Assets partition not found");
+        board.logger().error(TAG, "Assets partition not found");
         return;
     }
     if (!touch.begin())
     {
-        logger.error(TAG, "GT911 initialization failed");
+        board.logger().error(TAG, "GT911 initialization failed");
         return;
     }
 
     auto& framebuffers = static_cast<brick::interfaces::display::IFrameBufferDisplay&>(display);
     if (framebuffers.frame_buffer_count() != 2)
     {
-        logger.error(TAG, "Expected two framebuffers, got %u", framebuffers.frame_buffer_count());
+        board.logger().error(TAG, "Expected two framebuffers, got %u", framebuffers.frame_buffer_count());
         return;
     }
 
     brick::interfaces::display::WritablePixelBuffer framebuffer[2];
     if (!framebuffers.get_frame_buffer(0, framebuffer[0]) || !framebuffers.get_frame_buffer(1, framebuffer[1]))
     {
-        logger.error(TAG, "Unable to acquire both framebuffers");
+        board.logger().error(TAG, "Unable to acquire both framebuffers");
         return;
     }
 
@@ -152,19 +139,19 @@ extern "C" void app_main()
         || !streamer.stream_to_buffer(*initial_asset, asset_source, framebuffer[1], scratch.data(), scratch.size())
         || !framebuffers.present_frame_buffer(0))
     {
-        logger.error(TAG, "Unable to initialize asset framebuffer");
+        board.logger().error(TAG, "Unable to initialize asset framebuffer");
         return;
     }
 
     std::uint8_t  active            = 0;
     std::uint32_t frame             = 0;
     std::uint32_t benchmark_frames  = 0;
-    std::int64_t  benchmark_started = esp_timer_get_time();
+    std::uint64_t benchmark_started = board.time().micros();
     bool          background_mode   = false;
     std::uint8_t  storage_mode      = 0;
     bool          sd_ready          = false;
     bool          touch_down        = false;
-    logger.info(TAG, "Partition AssetStreamer page-flip test active: touch toggles images/backgrounds");
+    board.logger().info(TAG, "Partition AssetStreamer page-flip test active: touch toggles images/backgrounds");
 
     while (true)
     {
@@ -183,19 +170,19 @@ extern "C" void app_main()
             if (storage_mode == 1U && !copy_to_psram())
             {
                 storage_mode = 0U;
-                logger.warning(TAG, "PSRAM asset copy failed; falling back to flash");
+                board.logger().warning(TAG, "PSRAM asset copy failed; falling back to flash");
             }
             if (storage_mode == 2U && !sd_ready)
             {
-                sd_ready = sd_filesystem.mount();
+                sd_ready = board.sd_card().mount();
                 if (!sd_ready)
                 {
                     storage_mode = 0U;
-                    logger.warning(TAG, "SD asset bundle unavailable; falling back to flash");
+                    board.logger().warning(TAG, "SD asset bundle unavailable; falling back to flash");
                 }
             }
             const char* storage_name = storage_mode == 0U ? "flash" : (storage_mode == 1U ? "psram" : "sd");
-            logger.info(TAG, "touch: storage=%s mode=%s x=%d y=%d", storage_name, background_mode ? "R/B" : "smiles",
+            board.logger().info(TAG, "touch: storage=%s mode=%s x=%d y=%d", storage_name, background_mode ? "R/B" : "smiles",
                         point.x, point.y);
         }
         touch_down = has_touch;
@@ -215,8 +202,8 @@ extern "C" void app_main()
             && streamer.stream_to_buffer(*asset, *selected_source, framebuffer[back], scratch.data(), scratch.size());
         if (!frame_ok && storage_mode == 2U)
         {
-            logger.warning(TAG, "SD asset read failed; falling back to flash");
-            sd_filesystem.unmount();
+            board.logger().warning(TAG, "SD asset read failed; falling back to flash");
+            board.sd_card().unmount();
             sd_ready     = false;
             storage_mode = 0U;
             repository.set_storage(brick::interfaces::display::AssetStorage::flash_partition);
@@ -227,7 +214,7 @@ extern "C" void app_main()
         }
         if (!frame_ok || !display.wait_for_vsync(100) || !framebuffers.present_frame_buffer(back))
         {
-            logger.error(TAG, "Asset framebuffer page flip failed at frame=%u", static_cast<unsigned>(frame));
+            board.logger().error(TAG, "Asset framebuffer page flip failed at frame=%u", static_cast<unsigned>(frame));
             return;
         }
 
@@ -235,18 +222,19 @@ extern "C" void app_main()
         ++frame;
         ++benchmark_frames;
         // Detailed per-frame diagnostic (disabled to keep the UART readable):
-        // logger.info(TAG, "presented frame=%u asset=%u storage=%u mode=%s flip=%lldus",
+        // board.logger().info(TAG, "presented frame=%u asset=%u storage=%u mode=%s flip=%lldus",
         //          static_cast<unsigned>(frame), static_cast<unsigned>(selected_id),
         //          static_cast<unsigned>(storage_mode),
         //          background_mode ? "backgrounds" : "smiles",
-        //          esp_timer_get_time() - frame_started);
+        //          board.time().micros() - frame_started);
         if (benchmark_frames == 60)
         {
-            const auto elapsed = esp_timer_get_time() - benchmark_started;
-            logger.info(TAG, "asset framebuffer benchmark: frames=60 elapsed=%lldus fps=%.2f", elapsed,
+            const auto elapsed = board.time().micros() - benchmark_started;
+            board.logger().info(TAG, "asset framebuffer benchmark: frames=60 elapsed=%lldus fps=%.2f", elapsed,
                         60000000.0 / static_cast<double>(elapsed));
             benchmark_frames  = 0;
-            benchmark_started = esp_timer_get_time();
+            benchmark_started = board.time().micros();
         }
     }
 }
+
