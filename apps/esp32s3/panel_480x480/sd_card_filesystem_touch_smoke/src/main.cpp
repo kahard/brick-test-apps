@@ -4,9 +4,8 @@
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/core/storage/StorageWriteVerify.h"
+#include "brick/core/time/Timer.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -72,10 +71,11 @@ extern "C" void app_main() {
   ESP_LOGI(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
   bool touch_was_down = false;
-  TickType_t next_card_probe = xTaskGetTickCount();
+  brick::core::time::Timer card_timer(g_board.time());
+  card_timer.start(1000);
   while (true) {
-    if (xTaskGetTickCount() >= next_card_probe) {
-      next_card_probe = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+    if (card_timer.expired()) {
+      card_timer.restart();
       if (g_board.sd_card().mounted()) {
         if (!g_board.sd_card().probe(kTestPath)) {
           g_board.sd_card().unmount();
@@ -93,6 +93,6 @@ extern "C" void app_main() {
       if (brick::core::storage::write_verify(g_board.sd_card(), kTestPath, pattern, sizeof(pattern) - 1U)) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
     }
     touch_was_down = touch_down;
-    vTaskDelay(pdMS_TO_TICKS(30));
+    g_board.time().delay_ms(30);
   }
 }
