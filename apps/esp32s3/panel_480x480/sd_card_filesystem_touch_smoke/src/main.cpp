@@ -46,18 +46,26 @@ void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kTextTop = 8;
   static std::uint16_t pixels[480 * kStatusHeight];
   std::fill(std::begin(pixels), std::end(pixels), 0x0000);
-  std::uint16_t x = 8;
-  for (const char* c = message; *c && x < 472; ++c) {
-    std::size_t index = 0;
-    while (index < brick_roboto_20_count && brick_roboto_20_chars[index] != *c) ++index;
-    if (index >= brick_roboto_20_count) continue;
-    const BrickBitmapGlyph& glyph = brick_roboto_20_glyphs[index];
-    for (std::uint16_t y = 0; y < glyph.height && y + kTextTop < kStatusHeight; ++y)
-      for (std::uint16_t col = 0; col < glyph.width && x + col < 480; ++col)
-        if (glyph.data[y * glyph.stride + col / 8] & (0x80u >> (col & 7)))
-          pixels[(y + kTextTop) * 480 + x + col] = color;
-    x = static_cast<std::uint16_t>(x + glyph.width + 1);
-  }
+  const auto render_line = [&](const char* text, const char* chars,
+                               const BrickBitmapGlyph* glyphs, std::size_t count,
+                               std::uint16_t top) {
+    std::uint16_t x = 8;
+    for (const char* c = text; *c && x < 472; ++c) {
+      std::size_t index = 0;
+      while (index < count && chars[index] != *c) ++index;
+      if (index >= count) continue;
+      const BrickBitmapGlyph& glyph = glyphs[index];
+      for (std::uint16_t y = 0; y < glyph.height && y + top < kStatusHeight; ++y)
+        for (std::uint16_t col = 0; col < glyph.width && x + col < 480; ++col)
+          if (glyph.data[y * glyph.stride + col / 8] & (0x80u >> (col & 7)))
+            pixels[(y + top) * 480 + x + col] = color;
+      x = static_cast<std::uint16_t>(x + glyph.width + 1);
+    }
+  };
+  render_line(message, brick_roboto_20_chars, brick_roboto_20_glyphs,
+              brick_roboto_20_count, kTextTop);
+  render_line("FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs,
+              brick_roboto_28_count, 42);
   const brick::interfaces::display::PixelBuffer buffer{
       reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, 960,
       brick::interfaces::display::PixelFormat::rgb565, false};
