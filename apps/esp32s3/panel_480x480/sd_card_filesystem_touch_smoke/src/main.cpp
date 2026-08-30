@@ -1,10 +1,9 @@
-#include <cerrno>
 #include <array>
 #include <algorithm>
-#include <cstring>
 
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/PixelBuffer.h"
+#include "brick/core/storage/StorageWriteVerify.h"
 #include "brick/platform/esp32/SdSpiFileSystem.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -65,38 +64,6 @@ void show_status(std::uint16_t color, const char* message) {
            completed ? 1 : 0);
 }
 
-bool probe_card() {
-  std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "rb");
-  if (!file)
-    return false;
-  unsigned char byte = 0;
-  return file->read(&byte, 1, 1) == 1;
-}
-
-bool write_read_verify() {
-  constexpr unsigned char expected[] = "BRICK SD CARD TEST 2026";
-  constexpr std::size_t expected_size = sizeof(expected) - 1;
-  {
-    std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "wb");
-    if (!file) { ESP_LOGE(kTag, "open for write failed: %s", std::strerror(errno)); return false; }
-    const std::size_t written = file->write(expected, 1, expected_size);
-    if (written != expected_size) { ESP_LOGE(kTag, "short write: %u/%u", (unsigned)written, (unsigned)expected_size); return false; }
-  }
-  unsigned char actual[expected_size] = {};
-  std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "rb");
-  if (!file) { ESP_LOGE(kTag, "open for read failed: %s", std::strerror(errno)); return false; }
-  const std::size_t read = file->read(actual, 1, expected_size);
-  const bool ok = read == expected_size && std::memcmp(actual, expected, expected_size) == 0;
-  ESP_LOGI(kTag, "write/read/verify %s (read=%u expected=%u)", ok ? "OK" : "FAIL", (unsigned)read, (unsigned)expected_size);
-  return ok;
-}
-
-void list_root() {
-  const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
-  for (std::size_t index = 0; index < files.size(); ++index)
-    ESP_LOGI(kTag, "ENTRY %u: %s", static_cast<unsigned>(index), files[index].c_str());
-  ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
-}
 }  // namespace
 
 extern "C" void app_main() {
@@ -105,8 +72,10 @@ extern "C" void app_main() {
   show_status(0x001F, "SD INIT");
   ESP_LOGI(kTag, "Pins CS=%d SCK=%d MOSI=%d MISO=%d", kSdCs, kSdSck, kSdMosi, kSdMiso);
   if (!g_board.sd_card().mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
-  list_root();
-  if (!write_read_verify()) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
+  const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
+  ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+  constexpr std::uint8_t pattern[] = "BRICK SD CARD TEST 2026";
+  if (!brick::core::storage::write_verify(g_board.sd_card(), kTestPath, pattern, sizeof(pattern) - 1U)) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
   else show_status(0x07E0, "SD READY");
   ESP_LOGI(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
@@ -116,19 +85,20 @@ extern "C" void app_main() {
     if (xTaskGetTickCount() >= next_card_probe) {
       next_card_probe = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
       if (g_board.sd_card().mounted()) {
-        if (!probe_card()) {
+        if (!g_board.sd_card().probe(kTestPath)) {
           g_board.sd_card().unmount();
           show_status(0xF800, "SD REMOVED");
         }
       } else if (g_board.sd_card().mount()) {
-        list_root();
+        const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
+        ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
         show_status(0x07E0, "SD INSERTED");
       }
     }
     std::size_t count = 0;
     const bool touch_down = g_board.touch().read(points.data(), points.size(), count) && count > 0;
     if (touch_down && !touch_was_down) {
-      if (write_read_verify()) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
+      if (brick::core::storage::write_verify(g_board.sd_card(), kTestPath, pattern, sizeof(pattern) - 1U)) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
     }
     touch_was_down = touch_down;
     vTaskDelay(pdMS_TO_TICKS(30));
