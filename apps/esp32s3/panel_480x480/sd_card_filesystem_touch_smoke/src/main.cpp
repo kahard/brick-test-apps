@@ -1,24 +1,17 @@
 #include <cerrno>
 #include <array>
 #include <algorithm>
-#include <cstdio>
 #include <cstring>
-#include <dirent.h>
-#include <sys/stat.h>
 
 #include "brick/platform/esp32/s3/St7701sRgbDisplay.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/touch/Gt911Touchscreen.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "brick/interfaces/display/PixelBuffer.h"
-
-#include "driver/sdspi_host.h"
-#include "driver/spi_common.h"
+#include "brick/platform/esp32/SdSpiFileSystem.h"
 #include "esp_log.h"
-#include "esp_vfs_fat.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "sdmmc_cmd.h"
 
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -36,10 +29,10 @@ constexpr gpio_num_t kSdMosi = GPIO_NUM_47;
 constexpr gpio_num_t kSdMiso = GPIO_NUM_41;
 constexpr gpio_num_t kSdSck = GPIO_NUM_48;
 
-sdmmc_card_t* g_card = nullptr;
-bool g_mounted = false;
 brick::platform::esp32::s3::St7701sRgbDisplay g_display(brick::platform::esp32::s3::profiles::st7701s_480x480());
 brick::platform::esp32::touch::Gt911Touchscreen g_touch(brick::platform::esp32::s3::profiles::st7701s_gt911());
+brick::platform::esp32::SdSpiFileSystem g_sd({kSdCs, kSdSck, kSdMosi, kSdMiso,
+                                              SPI2_HOST, kMountPoint, 20000});
 
 void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
@@ -78,100 +71,37 @@ void show_status(std::uint16_t color, const char* message) {
            completed ? 1 : 0);
 }
 
-bool mount_card() {
-  if (g_mounted) return true;
-  spi_bus_config_t bus = {};
-  bus.mosi_io_num = kSdMosi;
-  bus.miso_io_num = kSdMiso;
-  bus.sclk_io_num = kSdSck;
-  bus.quadwp_io_num = -1;
-  bus.quadhd_io_num = -1;
-  esp_err_t result = spi_bus_initialize(SPI2_HOST, &bus, SDSPI_DEFAULT_DMA);
-  if (result != ESP_OK && result != ESP_ERR_INVALID_STATE) {
-    ESP_LOGE(kTag, "SPI bus init failed: %s", esp_err_to_name(result));
-    return false;
-  }
-  sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-  host.slot = SPI2_HOST;
-  host.max_freq_khz = 1000;
-  sdspi_device_config_t device = SDSPI_DEVICE_CONFIG_DEFAULT();
-  device.host_id = SPI2_HOST;
-  device.gpio_cs = kSdCs;
-  esp_vfs_fat_mount_config_t mount = {};
-  mount.format_if_mount_failed = false;
-  mount.max_files = 4;
-  mount.allocation_unit_size = 16 * 1024;
-  result = esp_vfs_fat_sdspi_mount(kMountPoint, &host, &device, &mount, &g_card);
-  if (result != ESP_OK) {
-    ESP_LOGE(kTag, "SD mount failed: %s (0x%x)", esp_err_to_name(result), result);
-    return false;
-  }
-  g_mounted = true;
-  ESP_LOGI(kTag, "SD mounted at %s", kMountPoint);
-  sdmmc_card_print_info(stdout, g_card);
-  return true;
-}
-
 bool probe_card() {
-  if (!g_mounted || g_card == nullptr)
+  std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "rb");
+  if (!file)
     return false;
-  struct stat info = {};
-  if (stat(kMountPoint, &info) != 0)
-    return false;
-  // A directory stat can remain cached after removal; probing an actual file
-  // forces the FAT/SDSPI layer to talk to the card.
-  std::FILE* file = std::fopen(kTestPath, "rb");
-  if (file == nullptr)
-    return false;
-  const int result = std::fgetc(file);
-  std::fclose(file);
-  return result != EOF;
-}
-
-void unmount_card() {
-  if (!g_mounted)
-    return;
-  esp_vfs_fat_sdcard_unmount(kMountPoint, g_card);
-  g_card = nullptr;
-  g_mounted = false;
-  spi_bus_free(SPI2_HOST);
-  ESP_LOGW(kTag, "SD card disconnected");
+  unsigned char byte = 0;
+  return file->read(&byte, 1, 1) == 1;
 }
 
 bool write_read_verify() {
   constexpr unsigned char expected[] = "BRICK SD CARD TEST 2026";
   constexpr std::size_t expected_size = sizeof(expected) - 1;
   {
-    std::FILE* file = std::fopen(kTestPath, "wb");
+    std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "wb");
     if (!file) { ESP_LOGE(kTag, "open for write failed: %s", std::strerror(errno)); return false; }
-    const std::size_t written = std::fwrite(expected, 1, expected_size, file);
-    std::fclose(file);
+    const std::size_t written = file->write(expected, 1, expected_size);
     if (written != expected_size) { ESP_LOGE(kTag, "short write: %u/%u", (unsigned)written, (unsigned)expected_size); return false; }
   }
   unsigned char actual[expected_size] = {};
-  std::FILE* file = std::fopen(kTestPath, "rb");
+  std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "rb");
   if (!file) { ESP_LOGE(kTag, "open for read failed: %s", std::strerror(errno)); return false; }
-  const std::size_t read = std::fread(actual, 1, expected_size, file);
-  std::fclose(file);
+  const std::size_t read = file->read(actual, 1, expected_size);
   const bool ok = read == expected_size && std::memcmp(actual, expected, expected_size) == 0;
   ESP_LOGI(kTag, "write/read/verify %s (read=%u expected=%u)", ok ? "OK" : "FAIL", (unsigned)read, (unsigned)expected_size);
   return ok;
 }
 
 void list_root() {
-  DIR* directory = opendir(kMountPoint);
-  if (!directory) {
-    ESP_LOGW(kTag, "Unable to list %s", kMountPoint);
-    return;
-  }
-  unsigned count = 0;
-  while (dirent* entry = readdir(directory)) {
-    if (std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0) continue;
-    ESP_LOGI(kTag, "ENTRY %u: %s%s", count++, entry->d_name,
-             entry->d_type == DT_DIR ? "/" : "");
-  }
-  closedir(directory);
-  ESP_LOGI(kTag, "Root entries: %u", count);
+  const std::vector<std::string> files = g_sd.list_files(kMountPoint);
+  for (std::size_t index = 0; index < files.size(); ++index)
+    ESP_LOGI(kTag, "ENTRY %u: %s", static_cast<unsigned>(index), files[index].c_str());
+  ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
 }
 }  // namespace
 
@@ -180,7 +110,7 @@ extern "C" void app_main() {
   if (!g_display.begin() || !g_touch.begin()) { ESP_LOGE(kTag, "Display/touch init failed"); return; }
   show_status(0x001F, "SD INIT");
   ESP_LOGI(kTag, "Pins CS=%d SCK=%d MOSI=%d MISO=%d", kSdCs, kSdSck, kSdMosi, kSdMiso);
-  if (!mount_card()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
+  if (!g_sd.mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
   list_root();
   if (!write_read_verify()) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
   else show_status(0x07E0, "SD READY");
@@ -191,12 +121,12 @@ extern "C" void app_main() {
   while (true) {
     if (xTaskGetTickCount() >= next_card_probe) {
       next_card_probe = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
-      if (g_mounted) {
+      if (g_sd.mounted()) {
         if (!probe_card()) {
-          unmount_card();
+          g_sd.unmount();
           show_status(0xF800, "SD REMOVED");
         }
-      } else if (mount_card()) {
+      } else if (g_sd.mount()) {
         list_root();
         show_status(0x07E0, "SD INSERTED");
       }
