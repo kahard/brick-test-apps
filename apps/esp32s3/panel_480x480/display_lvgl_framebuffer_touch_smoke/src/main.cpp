@@ -5,8 +5,6 @@
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/platform/esp32/LvglTouchAdapter.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "lvgl.h"
 
 LV_FONT_DECLARE(brick_font_24);
@@ -30,15 +28,7 @@ void button_event_cb(lv_event_t* event)
     g_logger->info(TAG, "LVGL button clicked count=%u", static_cast<unsigned>(press_counter));
 }
 
-auto panel_config()
-{
-    auto config               = brick::platform::esp32::s3::profiles::st7701s_480x480();
-    config.pixel_clock_hz     = 16'000'000;
-    config.frame_buffer_count = 2;
-    return config;
-}
-
-brick::platform::esp32::s3::Panel480Board board(panel_config());
+brick::platform::esp32::s3::Panel480Board board(brick::platform::esp32::s3::Panel480Board::double_buffered_config());
 auto&                                     display = board.display();
 auto&                                     touch   = board.touch();
 
@@ -98,7 +88,7 @@ extern "C" void app_main()
     lv_label_set_text(press_label, "Kliknięcia: 0");
     lv_obj_align(press_label, LV_ALIGN_BOTTOM_MID, 0, -40);
 
-    g_logger->info(TAG, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=16MHz touch=GT911",
+    g_logger->info(TAG, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=12MHz touch=GT911",
                    framebuffers.frame_buffer_count());
 
     std::uint32_t            frame_counter = 0;
