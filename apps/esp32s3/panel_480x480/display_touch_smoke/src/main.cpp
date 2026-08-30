@@ -2,9 +2,8 @@
 #include <cstdint>
 
 #include "brick/boards/esp32/s3/Panel480Board.h"
+#include "brick/core/time/Timer.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 namespace {
 constexpr char TAG[] = "brick_st7701s_smoke";
@@ -76,6 +75,8 @@ extern "C" void app_main() {
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
   brick::interfaces::display::TouchPoint marker_point{};
   bool marker_visible = false;
+  brick::core::time::Timer frame_timer(board.time());
+  frame_timer.start(16);
   while (true) {
     std::size_t count = 0;
     if (touch.read(points.data(), points.size(), count)) {
@@ -97,6 +98,7 @@ extern "C" void app_main() {
                  point.pressure, static_cast<unsigned>(point.state));
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(16));
+    if (frame_timer.expired()) frame_timer.restart();
+    board.time().delay_ms(1);
   }
 }

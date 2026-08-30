@@ -1,11 +1,11 @@
 #include <cstdint>
 
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
+#include "brick/core/time/Timer.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "esp_log.h"
 #include "esp_timer.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 namespace {
 constexpr char TAG[] = "brick_st7701s_framebuffer";
@@ -18,7 +18,8 @@ auto panel_config() {
   return config;
 }
 
-brick::platform::esp32::s3::St7701sRgbDisplay display(panel_config());
+brick::platform::esp32::s3::Panel480Board board(panel_config());
+auto& display = board.display();
 
 bool fill_and_present(brick::interfaces::display::IFrameBufferDisplay& framebuffers,
                       std::uint8_t index, std::uint16_t color) {
@@ -67,6 +68,6 @@ extern "C" void app_main() {
     if (!fill_and_present(framebuffers, index, color))
       return;
     index ^= 1;
-    vTaskDelay(pdMS_TO_TICKS(500));
+    board.time().delay_ms(500);
   }
 }
