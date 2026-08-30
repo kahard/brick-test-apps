@@ -4,6 +4,7 @@
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/core/storage/StorageWriteVerify.h"
+#include "brick/core/display/Screen.h"
 #include "brick/core/time/Timer.h"
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -16,6 +17,7 @@ constexpr char kMountPoint[] = "/sdcard";
 constexpr char kTestPath[] = "/sdcard/BRICKTST.BIN";
 
 brick::platform::esp32::s3::Panel480Board g_board;
+brick::core::display::Screen g_screen(g_board.display());
 
 void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
@@ -45,11 +47,8 @@ void show_status(std::uint16_t color, const char* message) {
   const brick::interfaces::display::PixelBuffer buffer{
       reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, 960,
       brick::interfaces::display::PixelFormat::rgb565, false};
-  // The area must exactly match the PixelBuffer dimensions.  A mismatch makes
-  // the display driver reject the transfer silently (and leaves the panel
-  // showing only its backlight).
-  const bool submitted = g_board.display().draw_buffer({0, 0, 480, kStatusHeight}, buffer);
-  const bool completed = submitted && g_board.display().wait_for_transfer_complete(1000);
+  const bool submitted = g_screen.draw({0, 0, 480, kStatusHeight}, buffer);
+  const bool completed = submitted && g_screen.wait_for_transfer_complete(1000);
   g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
 }
