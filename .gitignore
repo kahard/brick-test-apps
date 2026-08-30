@@ -2,6 +2,8 @@
 **/managed_components/
 **/assets/generated/
 **/generated_assets.h
+**/generated_font.h
+**/generated_font_large.h
 **/.pytest_cache/
 **/sdkconfig*
 !apps/esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/sdkconfig.defaults

@@ -6,7 +6,7 @@ PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../.
 
 PYTHON ?= python
 ASSET_TOOLS ?= ../../../../../brick_framework/tools/assets
-FONT_SOURCE ?= ../display_lvgl_asset_framebuffer_touch_smoke/assets/Roboto-Regular.ttf
+FONT_SOURCE ?= ../display_asset_stream_api_framebuffer_smoke/assets/Roboto-Regular.ttf
 FONT_OUTPUT ?= src/generated_font.h
 FONT_LARGE_SOURCE ?= $(FONT_SOURCE)
 FONT_LARGE_OUTPUT ?= src/generated_font_large.h
