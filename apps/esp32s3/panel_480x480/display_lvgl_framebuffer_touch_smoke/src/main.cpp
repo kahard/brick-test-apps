@@ -1,13 +1,13 @@
 #include <cstdint>
 
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
+#include "brick/core/time/Timer.h"
 #include "brick/platform/esp32/LvglDisplayAdapter.h"
 #include "brick/platform/esp32/LvglTouchAdapter.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "lvgl.h"
 
 LV_FONT_DECLARE(brick_font_24);
@@ -36,9 +36,9 @@ auto panel_config() {
   return config;
 }
 
-brick::platform::esp32::s3::St7701sRgbDisplay display(panel_config());
-brick::platform::esp32::touch::Gt911Touchscreen touch(
-    brick::platform::esp32::s3::profiles::st7701s_gt911());
+brick::platform::esp32::s3::Panel480Board board(panel_config());
+auto& display = board.display();
+auto& touch = board.touch();
 
 }
 
@@ -93,22 +93,25 @@ extern "C" void app_main() {
   ESP_LOGI(TAG, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=16MHz touch=GT911",
            framebuffers.frame_buffer_count());
 
-  std::uint32_t elapsed_ms = 0;
   std::uint32_t frame_counter = 0;
+  brick::core::time::Timer step_timer(board.time());
+  brick::core::time::Timer frame_timer(board.time());
+  step_timer.start(10);
+  frame_timer.start(1000);
   while (true) {
-    constexpr std::uint32_t kStepMs = 10;
-    vTaskDelay(pdMS_TO_TICKS(kStepMs));
-    elapsed_ms += kStepMs;
-    lv_tick_inc(kStepMs);
-    lv_timer_handler();
-
-    if (elapsed_ms >= 1000) {
-      elapsed_ms = 0;
+    if (step_timer.expired()) {
+      step_timer.restart();
+      lv_tick_inc(10);
+      lv_timer_handler();
+    }
+    if (frame_timer.expired()) {
+      frame_timer.restart();
       ++frame_counter;
       lv_label_set_text_fmt(title, "BRICK + LVGL DIRECT\nframe=%u",
                             static_cast<unsigned>(frame_counter));
       ESP_LOGI(TAG, "LVGL direct page flip active frame=%u",
                static_cast<unsigned>(frame_counter));
     }
+    board.time().delay_ms(1);
   }
 }
