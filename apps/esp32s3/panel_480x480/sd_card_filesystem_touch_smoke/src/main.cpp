@@ -23,14 +23,15 @@ void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
   constexpr std::uint16_t kTextTop = 8;
   brick::core::display::Screen::Canvas canvas = g_screen.create_canvas(kStatusHeight);
-  const bool allocated = canvas.valid();
-  const bool rendered = allocated && canvas.clear(0x0000) &&
-      canvas.text(8, kTextTop, message, brick_roboto_20_chars,
-                  brick_roboto_20_glyphs, brick_roboto_20_count, color) &&
-      canvas.text(8, 42, "FONT 28 PX", brick_roboto_28_chars,
-                  brick_roboto_28_glyphs, brick_roboto_28_count, color);
-  const bool completed = rendered && canvas.present();
-  const bool submitted = rendered;
+  const bool submitted = canvas.valid();
+  if (submitted) {
+    canvas.clear(0x0000)
+        .text(8, kTextTop, message, brick_roboto_20_chars, brick_roboto_20_glyphs,
+              brick_roboto_20_count, color)
+        .text(8, 42, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs,
+              brick_roboto_28_count, color);
+  }
+  const bool completed = submitted && canvas.present();
   g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
 }
