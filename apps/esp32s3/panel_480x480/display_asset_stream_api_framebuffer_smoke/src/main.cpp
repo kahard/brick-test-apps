@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "PartitionAssetSource.h"
+#include "brick/platform/esp32/PartitionAssetSource.h"
 #include "brick/core/image/AssetRepository.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
@@ -25,7 +25,7 @@ auto& display = board.display();
 auto& touch = board.touch();
 std::array<std::uint8_t, kScratchBytes>         scratch{};
 
-PartitionAssetSource              asset_source("assets");
+brick::platform::esp32::PartitionAssetSource asset_source("assets");
 brick::core::image::AssetStreamer streamer(display);
 
 class RamAssetSource final : public brick::interfaces::display::IAssetSource
