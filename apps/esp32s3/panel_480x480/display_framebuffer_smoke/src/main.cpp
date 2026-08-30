@@ -3,7 +3,7 @@
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/core/time/Timer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h" #include "esp_timer.h"
+#include "esp_timer.h"
 
 namespace
 {
@@ -11,14 +11,8 @@ constexpr char          TAG[]   = "brick_st7701s_framebuffer";
 constexpr std::uint16_t kWidth  = 480;
 constexpr std::uint16_t kHeight = 480;
 
-auto panel_config()
-{
-    auto config               = brick::platform::esp32::s3::profiles::st7701s_480x480();
-    config.frame_buffer_count = 2;
-    return config;
-}
-
-brick::platform::esp32::s3::Panel480Board board(panel_config());
+brick::platform::esp32::s3::Panel480Board board(
+    brick::platform::esp32::s3::Panel480Board::double_buffered_config());
 auto&                                     display = board.display();
 
 bool fill_and_present(brick::interfaces::display::IFrameBufferDisplay& framebuffers, std::uint8_t index,
