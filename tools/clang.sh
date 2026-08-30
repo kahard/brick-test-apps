@@ -15,4 +15,4 @@ while IFS= read -r -d '' file; do
   index=$((index + 1))
   echo "Formatting [$index] $file"
   clang-format "${FLAGS[@]}" "$file"
-done < <(find . \( -path './.git' -o -path './.git/*' -o -path './libs/brick' -o -path './libs/brick/*' -o -path './libs/brick-boards' -o -path './libs/brick-boards/*' -o -path '*/.pio' -o -path '*/.pio/*' \) -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' -o -name '*.h' \) -print0)
+done < <(find . \( -path './.git' -o -path './.git/*' -o -path './libs/brick' -o -path './libs/brick/*' -o -path './libs/brick-boards' -o -path './libs/brick-boards/*' -o -path '*/.pio' -o -path '*/.pio/*' -o -path '*/generated' -o -path '*/generated/*' \) -prune -o -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' -o -name '*.h' \) -print0)
