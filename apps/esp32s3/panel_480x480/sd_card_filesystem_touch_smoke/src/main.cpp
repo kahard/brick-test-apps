@@ -5,8 +5,6 @@
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/core/storage/StorageWriteVerify.h"
 #include "brick/core/time/Timer.h"
-#include "esp_log.h"
-
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
 
@@ -52,23 +50,23 @@ void show_status(std::uint16_t color, const char* message) {
   // showing only its backlight).
   const bool submitted = g_board.display().draw_buffer({0, 0, 480, kStatusHeight}, buffer);
   const bool completed = submitted && g_board.display().wait_for_transfer_complete(1000);
-  ESP_LOGI(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
+  g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
 }
 
 }  // namespace
 
 extern "C" void app_main() {
-  ESP_LOGI(kTag, "ESP32-S3 4\" SD card filesystem smoke");
-  if (!g_board.begin()) { ESP_LOGE(kTag, "Board init failed"); return; }
+  g_board.logger().info(kTag, "ESP32-S3 4\" SD card filesystem smoke");
+  if (!g_board.begin()) { g_board.logger().error(kTag, "Board init failed"); return; }
   show_status(0x001F, "SD INIT");
-  if (!g_board.sd_card().mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
+  if (!g_board.sd_card().mount()) { show_status(0xF800, "SD MOUNT FAIL"); g_board.logger().error(kTag, "SD CARD TEST FAIL: mount"); return; }
   const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
-  ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+  g_board.logger().info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
   constexpr std::uint8_t pattern[] = "BRICK SD CARD TEST 2026";
-  if (!brick::core::storage::write_verify(g_board.sd_card(), kTestPath, pattern, sizeof(pattern) - 1U)) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
+  if (!brick::core::storage::write_verify(g_board.sd_card(), kTestPath, pattern, sizeof(pattern) - 1U)) { show_status(0xF800, "WRITE READ FAIL"); g_board.logger().error(kTag, "SD CARD TEST FAIL: write/read"); }
   else show_status(0x07E0, "SD READY");
-  ESP_LOGI(kTag, "SD CARD TEST PASS");
+  g_board.logger().info(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
   bool touch_was_down = false;
   brick::core::time::Timer card_timer(g_board.time());
@@ -83,7 +81,7 @@ extern "C" void app_main() {
         }
       } else if (g_board.sd_card().mount()) {
         const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
-        ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+        g_board.logger().info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
         show_status(0x07E0, "SD INSERTED");
       }
     }
