@@ -3,10 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "brick/platform/esp32/s3/St7701sRgbDisplay.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
-#include "brick/platform/esp32/touch/Gt911Touchscreen.h"
-#include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/platform/esp32/SdSpiFileSystem.h"
 #include "esp_log.h"
@@ -29,10 +26,7 @@ constexpr gpio_num_t kSdMosi = GPIO_NUM_47;
 constexpr gpio_num_t kSdMiso = GPIO_NUM_41;
 constexpr gpio_num_t kSdSck = GPIO_NUM_48;
 
-brick::platform::esp32::s3::St7701sRgbDisplay g_display(brick::platform::esp32::s3::profiles::st7701s_480x480());
-brick::platform::esp32::touch::Gt911Touchscreen g_touch(brick::platform::esp32::s3::profiles::st7701s_gt911());
-brick::platform::esp32::SdSpiFileSystem g_sd({kSdCs, kSdSck, kSdMosi, kSdMiso,
-                                              SPI2_HOST, kMountPoint, 20000});
+brick::platform::esp32::s3::Panel480Board g_board;
 
 void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
@@ -65,14 +59,14 @@ void show_status(std::uint16_t color, const char* message) {
   // The area must exactly match the PixelBuffer dimensions.  A mismatch makes
   // the display driver reject the transfer silently (and leaves the panel
   // showing only its backlight).
-  const bool submitted = g_display.draw_buffer({0, 0, 480, kStatusHeight}, buffer);
-  const bool completed = submitted && g_display.wait_for_transfer_complete(1000);
+  const bool submitted = g_board.display().draw_buffer({0, 0, 480, kStatusHeight}, buffer);
+  const bool completed = submitted && g_board.display().wait_for_transfer_complete(1000);
   ESP_LOGI(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
 }
 
 bool probe_card() {
-  std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "rb");
+  std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "rb");
   if (!file)
     return false;
   unsigned char byte = 0;
@@ -83,13 +77,13 @@ bool write_read_verify() {
   constexpr unsigned char expected[] = "BRICK SD CARD TEST 2026";
   constexpr std::size_t expected_size = sizeof(expected) - 1;
   {
-    std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "wb");
+    std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "wb");
     if (!file) { ESP_LOGE(kTag, "open for write failed: %s", std::strerror(errno)); return false; }
     const std::size_t written = file->write(expected, 1, expected_size);
     if (written != expected_size) { ESP_LOGE(kTag, "short write: %u/%u", (unsigned)written, (unsigned)expected_size); return false; }
   }
   unsigned char actual[expected_size] = {};
-  std::unique_ptr<brick::interfaces::storage::IFile> file = g_sd.open(kTestPath, "rb");
+  std::unique_ptr<brick::interfaces::storage::IFile> file = g_board.sd_card().open(kTestPath, "rb");
   if (!file) { ESP_LOGE(kTag, "open for read failed: %s", std::strerror(errno)); return false; }
   const std::size_t read = file->read(actual, 1, expected_size);
   const bool ok = read == expected_size && std::memcmp(actual, expected, expected_size) == 0;
@@ -98,7 +92,7 @@ bool write_read_verify() {
 }
 
 void list_root() {
-  const std::vector<std::string> files = g_sd.list_files(kMountPoint);
+  const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
   for (std::size_t index = 0; index < files.size(); ++index)
     ESP_LOGI(kTag, "ENTRY %u: %s", static_cast<unsigned>(index), files[index].c_str());
   ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
@@ -107,10 +101,10 @@ void list_root() {
 
 extern "C" void app_main() {
   ESP_LOGI(kTag, "ESP32-S3 4\" SD card filesystem smoke");
-  if (!g_display.begin() || !g_touch.begin()) { ESP_LOGE(kTag, "Display/touch init failed"); return; }
+  if (!g_board.begin()) { ESP_LOGE(kTag, "Board init failed"); return; }
   show_status(0x001F, "SD INIT");
   ESP_LOGI(kTag, "Pins CS=%d SCK=%d MOSI=%d MISO=%d", kSdCs, kSdSck, kSdMosi, kSdMiso);
-  if (!g_sd.mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
+  if (!g_board.sd_card().mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
   list_root();
   if (!write_read_verify()) { show_status(0xF800, "WRITE READ FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: write/read"); }
   else show_status(0x07E0, "SD READY");
@@ -121,18 +115,18 @@ extern "C" void app_main() {
   while (true) {
     if (xTaskGetTickCount() >= next_card_probe) {
       next_card_probe = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
-      if (g_sd.mounted()) {
+      if (g_board.sd_card().mounted()) {
         if (!probe_card()) {
-          g_sd.unmount();
+          g_board.sd_card().unmount();
           show_status(0xF800, "SD REMOVED");
         }
-      } else if (g_sd.mount()) {
+      } else if (g_board.sd_card().mount()) {
         list_root();
         show_status(0x07E0, "SD INSERTED");
       }
     }
     std::size_t count = 0;
-    const bool touch_down = g_touch.read(points.data(), points.size(), count) && count > 0;
+    const bool touch_down = g_board.touch().read(points.data(), points.size(), count) && count > 0;
     if (touch_down && !touch_was_down) {
       if (write_read_verify()) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
     }
