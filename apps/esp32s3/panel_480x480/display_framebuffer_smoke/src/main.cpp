@@ -3,7 +3,6 @@
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/core/time/Timer.h"
 #include "brick/interfaces/display/IFrameBufferDisplay.h"
-#include "esp_timer.h"
 
 namespace
 {
@@ -25,18 +24,18 @@ bool fill_and_present(brick::interfaces::display::IFrameBufferDisplay& framebuff
         return false;
     }
 
-    const auto start_us = esp_timer_get_time();
+    const auto start_us = board.time().micros();
     auto*      pixels   = reinterpret_cast<std::uint16_t*>(buffer.data);
     for (std::size_t pixel = 0; pixel < kWidth * kHeight; ++pixel)
         pixels[pixel] = color;
-    const auto fill_us = esp_timer_get_time() - start_us;
+    const auto fill_us = board.time().micros() - start_us;
 
     if (!framebuffers.present_frame_buffer(index) || !display.wait_for_vsync(100))
     {
         board.logger().error(TAG, "Unable to present framebuffer %u", index);
         return false;
     }
-    const auto total_us = esp_timer_get_time() - start_us;
+    const auto total_us = board.time().micros() - start_us;
     board.logger().info(TAG, "framebuffer=%u color=0x%04X fill=%lldus present+vsync=%lldus", index, color,
                         static_cast<long long>(fill_us), static_cast<long long>(total_us));
     return true;
