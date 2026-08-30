@@ -4,7 +4,6 @@
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/core/storage/StorageWriteVerify.h"
-#include "brick/platform/esp32/SdSpiFileSystem.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -18,12 +17,6 @@ constexpr char kMountPoint[] = "/sdcard";
 // Keep the filename in FAT 8.3 form; this panel's FAT configuration does not
 // accept long filenames.
 constexpr char kTestPath[] = "/sdcard/BRICKTST.BIN";
-
-// ESP32-S3 4" panel wiring from the vendor demo.
-constexpr gpio_num_t kSdCs = GPIO_NUM_42;
-constexpr gpio_num_t kSdMosi = GPIO_NUM_47;
-constexpr gpio_num_t kSdMiso = GPIO_NUM_41;
-constexpr gpio_num_t kSdSck = GPIO_NUM_48;
 
 brick::platform::esp32::s3::Panel480Board g_board;
 
@@ -70,7 +63,6 @@ extern "C" void app_main() {
   ESP_LOGI(kTag, "ESP32-S3 4\" SD card filesystem smoke");
   if (!g_board.begin()) { ESP_LOGE(kTag, "Board init failed"); return; }
   show_status(0x001F, "SD INIT");
-  ESP_LOGI(kTag, "Pins CS=%d SCK=%d MOSI=%d MISO=%d", kSdCs, kSdSck, kSdMosi, kSdMiso);
   if (!g_board.sd_card().mount()) { show_status(0xF800, "SD MOUNT FAIL"); ESP_LOGE(kTag, "SD CARD TEST FAIL: mount"); return; }
   const std::vector<std::string> files = g_board.sd_card().list_files(kMountPoint);
   ESP_LOGI(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
