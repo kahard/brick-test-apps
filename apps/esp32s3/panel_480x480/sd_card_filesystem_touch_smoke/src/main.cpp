@@ -23,31 +23,18 @@ void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
   constexpr std::uint16_t kTextTop = 8;
   static std::uint16_t pixels[480 * kStatusHeight];
-  std::fill(std::begin(pixels), std::end(pixels), 0x0000);
-  const auto render_line = [&](const char* text, const char* chars,
-                               const BrickBitmapGlyph* glyphs, std::size_t count,
-                               std::uint16_t top) {
-    std::uint16_t x = 8;
-    for (const char* c = text; *c && x < 472; ++c) {
-      std::size_t index = 0;
-      while (index < count && chars[index] != *c) ++index;
-      if (index >= count) continue;
-      const BrickBitmapGlyph& glyph = glyphs[index];
-      for (std::uint16_t y = 0; y < glyph.height && y + top < kStatusHeight; ++y)
-        for (std::uint16_t col = 0; col < glyph.width && x + col < 480; ++col)
-          if (glyph.data[y * glyph.stride + col / 8] & (0x80u >> (col & 7)))
-            pixels[(y + top) * 480 + x + col] = color;
-      x = static_cast<std::uint16_t>(x + glyph.width + 1);
-    }
-  };
-  render_line(message, brick_roboto_20_chars, brick_roboto_20_glyphs,
-              brick_roboto_20_count, kTextTop);
-  render_line("FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs,
-              brick_roboto_28_count, 42);
-  const brick::interfaces::display::PixelBuffer buffer{
-      reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, 960,
+  brick::interfaces::display::WritablePixelBuffer buffer{
+      reinterpret_cast<std::uint8_t*>(pixels), 480, kStatusHeight, 480 * sizeof(std::uint16_t),
       brick::interfaces::display::PixelFormat::rgb565, false};
-  const bool submitted = g_screen.draw({0, 0, 480, kStatusHeight}, buffer);
+  g_screen.fill(buffer, 0x0000);
+  g_screen.draw_text(buffer, 8, kTextTop, message, brick_roboto_20_chars,
+                     brick_roboto_20_glyphs, brick_roboto_20_count, color);
+  g_screen.draw_text(buffer, 8, 42, "FONT 28 PX", brick_roboto_28_chars,
+                     brick_roboto_28_glyphs, brick_roboto_28_count, color);
+  const brick::interfaces::display::PixelBuffer view{
+      reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, buffer.stride_bytes,
+      brick::interfaces::display::PixelFormat::rgb565, false};
+  const bool submitted = g_screen.draw({0, 0, 480, kStatusHeight}, view);
   const bool completed = submitted && g_screen.wait_for_transfer_complete(1000);
   g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
