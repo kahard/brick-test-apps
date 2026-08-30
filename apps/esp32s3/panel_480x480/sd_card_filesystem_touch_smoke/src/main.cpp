@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #include "brick/platform/esp32/s3/St7701sRgbDisplay.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
@@ -41,7 +42,9 @@ brick::platform::esp32::s3::St7701sRgbDisplay g_display(brick::platform::esp32::
 brick::platform::esp32::touch::Gt911Touchscreen g_touch(brick::platform::esp32::s3::profiles::st7701s_gt911());
 
 void show_status(std::uint16_t color, const char* message) {
-  static std::uint16_t pixels[480 * 80];
+  constexpr std::uint16_t kStatusHeight = 96;
+  constexpr std::uint16_t kTextTop = 8;
+  static std::uint16_t pixels[480 * kStatusHeight];
   std::fill(std::begin(pixels), std::end(pixels), 0x0000);
   std::uint16_t x = 8;
   for (const char* c = message; *c && x < 472; ++c) {
@@ -49,19 +52,19 @@ void show_status(std::uint16_t color, const char* message) {
     while (index < brick_roboto_20_count && brick_roboto_20_chars[index] != *c) ++index;
     if (index >= brick_roboto_20_count) continue;
     const BrickBitmapGlyph& glyph = brick_roboto_20_glyphs[index];
-    for (std::uint16_t y = 0; y < glyph.height && y < 80; ++y)
+    for (std::uint16_t y = 0; y < glyph.height && y + kTextTop < kStatusHeight; ++y)
       for (std::uint16_t col = 0; col < glyph.width && x + col < 480; ++col)
         if (glyph.data[y * glyph.stride + col / 8] & (0x80u >> (col & 7)))
-          pixels[y * 480 + x + col] = color;
+          pixels[(y + kTextTop) * 480 + x + col] = color;
     x = static_cast<std::uint16_t>(x + glyph.width + 1);
   }
   const brick::interfaces::display::PixelBuffer buffer{
-      reinterpret_cast<const std::uint8_t*>(pixels), 480, 80, 960,
+      reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, 960,
       brick::interfaces::display::PixelFormat::rgb565, false};
   // The area must exactly match the PixelBuffer dimensions.  A mismatch makes
   // the display driver reject the transfer silently (and leaves the panel
   // showing only its backlight).
-  const bool submitted = g_display.draw_buffer({0, 0, 480, 80}, buffer);
+  const bool submitted = g_display.draw_buffer({0, 0, 480, kStatusHeight}, buffer);
   const bool completed = submitted && g_display.wait_for_transfer_complete(1000);
   ESP_LOGI(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
@@ -99,6 +102,32 @@ bool mount_card() {
   ESP_LOGI(kTag, "SD mounted at %s", kMountPoint);
   sdmmc_card_print_info(stdout, g_card);
   return true;
+}
+
+bool probe_card() {
+  if (!g_mounted || g_card == nullptr)
+    return false;
+  struct stat info = {};
+  if (stat(kMountPoint, &info) != 0)
+    return false;
+  // A directory stat can remain cached after removal; probing an actual file
+  // forces the FAT/SDSPI layer to talk to the card.
+  std::FILE* file = std::fopen(kTestPath, "rb");
+  if (file == nullptr)
+    return false;
+  const int result = std::fgetc(file);
+  std::fclose(file);
+  return result != EOF;
+}
+
+void unmount_card() {
+  if (!g_mounted)
+    return;
+  esp_vfs_fat_sdcard_unmount(kMountPoint, g_card);
+  g_card = nullptr;
+  g_mounted = false;
+  spi_bus_free(SPI2_HOST);
+  ESP_LOGW(kTag, "SD card disconnected");
 }
 
 bool write_read_verify() {
@@ -150,7 +179,20 @@ extern "C" void app_main() {
   ESP_LOGI(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
   bool touch_was_down = false;
+  TickType_t next_card_probe = xTaskGetTickCount();
   while (true) {
+    if (xTaskGetTickCount() >= next_card_probe) {
+      next_card_probe = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+      if (g_mounted) {
+        if (!probe_card()) {
+          unmount_card();
+          show_status(0xF800, "SD REMOVED");
+        }
+      } else if (mount_card()) {
+        list_root();
+        show_status(0x07E0, "SD INSERTED");
+      }
+    }
     std::size_t count = 0;
     const bool touch_down = g_touch.read(points.data(), points.size(), count) && count > 0;
     if (touch_down && !touch_was_down) {
