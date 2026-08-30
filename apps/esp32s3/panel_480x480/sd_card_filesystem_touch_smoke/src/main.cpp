@@ -20,8 +20,8 @@
 #include "freertos/task.h"
 #include "sdmmc_cmd.h"
 
-#include "generated_font.h"
-#include "generated_font_large.h"
+#include "generated/generated_font.h"
+#include "generated/generated_font_large.h"
 
 namespace {
 constexpr char kTag[] = "brick_sd_card_smoke";
