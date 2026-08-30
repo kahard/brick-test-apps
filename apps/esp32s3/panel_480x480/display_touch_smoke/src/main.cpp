@@ -3,8 +3,6 @@
 
 #include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/core/time/Timer.h"
-#include "esp_log.h"
-
 namespace {
 constexpr char TAG[] = "brick_st7701s_smoke";
 constexpr std::uint16_t kWidth = 480;
@@ -63,13 +61,13 @@ bool draw_marker(const brick::interfaces::display::TouchPoint& point, bool activ
 }  // namespace
 
 extern "C" void app_main() {
-  ESP_LOGI(TAG, "Starting ESP32-S3 ST7701S/GT911 smoke test");
+  board.logger().info(TAG, "Starting ESP32-S3 ST7701S/GT911 smoke test");
   if (!board.begin()) {
-    ESP_LOGE(TAG, "ST7701S RGB display initialization failed");
+    board.logger().error(TAG, "ST7701S RGB display initialization failed");
     return;
   }
-  ESP_LOGI(TAG, "Display and touch initialized");
-  ESP_LOGI(TAG, "Touch initialized");
+  board.logger().info(TAG, "Display and touch initialized");
+  board.logger().info(TAG, "Touch initialized");
   draw_test_pattern();
 
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
@@ -93,7 +91,7 @@ extern "C" void app_main() {
           marker_visible = true;
           draw_marker(marker_point, true);
         }
-        ESP_LOGI(TAG, "touch id=%u x=%d y=%d raw=(%d,%d) pressure=%d state=%u",
+        board.logger().info(TAG, "touch id=%u x=%d y=%d raw=(%d,%d) pressure=%d state=%u",
                  point.id, point.x, point.y, point.raw_x, point.raw_y,
                  point.pressure, static_cast<unsigned>(point.state));
       }

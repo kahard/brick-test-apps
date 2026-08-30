@@ -7,13 +7,13 @@
 #include "brick/platform/esp32/LvglTouchAdapter.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_480x480.h"
 #include "brick/platform/esp32/s3/profiles/st7701s_gt911.h"
-#include "esp_log.h"
 #include "lvgl.h"
 
 LV_FONT_DECLARE(brick_font_24);
 
 namespace {
 constexpr char TAG[] = "brick_st7701s_lvgl_fb";
+brick::interfaces::logging::ILogger* g_logger = nullptr;
 lv_obj_t* press_label = nullptr;
 std::uint32_t press_counter = 0;
 
@@ -25,7 +25,7 @@ void button_event_cb(lv_event_t* event) {
   ++press_counter;
   lv_label_set_text_fmt(press_label, "Kliknięcia: %u",
                         static_cast<unsigned>(press_counter));
-  ESP_LOGI(TAG, "LVGL button clicked count=%u",
+  g_logger->info(TAG, "LVGL button clicked count=%u",
            static_cast<unsigned>(press_counter));
 }
 
@@ -43,13 +43,14 @@ auto& touch = board.touch();
 }
 
 extern "C" void app_main() {
-  ESP_LOGI(TAG, "Starting ESP32-S3 ST7701S LVGL framebuffer + GT911 smoke test");
+  g_logger = &board.logger();
+  g_logger->info(TAG, "Starting ESP32-S3 ST7701S LVGL framebuffer + GT911 smoke test");
   if (!display.begin()) {
-    ESP_LOGE(TAG, "ST7701S RGB display initialization failed");
+    g_logger->error(TAG, "ST7701S RGB display initialization failed");
     return;
   }
   if (!touch.begin()) {
-    ESP_LOGE(TAG, "GT911 initialization failed");
+    g_logger->error(TAG, "GT911 initialization failed");
     return;
   }
 
@@ -58,12 +59,12 @@ extern "C" void app_main() {
   auto& framebuffers = static_cast<brick::interfaces::display::IFrameBufferDisplay&>(display);
   auto* lv_display = adapter.create_framebuffer(framebuffers);
   if (lv_display == nullptr) {
-    ESP_LOGE(TAG, "Unable to create LVGL direct framebuffer display");
+    g_logger->error(TAG, "Unable to create LVGL direct framebuffer display");
     return;
   }
   brick::platform::esp32::LvglTouchAdapter touch_adapter(touch);
   if (touch_adapter.create() == nullptr) {
-    ESP_LOGE(TAG, "Unable to create LVGL touch input");
+    g_logger->error(TAG, "Unable to create LVGL touch input");
     return;
   }
 
@@ -90,7 +91,7 @@ extern "C" void app_main() {
   lv_label_set_text(press_label, "Kliknięcia: 0");
   lv_obj_align(press_label, LV_ALIGN_BOTTOM_MID, 0, -40);
 
-  ESP_LOGI(TAG, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=16MHz touch=GT911",
+  g_logger->info(TAG, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=16MHz touch=GT911",
            framebuffers.frame_buffer_count());
 
   std::uint32_t frame_counter = 0;
@@ -109,7 +110,7 @@ extern "C" void app_main() {
       ++frame_counter;
       lv_label_set_text_fmt(title, "BRICK + LVGL DIRECT\nframe=%u",
                             static_cast<unsigned>(frame_counter));
-      ESP_LOGI(TAG, "LVGL direct page flip active frame=%u",
+      g_logger->info(TAG, "LVGL direct page flip active frame=%u",
                static_cast<unsigned>(frame_counter));
     }
     board.time().delay_ms(1);

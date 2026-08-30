@@ -8,5 +8,6 @@ idf_component_register(
         "../../../../../libs/brick/platforms/esp32/src/Gt911Touchscreen.cpp"
         "../../../../../libs/brick/libs/core/src/TouchMapper.cpp"
         "../../../../../libs/brick/platforms/esp32/src/FreeRtosTime.cpp"
+        "../../../../../libs/brick/platforms/esp32/src/EspIdfLogger.cpp"
     INCLUDE_DIRS "."
 )
