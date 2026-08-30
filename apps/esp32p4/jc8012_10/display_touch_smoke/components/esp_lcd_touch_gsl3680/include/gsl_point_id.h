@@ -11,8 +11,7 @@ struct gsl_touch_info
 
 unsigned int gsl_mask_tiaoping(void);
 unsigned int gsl_version_id(void);
-void gsl_alg_id_main(struct gsl_touch_info *cinfo);
-void gsl_DataInit(unsigned int *conf_in);
+void         gsl_alg_id_main(struct gsl_touch_info* cinfo);
+void         gsl_DataInit(unsigned int* conf_in);
 
 #endif
-

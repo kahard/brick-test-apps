@@ -28,7 +28,9 @@ void show_status(std::uint16_t color, const char* message)
     const bool                           submitted     = canvas.valid();
     if (submitted)
     {
-        canvas.clear(0x0000).text(8, kTextTop, message, brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count, color).text(8, 42, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count, color);
+        canvas.clear(0x0000)
+            .text(8, kTextTop, message, brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count, color)
+            .text(8, 42, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count, color);
     }
     const bool completed = submitted && canvas.present();
     g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0, completed ? 1 : 0);
