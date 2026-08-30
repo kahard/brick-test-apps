@@ -1,6 +1,7 @@
 param(
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot ".."))
 )
+$ErrorActionPreference = "Stop"
 
 $vscode = Join-Path $Root ".vscode"
 New-Item -ItemType Directory -Force -Path $vscode | Out-Null
