@@ -1,4 +1,4 @@
-.PHONY: all clean-all build-all setup-vscode
+.PHONY: all clean-all build-all setup-vscode format format-check
 
 all: build-all
 
@@ -10,3 +10,9 @@ build-all:
 
 setup-vscode:
 	powershell -NoProfile -ExecutionPolicy Bypass -File tools/setup-vscode.ps1
+
+format:
+	bash ./tools/clang.sh format
+
+format-check:
+	bash ./tools/clang.sh format-check
