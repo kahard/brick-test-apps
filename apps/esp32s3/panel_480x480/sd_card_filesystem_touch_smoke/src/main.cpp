@@ -22,20 +22,15 @@ brick::core::display::Screen g_screen(g_board.display());
 void show_status(std::uint16_t color, const char* message) {
   constexpr std::uint16_t kStatusHeight = 96;
   constexpr std::uint16_t kTextTop = 8;
-  static std::uint16_t pixels[480 * kStatusHeight];
-  brick::interfaces::display::WritablePixelBuffer buffer{
-      reinterpret_cast<std::uint8_t*>(pixels), 480, kStatusHeight, 480 * sizeof(std::uint16_t),
-      brick::interfaces::display::PixelFormat::rgb565, false};
-  g_screen.fill(buffer, 0x0000);
-  g_screen.draw_text(buffer, 8, kTextTop, message, brick_roboto_20_chars,
-                     brick_roboto_20_glyphs, brick_roboto_20_count, color);
-  g_screen.draw_text(buffer, 8, 42, "FONT 28 PX", brick_roboto_28_chars,
-                     brick_roboto_28_glyphs, brick_roboto_28_count, color);
-  const brick::interfaces::display::PixelBuffer view{
-      reinterpret_cast<const std::uint8_t*>(pixels), 480, kStatusHeight, buffer.stride_bytes,
-      brick::interfaces::display::PixelFormat::rgb565, false};
-  const bool submitted = g_screen.draw({0, 0, 480, kStatusHeight}, view);
-  const bool completed = submitted && g_screen.wait_for_transfer_complete(1000);
+  brick::core::display::Screen::Canvas canvas = g_screen.create_canvas(kStatusHeight);
+  const bool allocated = canvas.valid();
+  const bool rendered = allocated && canvas.clear(0x0000) &&
+      canvas.text(8, kTextTop, message, brick_roboto_20_chars,
+                  brick_roboto_20_glyphs, brick_roboto_20_count, color) &&
+      canvas.text(8, 42, "FONT 28 PX", brick_roboto_28_chars,
+                  brick_roboto_28_glyphs, brick_roboto_28_count, color);
+  const bool completed = rendered && canvas.present();
+  const bool submitted = rendered;
   g_board.logger().info(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
            completed ? 1 : 0);
 }
