@@ -58,7 +58,13 @@ void show_status(std::uint16_t color, const char* message) {
   const brick::interfaces::display::PixelBuffer buffer{
       reinterpret_cast<const std::uint8_t*>(pixels), 480, 80, 960,
       brick::interfaces::display::PixelFormat::rgb565, false};
-  g_display.draw_buffer({0, 0, 480, 40}, buffer);
+  // The area must exactly match the PixelBuffer dimensions.  A mismatch makes
+  // the display driver reject the transfer silently (and leaves the panel
+  // showing only its backlight).
+  const bool submitted = g_display.draw_buffer({0, 0, 480, 80}, buffer);
+  const bool completed = submitted && g_display.wait_for_transfer_complete(1000);
+  ESP_LOGI(kTag, "status '%s': draw=%d complete=%d", message, submitted ? 1 : 0,
+           completed ? 1 : 0);
 }
 
 bool mount_card() {
@@ -143,12 +149,14 @@ extern "C" void app_main() {
   else show_status(0x07E0, "SD READY");
   ESP_LOGI(kTag, "SD CARD TEST PASS");
   std::array<brick::interfaces::display::TouchPoint, 5> points{};
+  bool touch_was_down = false;
   while (true) {
     std::size_t count = 0;
-    if (g_touch.read(points.data(), points.size(), count) && count > 0) {
+    const bool touch_down = g_touch.read(points.data(), points.size(), count) && count > 0;
+    if (touch_down && !touch_was_down) {
       if (write_read_verify()) show_status(0x07E0, "WRITE READ OK"); else show_status(0xF800, "WRITE READ FAIL");
-      vTaskDelay(pdMS_TO_TICKS(500));
     }
+    touch_was_down = touch_down;
     vTaskDelay(pdMS_TO_TICKS(30));
   }
 }
