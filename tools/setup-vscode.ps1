@@ -23,6 +23,8 @@ $properties = [ordered]@{
             '${workspaceFolder}/apps/**/src'
             '${workspaceFolder}/apps/**/.pio/libdeps/**/include'
             '${workspaceFolder}/.pio/libdeps/**/include'
+            '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include'
+            '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include/**'
         )
         defines = @("ESP_PLATFORM", "ARDUINO_ARCH_ESP32")
         browse = [ordered]@{
