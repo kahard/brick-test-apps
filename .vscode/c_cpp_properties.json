@@ -1,0 +1,35 @@
+{
+  "configurations": [
+    {
+      "name": "BRICK test apps",
+      "compilerPath": "${env:USERPROFILE}/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32s3-elf-g++.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/libs/brick/libs/interfaces/include",
+        "${workspaceFolder}/libs/brick/libs/core/include",
+        "${workspaceFolder}/libs/brick/platforms/esp32/include",
+        "${workspaceFolder}/libs/brick/platforms/esp8266/include",
+        "${workspaceFolder}/libs/brick/platforms/stm32/include",
+        "${workspaceFolder}/libs/brick-boards/include",
+        "${workspaceFolder}/apps/**/include",
+        "${workspaceFolder}/apps/**/src",
+        "${workspaceFolder}/apps/**/.pio/libdeps/**/include",
+        "${workspaceFolder}/.pio/libdeps/**/include"
+      ],
+      "defines": [
+        "ESP_PLATFORM",
+        "ARDUINO_ARCH_ESP32"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/libs/brick",
+          "${workspaceFolder}/libs/brick-boards",
+          "${workspaceFolder}/apps"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ],
+  "version": 4
+}
