@@ -25,6 +25,9 @@ $properties = [ordered]@{
             '${workspaceFolder}/.pio/libdeps/**/include'
             '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include'
             '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include/**'
+            '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/freertos/config/include/freertos'
+            '${env:USERPROFILE}/.platformio/packages/framework-espidf/components/freertos/FreeRTOS-Kernel/include'
+            '${workspaceFolder}/apps/**/.pio/build/**/config'
         )
         defines = @("ESP_PLATFORM", "ARDUINO_ARCH_ESP32")
         browse = [ordered]@{
