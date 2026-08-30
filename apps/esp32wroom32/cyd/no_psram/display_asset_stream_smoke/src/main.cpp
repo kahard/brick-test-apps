@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "PartitionAssetSource.h"
+#include "brick/platform/esp32/PartitionAssetSource.h"
 #include "brick/core/image/AssetStreamer.h"
 #include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/interfaces/display/TouchscreenTypes.h"
@@ -26,7 +26,7 @@ constexpr std::size_t   kStripeBytes  = static_cast<std::size_t>(kWidth) * kStri
 
 brick::platform::esp32::Ili9341SpiDisplay         display(brick::platform::esp32::profiles::cyd_ili9341_320x240());
 brick::platform::esp32::touch::Xpt2046Touchscreen touch(brick::platform::esp32::profiles::cyd_xpt2046());
-PartitionAssetSource                              asset_source("assets");
+brick::platform::esp32::PartitionAssetSource     asset_source("assets");
 brick::core::image::AssetStreamer                 streamer(display);
 std::uint8_t*                                     stripe   = nullptr;
 generated_assets::Id                              selected = generated_assets::Id::joy_tears;
