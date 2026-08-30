@@ -17,7 +17,10 @@
         "${workspaceFolder}/apps/**/.pio/libdeps/**/include",
         "${workspaceFolder}/.pio/libdeps/**/include",
         "${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include",
-        "${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include/**"
+        "${env:USERPROFILE}/.platformio/packages/framework-espidf/components/**/include/**",
+        "${env:USERPROFILE}/.platformio/packages/framework-espidf/components/freertos/config/include/freertos",
+        "${env:USERPROFILE}/.platformio/packages/framework-espidf/components/freertos/FreeRTOS-Kernel/include",
+        "${workspaceFolder}/apps/**/.pio/build/**/config"
       ],
       "defines": [
         "ESP_PLATFORM",
