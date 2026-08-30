@@ -1,4 +1,4 @@
-.PHONY: all clean-all build-all
+.PHONY: all clean-all build-all setup-vscode
 
 all: build-all
 
@@ -7,3 +7,6 @@ clean-all:
 
 build-all:
 	powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-all.ps1
+
+setup-vscode:
+	powershell -NoProfile -ExecutionPolicy Bypass -File tools/setup-vscode.ps1
