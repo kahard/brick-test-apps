@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "brick/boards/esp32/s3/Panel480Board.h"
+#include "brick/core/display/Screen.h"
 #include "brick/core/time/Timer.h"
 namespace {
 constexpr char TAG[] = "brick_st7701s_smoke";
@@ -15,6 +16,7 @@ constexpr std::uint16_t kMarkerBorder = 4;
 brick::platform::esp32::s3::Panel480Board board;
 auto& display = board.display();
 auto& touch = board.touch();
+brick::core::display::Screen screen(display);
 
 void draw_test_pattern() {
   static std::array<std::uint16_t, kWidth * kStripeHeight> stripe{};
@@ -26,7 +28,7 @@ void draw_test_pattern() {
         reinterpret_cast<const std::uint8_t*>(stripe.data()), kWidth, kStripeHeight,
         static_cast<std::size_t>(kWidth) * sizeof(std::uint16_t),
         brick::interfaces::display::PixelFormat::rgb565, false};
-    display.draw_buffer({0, index * kStripeHeight, kWidth, kStripeHeight}, buffer);
+    screen.draw({0, index * kStripeHeight, kWidth, kStripeHeight}, buffer);
   }
 }
 
@@ -55,8 +57,8 @@ bool draw_marker(const brick::interfaces::display::TouchPoint& point, bool activ
       reinterpret_cast<const std::uint8_t*>(marker.data()), kMarkerSize, kMarkerSize,
       static_cast<std::size_t>(kMarkerSize) * sizeof(std::uint16_t),
       brick::interfaces::display::PixelFormat::rgb565, false};
-  return display.draw_buffer({x0, y0, kMarkerSize, kMarkerSize}, buffer) &&
-         display.wait_for_transfer_complete(1000);
+  return screen.draw({x0, y0, kMarkerSize, kMarkerSize}, buffer) &&
+         screen.wait_for_transfer_complete(1000);
 }
 }  // namespace
 
