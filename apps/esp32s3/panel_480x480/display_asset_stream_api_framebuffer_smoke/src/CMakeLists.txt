@@ -11,5 +11,12 @@ idf_component_register(
         "../../../../../libs/brick/platforms/esp32/src/File.cpp"
         "../../../../../libs/brick/libs/core/src/TouchMapper.cpp"
         "main.cpp"
+        "Application.cpp"
+        "AssetStreamTest.cpp"
+        "AssetBenchmark.cpp"
+        "AssetPlayback.cpp"
+        "AssetSources.cpp"
+        "FramebufferPresenter.cpp"
+        "TouchInput.cpp"
     INCLUDE_DIRS "."
 )

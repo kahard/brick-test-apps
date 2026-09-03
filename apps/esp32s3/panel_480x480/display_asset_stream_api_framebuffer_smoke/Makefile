@@ -13,11 +13,11 @@ compile: assets
 	$(PIO_RUN) run -e $(ENV)
 
 upload: assets
-	$(PIO_RUN) run -e $(ENV) -t upload
+	$(PIO_RUN) run -e $(ENV) -t upload --upload-port $(PORT)
 	python -m esptool --chip esp32s3 --port $(PORT) --baud 460800 write_flash $(ASSET_OFFSET) assets/generated/assets.bin
 
 monitor:
-	$(PIO) device monitor -e $(ENV)
+	$(PIO) device monitor -e $(ENV) -p $(PORT)
 
 assets:
 	python ../../../../../brick_framework/tools/assets/generate_image_asset.py --input assets/joy_tears.png --symbol brick_joy_tears_stream --format rgb565 --resize 480x480 --binary assets/generated/joy_tears_stream_rgb565.bin
