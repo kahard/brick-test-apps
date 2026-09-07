@@ -17,3 +17,7 @@
 !apps/esp32s3/panel_480x480/display_lvgl_asset_smoke/src/CMakeLists.txt
 !apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/CMakeLists.txt
 !apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/src/CMakeLists.txt
+
+# JC1060 build descriptions and defaults are maintained project sources.
+!apps/esp32p4/jc1060_7/**/CMakeLists.txt
+!apps/esp32p4/jc1060_7/**/sdkconfig.defaults

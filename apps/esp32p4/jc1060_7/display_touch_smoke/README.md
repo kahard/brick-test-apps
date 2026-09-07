@@ -1,43 +1,19 @@
-# JC1060 7-inch display and touch smoke test
+# JC1060 display and touch test
 
-Target: ESP32-P4 JC1060 1024x600 panel.
+Uses the board template, selected by Features in ApplicationConfig.h and aliased
+in Types.h. Application owns the board and injects display, touch, time and logger
+interfaces into TouchTest. ColorPattern and TouchMarker handle rendering.
 
-This application will validate the Brick MIPI-DSI display adapter and GT911
-touchscreen adapter without ESPHome.
+The test draws six horizontal colors, then marks touch positions. Pixel transfers
+must complete before reusing the render buffer. The board initializes the panel
+and enables its backlight; there is no GPIO setup in the application.
 
-Brick headers are resolved from the repository submodule by a PlatformIO
-pre-script, so the project remains portable when cloned elsewhere.
-
-The application source and Brick API compile on ESP32-P4. The test uses a
-local ECO2-compatible `esp32-p4-eco2-evboard` profile. Its local
-`sdkconfig.defaults` matches the working ESPHome configuration: 16 MB flash,
-HEX PSRAM, 80 MHz DIO flash and ESP32-P4 revision 0.
-
-## Hardware profile
-
-- display: 1024x600 MIPI-DSI, 2 lanes, 600 Mbps, 40 MHz pixel clock;
-- display reset: GPIO27;
-- GT911 SDA: GPIO7;
-- GT911 SCL: GPIO8;
-- GT911 default address: `0x5D`;
-- ESP32-P4 board definition: `esp32-p4-eco2-evboard` (ESP32-P4 ECO2).
-
-## Test behavior
-
-- initialize the display and show a color test pattern;
-- initialize GT911 and print touch coordinates and state to the serial log;
-- draw a marker at the last reported touch position.
-
-## Build commands
-
-Run these commands from this directory:
+Run from this folder:
 
 ```text
-make clean    # remove the PlatformIO build output
-make compile  # compile the application
-make upload   # compile if needed and upload to the board
-make monitor  # open the serial monitor
+make compile
+make PORT=COM11 upload monitor
 ```
 
-The `PIO` and `ENV` variables can be overridden when needed, for example:
-`make compile PIO=pio ENV=jc1060_7_display_touch_smoke`.
+The PlatformIO board is esp32-p4-evboard; the JC1060 hardware profile lives in
+libs/brick-boards. See [the demo guide](../README.md) for the project overview.

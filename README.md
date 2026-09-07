@@ -29,6 +29,9 @@ Examples: `display_touch_smoke`, `jpeg_decode_benchmark`,
 Each application should contain its own `README.md` describing the hardware,
 expected wiring, build/upload commands, and the result of the test.
 
+The [JC1060 7-inch demo guide](apps/esp32p4/jc1060_7/README.md) describes the
+Application/board-template structure and maps these demos to the 4-inch examples.
+
 ## Checkout and update
 
 Clone the repository together with BRICK:

@@ -1,15 +1,20 @@
 from pathlib import Path
+import subprocess
+import sys
+from SCons.Script import COMMAND_LINE_TARGETS
 
 Import("env")
-
 project_dir = Path(env.subst("$PROJECT_DIR"))
-brick_root = project_dir.parents[3] / "libs" / "brick"
-env.Append(CPPPATH=[str(brick_root / "libs" / "interfaces" / "include"), str(brick_root / "libs" / "core" / "include"), str(brick_root / "platforms" / "esp32" / "include"), str(project_dir.parents[3] / "libs" / "brick-boards" / "include")])
+repo = project_dir.parents[3]
+brick = repo / "libs" / "brick"
+env.Append(CPPPATH=[
+    str(brick / "libs" / "interfaces" / "include"),
+    str(brick / "libs" / "core" / "include"),
+    str(brick / "platforms" / "esp32" / "include"),
+    str(repo / "libs" / "brick-boards" / "include"),
+    str(project_dir / "generated"),
+])
 env.Append(CPPPATH=[str(project_dir / ".pio" / "libdeps" / env.subst("$PIOENV") / "lvgl" / "src")])
-brick_build_dir = Path(env.subst("$BUILD_DIR")) / "brick"
-env.BuildSources(str(brick_build_dir / "core"), str(brick_root / "libs" / "core" / "src"), "+<TouchMapper.cpp>")
-env.BuildSources(str(brick_build_dir / "touch"), str(brick_root / "platforms" / "esp32" / "src"), "+<Gt911Touchscreen.cpp>")
-env.BuildSources(str(brick_build_dir / "display"), str(brick_root / "platforms" / "esp32" / "src"), "+<MipiDsiDisplay.cpp>")
-env.BuildSources(str(brick_build_dir / "storage"), str(brick_root / "platforms" / "esp32" / "src"), "+<SdmmcFileSystem.cpp>")
-env.BuildSources(str(brick_build_dir / "lvgl"), str(brick_root / "platforms" / "esp32" / "src"), "+<LvglDisplayAdapter.cpp>")
-env.BuildSources(str(brick_build_dir / "lvgl"), str(brick_root / "platforms" / "esp32" / "src"), "+<LvglTouchAdapter.cpp>")
+if "clean" not in COMMAND_LINE_TARGETS:
+    subprocess.run([sys.executable, str(project_dir / "generate_assets.py")], check=True)
+env.Append(FLASH_EXTRA_IMAGES=[("0x610000", str(project_dir / "generated" / "assets.bin"))])

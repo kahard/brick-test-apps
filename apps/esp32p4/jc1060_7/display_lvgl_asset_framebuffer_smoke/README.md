@@ -1,16 +1,23 @@
-# JC1060 7" LVGL asset framebuffer smoke test
+# JC1060 LVGL asset / framebuffer / touch test
 
-Testuje pełny framebuffer LVGL dla panelu MIPI DSI JC1060 1024x600 z dotykiem GT911.
-Obraz `joy_tears` jest ładowany z partycji `assets`, a przycisk na ekranie zwiększa licznik dotknięć.
+The equivalent of the 4-inch LVGL/touch demo, retaining the existing 7-inch asset
+example as well. A button alternates two 100x100 smile images and updates a click
+counter. Images are loaded from a single flash bundle into PSRAM during startup.
 
-## Build i uruchomienie
+Application owns a template-configured Board and LvglTest. LvglTest composes:
 
-```powershell
-make ENV=jc1060_7_display_lvgl_asset_framebuffer_smoke PORT=COM17 compile
-make ENV=jc1060_7_display_lvgl_asset_framebuffer_smoke PORT=COM17 upload
-make ENV=jc1060_7_display_lvgl_asset_framebuffer_smoke PORT=COM17 monitor
+- LvglRuntime: FULL mode, two PSRAM render buffers and actual elapsed LVGL ticks.
+- LvglAssets: generated enum IDs, descriptors and framework PartitionAssetSource.
+- TouchView: LVGL widgets and the button callback.
+- The framework's LvglTouchAdapter, receiving ITouchscreen.
+
+No direct partition, GPIO or FreeRTOS calls remain in main.cpp.
+
+```text
+make compile
+make PORT=COM11 upload monitor
 ```
 
-`upload` programuje firmware przez PlatformIO, a następnie zapisuje `assets/generated/assets.bin`
-do partycji `assets` pod adresem `0x610000`. Assety są generowane przed kompilacją i nie są
-wersjonowane w Git.
+Every build regenerates generated/assets.bin and generated/generated_assets.h
+with the framework scripts. Upload writes both firmware and the asset partition
+on the selected port. See [the demo guide](../README.md) for P4/S3 differences.
