@@ -1,37 +1,23 @@
-# JC8012 10-inch LVGL framebuffer smoke test
+# JC8012 LVGL asset / framebuffer / touch test
 
-Test aplikacji BRICK dla panelu JC8012 800x1280 na ESP32-P4.
+The equivalent of the 4-inch LVGL/touch demo, retaining the existing 7-inch asset
+example as well. A button alternates two 100x100 smile images and updates a click
+counter. Images are loaded from a single flash bundle into PSRAM during startup.
 
-## Zakres
+Application owns a template-configured Board and LvglTest. LvglTest composes:
 
-- pełny framebuffer RGB565 w PSRAM,
-- dwa framebuffer'y MIPI-DSI z page flip,
-- assety RGB565 z partycji `assets`, ładowane do PSRAM przed prezentacją,
-- LVGL 9.5,
-- dotyk GSL3680 z przełączaniem assetów przyciskiem,
-- rotacje obrazu 0, 90, 180 i 270 stopni,
-- benchmark pełnego odświeżania kolorów i assetów.
+- LvglRuntime: FULL mode, two PSRAM render buffers and actual elapsed LVGL ticks.
+- LvglAssets: generated enum IDs, descriptors and framework PartitionAssetSource.
+- TouchView: LVGL widgets and the button callback.
+- The framework's LvglTouchAdapter, receiving ITouchscreen.
 
-## Najważniejsze targety
+No direct partition, GPIO or FreeRTOS calls remain in main.cpp.
 
 ```text
-*_r0/r90/r180/r270              test obrazu i assetów
-*_touch_r0/...                   test LVGL + dotyku
-*_fps_color_r0                   benchmark zmian kolorów
-*_fps_asset_r0                   benchmark przełączania assetów
+make compile
+make PORT=COM11 upload monitor
 ```
 
-Przykłady:
-
-```powershell
-make PORT=COM21 upload-touch-90
-make PORT=COM21 upload-fps-color
-make PORT=COM21 upload-fps-asset
-```
-
-## Wynik benchmarku JC8012
-
-Przy pełnym framebufferze 800x1280 uzyskano około `10.4 FPS`, czyli około
-`96 ms` na pełne odświeżenie. Wynik był praktycznie taki sam dla zmian
-kolorów i assetów z PSRAM, dlatego ograniczeniem jest transfer pełnego
-framebuffera przez MIPI-DSI.
+Every build regenerates generated/assets.bin and generated/generated_assets.h
+with the framework scripts. Upload writes both firmware and the asset partition
+on the selected port. See [the demo guide](../README.md) for P4/S3 differences.

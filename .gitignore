@@ -21,3 +21,7 @@
 # JC1060 build descriptions and defaults are maintained project sources.
 !apps/esp32p4/jc1060_7/**/CMakeLists.txt
 !apps/esp32p4/jc1060_7/**/sdkconfig.defaults
+
+# JC8012 build descriptions and defaults are maintained project sources.
+!apps/esp32p4/jc8012_10/**/CMakeLists.txt
+!apps/esp32p4/jc8012_10/**/sdkconfig.defaults
