@@ -13,6 +13,6 @@ public:
 
 private:
     Board    board_;
-    LvglDemo demo_{ board_ };
+    LvglDemo demo_{ board_.display(), board_.touch(), board_.time(), board_.logger() };
 };
 }  // namespace cyd_lvgl_asset_smoke

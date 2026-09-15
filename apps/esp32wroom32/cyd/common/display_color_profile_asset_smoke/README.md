@@ -1,5 +1,9 @@
 # CYD: asset z profilem kolorow
 
+Ta aplikacja jest wspolna dla wariantu CYD z PSRAM i bez PSRAM. Uzywa tylko
+jednego bufora DMA o wysokosci 16 linii; source asset jest czytany z flasha
+ponownie przy kazdym przesunieciu podzialu.
+
 Demonstrator laduje portret z tablica ColorChecker z partycji `assets`. Lewa czesc ekranu przedstawia dane RGB565 bez zmian, prawa wynik zastosowania `Rgb565ColorProfile`. Przesuniecie palcem zmienia polozenie czarnej granicy, a podwojne dotkniecie ustawia ja na srodku.
 
 ## Uzycie profilu z kalibratora

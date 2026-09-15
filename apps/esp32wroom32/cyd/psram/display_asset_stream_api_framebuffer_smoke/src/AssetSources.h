@@ -2,15 +2,15 @@
 
 #include <memory>
 
-#include "Types.h"
 #include "brick/interfaces/display/AssetDescriptor.h"
+#include "brick/interfaces/storage/IFileSystem.h"
 
 namespace cyd_asset_stream_smoke
 {
 class AssetSources final
 {
 public:
-    explicit AssetSources(Board& board);
+    explicit AssetSources(brick::interfaces::storage::IFileSystem& filesystem);
     ~AssetSources();
 
     bool                                      initialize();

@@ -54,8 +54,8 @@ namespace
 
 struct AssetSources::Impl
 {
-    explicit Impl(Board& board)
-        : board(board), flash_source("assets"), sd_source(board.sd()),
+    explicit Impl(brick::interfaces::storage::IFileSystem& filesystem)
+        : filesystem(filesystem), flash_source("assets"), sd_source(filesystem),
           repository(&flash_source, &psram_source, &sd_source)
     {
     }
@@ -86,7 +86,7 @@ struct AssetSources::Impl
         return true;
     }
 
-    Board&                                       board;
+    brick::interfaces::storage::IFileSystem&     filesystem;
     brick::platform::esp32::PartitionAssetSource flash_source;
     PsramAssetSource                             psram_source;
     SdAssetSource                                sd_source;
@@ -95,7 +95,7 @@ struct AssetSources::Impl
     bool                                         psram_ready  = false;
 };
 
-AssetSources::AssetSources(Board& board) : impl_(std::make_unique<Impl>(board))
+AssetSources::AssetSources(brick::interfaces::storage::IFileSystem& filesystem) : impl_(std::make_unique<Impl>(filesystem))
 {
 }
 AssetSources::~AssetSources() = default;
@@ -109,7 +109,7 @@ brick::interfaces::display::IAssetSource* AssetSources::select(std::uint8_t stor
 {
     if (storage == 1U && !impl_->prepare_psram())
         return nullptr;
-    if (storage == 2U && !impl_->board.sd().mounted() && !impl_->board.sd().mount())
+    if (storage == 2U && !impl_->filesystem.mounted() && !impl_->filesystem.mount())
         return nullptr;
 
     const brick::interfaces::display::AssetStorage selected =
@@ -127,7 +127,7 @@ brick::interfaces::display::IAssetSource& AssetSources::flash()
 
 void AssetSources::fallback_to_flash()
 {
-    impl_->board.sd().unmount();
+    impl_->filesystem.unmount();
     impl_->repository.set_storage(brick::interfaces::display::AssetStorage::flash_partition);
 }
 }  // namespace cyd_asset_stream_smoke

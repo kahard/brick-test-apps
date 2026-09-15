@@ -17,7 +17,11 @@ namespace
     constexpr std::int32_t kStatusHeight = 72;
 }  // namespace
 
-SdCardTest::SdCardTest(Board& board) : board_(board), screen_(board.display()), card_timer_(board.time())
+SdCardTest::SdCardTest(brick::interfaces::display::IDisplayDevice& display,
+                       brick::interfaces::storage::IFileSystem& filesystem,
+                       brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
+                       brick::interfaces::logging::ILogger& logger)
+    : filesystem_(filesystem), touch_(touch), time_(time), logger_(logger), screen_(display), card_timer_(time)
 {
 }
 
@@ -43,32 +47,32 @@ void SdCardTest::show_status(std::uint16_t color, const char* message)
 
 bool SdCardTest::write_read_verify()
 {
-    return brick::core::storage::write_verify(board_.sd(), kTestPath, kPattern, sizeof(kPattern) - 1U);
+    return brick::core::storage::write_verify(filesystem_, kTestPath, kPattern, sizeof(kPattern) - 1U);
 }
 
 void SdCardTest::refresh_card_status()
 {
-    if (board_.sd().mounted() && !board_.sd().probe(kTestPath))
+    if (filesystem_.mounted() && !filesystem_.probe(kTestPath))
     {
-        board_.sd().unmount();
+        filesystem_.unmount();
         show_status(0xF800, "SD REMOVED");
         return;
     }
-    if (!board_.sd().mounted() && board_.sd().mount())
+    if (!filesystem_.mounted() && filesystem_.mount())
     {
-        const std::vector<std::string> files = board_.sd().list_files(kMountPoint);
-        board_.logger().info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+        const std::vector<std::string> files = filesystem_.list_files(kMountPoint);
+        logger_.info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
         show_status(0x07E0, "SD INSERTED");
     }
 }
 
 bool SdCardTest::initialize()
 {
-    board_.logger().info(kTag, "CYD SD card filesystem and font smoke");
+    logger_.info(kTag, "CYD SD card filesystem and font smoke");
     clear_screen();
     show_status(0x001F, "SD INIT");
     refresh_card_status();
-    if (board_.sd().mounted())
+    if (filesystem_.mounted())
     {
         const bool verified = write_read_verify();
         show_status(verified ? 0x07E0 : 0xF800, verified ? "SD READY" : "WRITE READ FAIL");
@@ -88,13 +92,13 @@ void SdCardTest::update()
     }
 
     std::size_t count      = 0;
-    const bool  touch_down = board_.touch().read(points_.data(), points_.size(), count) && count > 0;
+    const bool  touch_down = touch_.read(points_.data(), points_.size(), count) && count > 0;
     if (touch_down && !touch_was_down_)
     {
-        const bool verified = board_.sd().mounted() && write_read_verify();
+        const bool verified = filesystem_.mounted() && write_read_verify();
         show_status(verified ? 0x07E0 : 0xF800, verified ? "WRITE READ OK" : "INSERT SD CARD");
     }
     touch_was_down_ = touch_down;
-    board_.time().delay_ms(30);
+    time_.delay_ms(30);
 }
 }  // namespace cyd_sd_card_filesystem_touch_smoke

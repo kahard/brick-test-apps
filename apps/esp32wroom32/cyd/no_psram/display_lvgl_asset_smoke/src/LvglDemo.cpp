@@ -11,7 +11,10 @@ namespace
     constexpr char kTag[] = "cyd_lvgl_assets";
 }
 
-LvglDemo::LvglDemo(Board& board) : board_(board)
+LvglDemo::LvglDemo(brick::interfaces::display::IDisplayDevice& display,
+                   brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
+                   brick::interfaces::logging::ILogger& logger)
+    : time_(time), logger_(logger), display_adapter_(display), touch_adapter_(touch)
 {
 }
 
@@ -29,7 +32,7 @@ void LvglDemo::on_button_clicked(lv_event_t* event)
     demo->selected_ ^= 1U;
     if (!demo->load_selected_asset())
     {
-        demo->board_.logger().error(kTag, "Unable to load selected asset");
+        demo->logger_.error(kTag, "Unable to load selected asset");
         return;
     }
 
@@ -72,10 +75,10 @@ void LvglDemo::create_widgets()
 
 bool LvglDemo::initialize()
 {
-    board_.logger().info(kTag, "Initializing CYD no-PSRAM LVGL partial-buffer asset demo");
+    logger_.info(kTag, "Initializing CYD no-PSRAM LVGL partial-buffer asset demo");
     if (!assets_.initialize() || !load_selected_asset())
     {
-        board_.logger().error(kTag, "Assets partition unavailable");
+        logger_.error(kTag, "Assets partition unavailable");
         return false;
     }
 
@@ -92,19 +95,19 @@ bool LvglDemo::initialize()
             == nullptr
         || touch_adapter_.create() == nullptr)
     {
-        board_.logger().error(kTag, "Unable to initialize LVGL adapters");
+        logger_.error(kTag, "Unable to initialize LVGL adapters");
         return false;
     }
 
     create_widgets();
-    board_.logger().info(kTag, "LVGL partial-buffer demo ready");
+    logger_.info(kTag, "LVGL partial-buffer demo ready");
     return true;
 }
 
 void LvglDemo::update()
 {
     constexpr std::uint32_t kUpdatePeriodMs = 10U;
-    board_.time().delay_ms(kUpdatePeriodMs);
+    time_.delay_ms(kUpdatePeriodMs);
     lv_tick_inc(kUpdatePeriodMs);
     lv_timer_handler();
 }

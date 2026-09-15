@@ -12,16 +12,20 @@ namespace
     constexpr std::uint32_t kRefreshTime = 1000U;
 }  // namespace
 
-AssetStreamTest::AssetStreamTest(Board& board) : board_(board)
+AssetStreamTest::AssetStreamTest(brick::interfaces::display::IDisplayDevice& display,
+                                 brick::interfaces::display::ITouchscreen& touch,
+                                 brick::interfaces::time::ITimeProvider& time,
+                                 brick::interfaces::logging::ILogger& logger)
+    : time_(time), logger_(logger), streamer_(display), refresh_timer_(time), touch_(touch)
 {
 }
 
 bool AssetStreamTest::initialize()
 {
-    board_.logger().info(kTag, "CYD asset stream: flash partition to internal DMA stripe buffer");
+    logger_.info(kTag, "CYD asset stream: flash partition to internal DMA stripe buffer");
     if (!stripe_.initialize() || !assets_.begin())
     {
-        board_.logger().error(kTag, "Internal DMA buffer or assets partition unavailable");
+        logger_.error(kTag, "Internal DMA buffer or assets partition unavailable");
         return false;
     }
     refresh_timer_.start(kRefreshTime);
@@ -37,7 +41,7 @@ void AssetStreamTest::update()
     }
     else if (refresh_timer_.expired())
         show_selected_asset();
-    board_.time().delay_ms(10U);
+    time_.delay_ms(10U);
 }
 
 bool AssetStreamTest::show_selected_asset()
@@ -48,16 +52,16 @@ bool AssetStreamTest::show_selected_asset()
     if (asset == nullptr)
         return false;
 
-    const std::uint64_t started_us = board_.time().micros();
+    const std::uint64_t started_us = time_.micros();
     const bool streamed = streamer_.stream(*asset, assets_, { 0, 0, kWidth, kHeight }, stripe_.data(), stripe_.size());
     if (streamed)
     {
         const char* name = selected_ == 0U ? "joy_tears" : "sweat_smile";
-        board_.logger().info(kTag, "asset=%s streamed=%llu us", name,
-                             static_cast<unsigned long long>(board_.time().micros() - started_us));
+        logger_.info(kTag, "asset=%s streamed=%llu us", name,
+                     static_cast<unsigned long long>(time_.micros() - started_us));
     }
     else
-        board_.logger().error(kTag, "Asset stream failed");
+        logger_.error(kTag, "Asset stream failed");
     refresh_timer_.restart();
     return streamed;
 }
