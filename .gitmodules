@@ -1,6 +1,3 @@
 [submodule "libs/brick"]
 	path = libs/brick
 	url = https://github.com/kahard/brick-framework.git
-[submodule "libs/brick-boards"]
-	path = libs/brick-boards
-	url = git@github.com:kahard/brick-boards.git

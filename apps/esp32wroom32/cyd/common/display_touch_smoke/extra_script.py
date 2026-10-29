@@ -5,7 +5,7 @@ import subprocess
 
 project_dir = Path(env.subst("$PROJECT_DIR"))
 brick_root = project_dir.parents[4] / "libs" / "brick"
-boards_root = project_dir.parents[4] / "libs" / "brick-boards"
+boards_root = brick_root / "boards"
 env.Append(CPPPATH=[
     str(brick_root / "libs" / "interfaces" / "include"),
     str(brick_root / "libs" / "core" / "include"),

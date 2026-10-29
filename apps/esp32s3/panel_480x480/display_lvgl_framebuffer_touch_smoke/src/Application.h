@@ -2,12 +2,12 @@
 
 #include "ApplicationConfig.h"
 #include "LvglTest.h"
-#include "brick/boards/esp32/s3/Panel480BoardTemplate.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
 
 class Application final
 {
 public:
-    using Board = brick::platform::esp32::s3::Panel480BoardTemplate<LvglFeatures>;
+    using Board = brick::boards::Panel480BoardTemplate<LvglFeatures>;
 
     Application();
     bool initialize();

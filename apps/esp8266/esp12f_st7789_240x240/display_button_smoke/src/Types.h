@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ApplicationConfig.h"
-#include "brick/boards/esp8266/Esp12fSt7789BoardTemplate.h"
+#include "brick/boards/esp8266/Esp12fSt7789Board.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/input/IButton.h"
 #include "brick/interfaces/logging/ILogger.h"
@@ -9,7 +9,7 @@
 
 namespace esp12f_st7789_button_smoke
 {
-using Board         = brick::platform::esp8266::Esp12fSt7789BoardTemplate<Features>;
+using Board         = brick::boards::Esp12fSt7789BoardTemplate<Features>;
 using DisplayDevice = brick::interfaces::display::IDisplayDevice;
 using Button        = brick::interfaces::input::IButton;
 using Logger        = brick::interfaces::logging::ILogger;

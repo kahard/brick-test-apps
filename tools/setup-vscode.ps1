@@ -18,7 +18,7 @@ $properties = [ordered]@{
             '${workspaceFolder}/libs/brick/platforms/esp32/include'
             '${workspaceFolder}/libs/brick/platforms/esp8266/include'
             '${workspaceFolder}/libs/brick/platforms/stm32/include'
-            '${workspaceFolder}/libs/brick-boards/include'
+            '${workspaceFolder}/libs/brick/boards/include'
             '${workspaceFolder}/apps/**/include'
             '${workspaceFolder}/apps/**/src'
             '${workspaceFolder}/apps/**/.pio/libdeps/**/include'
@@ -26,7 +26,7 @@ $properties = [ordered]@{
         )
         defines = @()
         browse = [ordered]@{
-            path = @('${workspaceFolder}/libs/brick', '${workspaceFolder}/libs/brick-boards', '${workspaceFolder}/apps')
+            path = @('${workspaceFolder}/libs/brick', '${workspaceFolder}/apps')
             limitSymbolsToIncludedHeaders = $true
         }
     })

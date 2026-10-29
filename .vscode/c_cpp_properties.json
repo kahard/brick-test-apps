@@ -11,7 +11,7 @@
         "${workspaceFolder}/libs/brick/platforms/esp32/include",
         "${workspaceFolder}/libs/brick/platforms/esp8266/include",
         "${workspaceFolder}/libs/brick/platforms/stm32/include",
-        "${workspaceFolder}/libs/brick-boards/include",
+        "${workspaceFolder}/libs/brick/boards/include",
         "${workspaceFolder}/apps/**/include",
         "${workspaceFolder}/apps/**/src",
         "${workspaceFolder}/apps/**/.pio/libdeps/**/include",
@@ -21,7 +21,6 @@
       "browse": {
         "path": [
           "${workspaceFolder}/libs/brick",
-          "${workspaceFolder}/libs/brick-boards",
           "${workspaceFolder}/apps"
         ],
         "limitSymbolsToIncludedHeaders": true

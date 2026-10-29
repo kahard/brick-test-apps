@@ -46,7 +46,7 @@ void SdmmcTest::show_status(std::uint16_t color, const char* message)
 
 bool SdmmcTest::write_read_verify()
 {
-    return brick::core::storage::write_verify(board_.sdmmc(), kTestPath, kPattern, sizeof(kPattern) - 1U);
+    return brick::core::storage::write_verify(board_.sd(), kTestPath, kPattern, sizeof(kPattern) - 1U);
 }
 
 bool SdmmcTest::initialize()
@@ -58,14 +58,14 @@ bool SdmmcTest::initialize()
         return false;
     }
     show_status(0x001F, "SDMMC INIT");
-    if (!board_.sdmmc().mounted() && !board_.sdmmc().mount())
+    if (!board_.sd().mounted() && !board_.sd().mount())
     {
         board_.logger().error(kTag, "SDMMC mount failed");
         show_status(0xF800, "SDMMC MOUNT FAIL");
         touch_timer_.start(1000);
         return true;
     }
-    const std::vector<std::string> files = board_.sdmmc().list_files(kMountPoint);
+    const std::vector<std::string> files = board_.sd().list_files(kMountPoint);
     board_.logger().info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
     const bool verified = write_read_verify();
     board_.logger().info(kTag, "%s", verified ? "WRITE READ OK" : "WRITE READ FAIL");
@@ -79,14 +79,14 @@ void SdmmcTest::update()
     if (touch_timer_.expired())
     {
         touch_timer_.restart();
-        if (board_.sdmmc().mounted() && !board_.sdmmc().probe(kTestPath))
+        if (board_.sd().mounted() && !board_.sd().probe(kTestPath))
         {
-            board_.sdmmc().unmount();
+            board_.sd().unmount();
             show_status(0xF800, "SDMMC REMOVED");
         }
-        else if (!board_.sdmmc().mounted() && board_.sdmmc().mount())
+        else if (!board_.sd().mounted() && board_.sd().mount())
         {
-            const std::vector<std::string> files = board_.sdmmc().list_files(kMountPoint);
+            const std::vector<std::string> files = board_.sd().list_files(kMountPoint);
             board_.logger().info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
             show_status(0x07E0, "SDMMC INSERTED");
         }

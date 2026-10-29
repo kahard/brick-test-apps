@@ -9,7 +9,7 @@ constexpr std::uint16_t kWidth  = 480;
 constexpr std::uint16_t kHeight = 480;
 }  // namespace
 
-FramebufferTest::FramebufferTest(brick::platform::esp32::s3::Panel480BoardTemplate<FramebufferFeatures>& board)
+FramebufferTest::FramebufferTest(brick::boards::Panel480BoardTemplate<FramebufferFeatures>& board)
     : board_(board), display_(&board.display())
 {
 }

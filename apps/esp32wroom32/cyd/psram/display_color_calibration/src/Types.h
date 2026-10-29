@@ -6,6 +6,6 @@
 namespace cyd_color_calibration
 {
 
-using Board = brick::platform::esp32::CydBoardTemplate<CalibrationFeatures>;
+using Board = brick::boards::CydTemplate<CalibrationFeatures>;
 
 }  // namespace cyd_color_calibration

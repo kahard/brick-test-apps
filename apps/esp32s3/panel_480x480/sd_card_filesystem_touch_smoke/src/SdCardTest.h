@@ -3,14 +3,14 @@
 #include <array>
 
 #include "ApplicationConfig.h"
-#include "brick/boards/esp32/s3/Panel480BoardTemplate.h"
+#include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/core/display/Screen.h"
 #include "brick/core/time/Timer.h"
 
 class SdCardTest final
 {
 public:
-    using Board = brick::platform::esp32::s3::Panel480BoardTemplate<SdFeatures>;
+    using Board = brick::boards::Panel480BoardTemplate<SdFeatures>;
 
     explicit SdCardTest(Board& board);
     bool initialize();

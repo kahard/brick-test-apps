@@ -5,5 +5,5 @@
 
 namespace cyd_asset_stream_smoke
 {
-using Board = brick::platform::esp32::CydBoardTemplate<AssetFeatures>;
+using Board = brick::boards::CydTemplate<AssetFeatures>;
 }  // namespace cyd_asset_stream_smoke

@@ -5,5 +5,5 @@
 
 namespace cyd_sd_card_filesystem_touch_smoke
 {
-using Board = brick::platform::esp32::CydBoardTemplate<SdFeatures>;
+using Board = brick::boards::CydTemplate<SdFeatures>;
 }  // namespace cyd_sd_card_filesystem_touch_smoke

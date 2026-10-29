@@ -11,7 +11,7 @@ public:
 
 private:
     Board                board_;
-    AssetSources         sources_{ board_.sdmmc() };
+    AssetSources         sources_{ board_.sd() };
     FramebufferPresenter presenter_{ board_.display() };
     AssetPlayback        playback_{ sources_, presenter_ };
     AssetStreamTest      test_{ playback_, board_.touch(), board_.time(), board_.logger() };

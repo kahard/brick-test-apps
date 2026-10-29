@@ -16,4 +16,4 @@ make PORT=COM11 upload monitor
 ```
 
 The PlatformIO board is esp32-p4-evboard; the JC1060 hardware profile lives in
-libs/brick-boards. See [the demo guide](../README.md) for the project overview.
+libs/brick/boards. See [the demo guide](../README.md) for the project overview.

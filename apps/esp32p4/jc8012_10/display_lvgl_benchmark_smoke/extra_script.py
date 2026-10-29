@@ -11,7 +11,7 @@ env.Append(CPPPATH=[
     str(brick / "libs" / "interfaces" / "include"),
     str(brick / "libs" / "core" / "include"),
     str(brick / "platforms" / "esp32" / "include"),
-    str(repo / "libs" / "brick-boards" / "include"),
+    str(repo / "libs" / "brick" / "boards" / "include"),
     str(project_dir / "generated"),
 ])
 env.Append(CPPPATH=[str(project_dir / ".pio" / "libdeps" / env.subst("$PIOENV") / "lvgl" / "src")])

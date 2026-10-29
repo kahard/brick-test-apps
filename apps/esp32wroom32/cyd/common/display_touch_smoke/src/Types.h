@@ -15,5 +15,5 @@ using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TouchPoint    = brick::interfaces::display::TouchPoint;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;
 using Logger        = brick::interfaces::logging::ILogger;
-using Board         = brick::platform::esp32::CydBoardTemplate<TouchFeatures>;
+using Board         = brick::boards::CydTemplate<TouchFeatures>;
 }  // namespace cyd_display_touch_smoke
