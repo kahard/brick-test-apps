@@ -1,7 +1,6 @@
 .pio/
-src/fonts/
+src/app/fonts/
 src/images/
 sdkconfig.*
-src/generated_assets.h
 assets/generated/
 !sdkconfig.defaults

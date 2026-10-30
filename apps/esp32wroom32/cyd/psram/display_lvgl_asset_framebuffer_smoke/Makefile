@@ -4,11 +4,11 @@ ENV ?= cyd_display_lvgl_asset_framebuffer_smoke_psram
 clean:
 	$(PIO) run -e $(ENV) -t clean
 font:
-	$(PYTHON) $(ASSET_TOOLS)/generate_lvgl_font.py --font ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/Roboto-Regular.ttf --output src/fonts/brick_roboto_20.c --name brick_roboto_20 --size 20 --bpp 4
+	$(PYTHON) $(ASSET_TOOLS)/generate_lvgl_font.py --font ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/Roboto-Regular.ttf --output src/app/fonts/brick_roboto_20.c --name brick_roboto_20 --size 20 --bpp 4
 images:
 	$(PYTHON) $(ASSET_TOOLS)/generate_image_asset.py --input ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/joy_tears.png --symbol brick_joy_tears --format rgb565 --resize 100x100 --binary assets/generated/joy_tears_rgb565.bin
 	$(PYTHON) $(ASSET_TOOLS)/generate_image_asset.py --input ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/sweat_smile.png --symbol brick_sweat_smile --format rgb565 --resize 100x100 --binary assets/generated/sweat_smile_rgb565.bin
-	$(PYTHON) $(ASSET_TOOLS)/bundle_assets.py --output assets/generated/assets.bin --header src/generated_assets.h --manifest assets/generated/assets.tsv --asset joy_tears=assets/generated/joy_tears_rgb565.bin,100x100,rgb565 --asset sweat_smile=assets/generated/sweat_smile_rgb565.bin,100x100,rgb565
+	$(PYTHON) $(ASSET_TOOLS)/bundle_assets.py --output assets/generated/assets.bin --header assets/generated/generated_assets.h --manifest assets/generated/assets.tsv --asset joy_tears=assets/generated/joy_tears_rgb565.bin,100x100,rgb565 --asset sweat_smile=assets/generated/sweat_smile_rgb565.bin,100x100,rgb565
 assets: font images
 compile: assets
 	$(PIO) run -e $(ENV)

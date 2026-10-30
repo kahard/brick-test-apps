@@ -13,6 +13,8 @@ env.Append(CPPPATH=[
     str(boards_root / "include"),
 ])
 env.Append(CPPPATH=[str(project_dir / ".pio" / "libdeps" / env.subst("$PIOENV") / "lvgl" / "src")])
+# generated_assets.h, written by `make assets` next to assets.bin.
+env.Append(CPPPATH=[str(project_dir / "src" / "app"), str(project_dir / "assets" / "generated")])
 brick_build_dir = Path(env.subst("$BUILD_DIR")) / "brick"
 env.BuildSources(str(brick_build_dir / "core"), str(brick_root / "libs" / "core" / "src"), "+<TouchMapper.cpp>")
 env.BuildSources(str(brick_build_dir / "platform"), str(brick_root / "platforms" / "esp32" / "src"), "+<Ili9341SpiDisplay.cpp>  +<Xpt2046Touchscreen.cpp>+<FreeRtosTime.cpp>+<EspIdfLogger.cpp>+<PartitionAssetSource.cpp>")
