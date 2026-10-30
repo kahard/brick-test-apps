@@ -5,5 +5,5 @@
 
 namespace cyd_lvgl_asset_smoke
 {
-using Board = brick::boards::CydTemplate<LvglFeatures>;
+using Board = brick::boards::CydBoardTemplate<LvglFeatures>;
 }  // namespace cyd_lvgl_asset_smoke

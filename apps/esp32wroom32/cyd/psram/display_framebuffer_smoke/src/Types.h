@@ -9,7 +9,7 @@
 namespace cyd_display_framebuffer_smoke
 {
 
-using Board         = brick::boards::CydTemplate<FramebufferFeatures>;
+using Board         = brick::boards::CydBoardTemplate<FramebufferFeatures>;
 using DisplayDevice = brick::interfaces::display::IDisplayDevice;
 using Logger        = brick::interfaces::logging::ILogger;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;

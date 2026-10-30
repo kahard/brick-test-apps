@@ -6,7 +6,7 @@
 #include "brick/interfaces/logging/ILogger.h"
 #include "brick/interfaces/time/ITimeProvider.h"
 
-using Board        = brick::boards::BoardTemplate<Features>;
+using Board        = brick::boards::Jc1060BoardTemplate<Features>;
 using Display      = brick::interfaces::display::IDisplayDevice;
 using Touchscreen  = brick::interfaces::display::ITouchscreen;
 using Logger       = brick::interfaces::logging::ILogger;

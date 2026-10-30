@@ -6,6 +6,6 @@
 namespace cyd_color_profile_asset_smoke
 {
 
-using Board = brick::boards::CydTemplate<ColorProfileAssetFeatures>;
+using Board = brick::boards::CydBoardTemplate<ColorProfileAssetFeatures>;
 
 }  // namespace cyd_color_profile_asset_smoke

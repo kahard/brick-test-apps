@@ -15,5 +15,5 @@ using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TouchPoint    = brick::interfaces::display::TouchPoint;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;
 using Logger        = brick::interfaces::logging::ILogger;
-using Board         = brick::boards::BoardTemplate<Features>;
+using Board         = brick::boards::Jc8012BoardTemplate<Features>;
 }  // namespace display_touch_smoke
