@@ -17,7 +17,7 @@ int main(int argc, char** argv)
     if (!board.begin() || !flash_assets.begin())
         return 1;
 
-    Application application({ board.display(), board.display(), board.touch(), flash_assets, board.sd(),
-                              board.memory(), board.time(), board.logger() });
+    Application application({ board.display(), board.display(), board.touch(), flash_assets, board.sd(), board.memory(),
+                              board.time(), board.logger() });
     return brick::platform::pc::run(application, board.simulator());
 }

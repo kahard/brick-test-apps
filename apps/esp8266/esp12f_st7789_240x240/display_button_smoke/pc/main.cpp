@@ -13,6 +13,7 @@ int main(int argc, char** argv)
     if (!board.begin())
         return 1;
 
-    esp12f_st7789_button_smoke::Application application({ board.display(), board.button(), board.time(), board.logger() });
+    esp12f_st7789_button_smoke::Application application(
+        { board.display(), board.button(), board.time(), board.logger() });
     return brick::platform::pc::run(application, board.simulator());
 }

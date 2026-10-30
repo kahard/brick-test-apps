@@ -23,7 +23,8 @@ void setup()
         board.logger().error("display_asset_stream_api_smoke", "board initialization failed");
         return;
     }
-    static esp12f_st7789_asset_stream_api_smoke::Application instance({ board.display(), board.time(), board.logger() });
+    static esp12f_st7789_asset_stream_api_smoke::Application instance(
+        { board.display(), board.time(), board.logger() });
     if (instance.initialize())
         application = &instance;
 }

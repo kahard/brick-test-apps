@@ -60,23 +60,23 @@ bool FontTest::draw_page()
                         brick_roboto_20_glyphs, brick_roboto_20_count, 0xFFE0)
            && draw_line(48, 28, "Roboto 12: ABC 123", brick_roboto_12_chars, brick_roboto_12_glyphs,
                         brick_roboto_12_count, 0xFFFF)
-           && draw_line(84, 40, "Roboto 20: TEST", brick_roboto_20_chars, brick_roboto_20_glyphs,
-                        brick_roboto_20_count, 0x07E0)
-           && draw_line(132, 52, "Roboto 28", brick_roboto_28_chars, brick_roboto_28_glyphs,
-                        brick_roboto_28_count, 0x07FF)
+           && draw_line(84, 40, "Roboto 20: TEST", brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count,
+                        0x07E0)
+           && draw_line(132, 52, "Roboto 28", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count,
+                        0x07FF)
            && draw_line(192, 32, "Button: change page", brick_roboto_12_chars, brick_roboto_12_glyphs,
                         brick_roboto_12_count, 0xF81F);
 }
 
-void FontTest::draw_progmem_text(brick::interfaces::display::WritablePixelBuffer buffer, std::int32_t x,
-                                 std::int32_t y, const char* value, const char* characters,
-                                 const BrickBitmapGlyph* glyphs, std::size_t glyph_count, std::uint16_t color)
+void FontTest::draw_progmem_text(brick::interfaces::display::WritablePixelBuffer buffer, std::int32_t x, std::int32_t y,
+                                 const char* value, const char* characters, const BrickBitmapGlyph* glyphs,
+                                 std::size_t glyph_count, std::uint16_t color)
 {
     for (std::size_t value_index = 0; brick_progmem_read_byte(value + value_index) != '\0'; ++value_index)
     {
-        const auto character = static_cast<char>(brick_progmem_read_byte(value + value_index));
+        const auto       character = static_cast<char>(brick_progmem_read_byte(value + value_index));
         BrickBitmapGlyph glyph{};
-        bool found = false;
+        bool             found = false;
 
         for (std::size_t glyph_index = 0; glyph_index < glyph_count; ++glyph_index)
         {
@@ -118,6 +118,6 @@ void FontTest::set_pixel(brick::interfaces::display::WritablePixelBuffer buffer,
     }
 
     auto* row = reinterpret_cast<std::uint16_t*>(buffer.data + static_cast<std::size_t>(y) * buffer.stride_bytes);
-    row[x] = color;
+    row[x]    = color;
 }
-}
+}  // namespace esp12f_st7789_display_font_smoke

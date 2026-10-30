@@ -15,14 +15,15 @@ namespace
 
 FramebufferTest::FramebufferTest(const Services& services)
     : display_(services.display), time_(services.time), logger_(services.logger),
-      frames_{ brick::core::memory::MemoryBlock{ services.memory }, brick::core::memory::MemoryBlock{ services.memory } }
+      frames_{ brick::core::memory::MemoryBlock{ services.memory },
+               brick::core::memory::MemoryBlock{ services.memory } }
 {
 }
 
 bool FramebufferTest::initialize()
 {
-    if (!frames_[0].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external) ||
-        !frames_[1].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external))
+    if (!frames_[0].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external)
+        || !frames_[1].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external))
     {
         logger_.error(kTag, "PSRAM framebuffer allocation failed");
         return false;

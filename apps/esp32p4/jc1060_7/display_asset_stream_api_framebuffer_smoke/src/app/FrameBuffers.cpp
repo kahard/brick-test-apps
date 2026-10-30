@@ -3,7 +3,8 @@
 namespace asset_stream_smoke
 {
 FrameBuffers::FrameBuffers(DisplayDevice& display, MemoryProvider& memory)
-    : screen_(display), pixels_{ brick::core::memory::MemoryBlock{ memory }, brick::core::memory::MemoryBlock{ memory } }
+    : screen_(display),
+      pixels_{ brick::core::memory::MemoryBlock{ memory }, brick::core::memory::MemoryBlock{ memory } }
 {
 }
 
@@ -11,8 +12,8 @@ bool FrameBuffers::initialize()
 {
     const brick::interfaces::display::DisplaySize size  = screen_.size();
     const std::size_t                             bytes = static_cast<std::size_t>(size.width) * size.height * 2;
-    return pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external) &&
-           pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
+    return pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external)
+           && pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
 }
 
 brick::interfaces::display::WritablePixelBuffer FrameBuffers::buffer(std::uint8_t index)

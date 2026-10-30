@@ -12,7 +12,8 @@ constexpr char         kTestPath[]   = "/sdcard/BRICKTST.BIN";
 constexpr std::uint8_t kPattern[]    = "BRICK SD CARD TEST 2026";
 }  // namespace
 
-SdCardTest::SdCardTest(const Services& services) : services_(services), screen_(services.display), card_timer_(services.time)
+SdCardTest::SdCardTest(const Services& services)
+    : services_(services), screen_(services.display), card_timer_(services.time)
 {
 }
 

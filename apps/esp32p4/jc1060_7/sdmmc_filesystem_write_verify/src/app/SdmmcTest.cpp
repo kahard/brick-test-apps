@@ -6,38 +6,41 @@
 
 namespace
 {
-constexpr char kTag[] = "brick_jc1060_sdmmc";
-constexpr char kMountPoint[] = "/sdcard";
-constexpr char kTestPath[] = "/sdcard/BRICKTST.BIN";
-constexpr std::uint8_t kPattern[] = "BRICK JC1060 SDMMC TEST 2026";
+constexpr char         kTag[]             = "brick_jc1060_sdmmc";
+constexpr char         kMountPoint[]      = "/sdcard";
+constexpr char         kTestPath[]        = "/sdcard/BRICKTST.BIN";
+constexpr std::uint8_t kPattern[]         = "BRICK JC1060 SDMMC TEST 2026";
 constexpr std::int32_t kStatusStripHeight = 32;
-}
+}  // namespace
 
-SdmmcTest::SdmmcTest(const Services& services) : services_(services), screen_(services.display), touch_timer_(services.time)
+SdmmcTest::SdmmcTest(const Services& services)
+    : services_(services), screen_(services.display), touch_timer_(services.time)
 {
 }
 
 void SdmmcTest::show_status(std::uint16_t color, const char* message)
 {
-    brick::core::display::Screen::Canvas message_canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{0, 0, 1024, kStatusStripHeight}, canvas_pixels_);
+    brick::core::display::Screen::Canvas message_canvas = screen_.create_canvas(
+        brick::interfaces::display::DisplayRect{ 0, 0, 1024, kStatusStripHeight }, canvas_pixels_);
     if (!message_canvas.valid())
     {
         services_.logger.error(kTag, "Status canvas does not fit its buffer");
         return;
     }
-    message_canvas.clear(0x0000).text(16, 2, message, brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count, color);
+    message_canvas.clear(0x0000).text(16, 2, message, brick_roboto_20_chars, brick_roboto_20_glyphs,
+                                      brick_roboto_20_count, color);
     if (!message_canvas.present())
         services_.logger.error(kTag, "Status canvas present failed");
 
-    brick::core::display::Screen::Canvas font_canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{0, kStatusStripHeight, 1024, kStatusStripHeight}, canvas_pixels_);
+    brick::core::display::Screen::Canvas font_canvas = screen_.create_canvas(
+        brick::interfaces::display::DisplayRect{ 0, kStatusStripHeight, 1024, kStatusStripHeight }, canvas_pixels_);
     if (!font_canvas.valid())
     {
         services_.logger.error(kTag, "Font canvas does not fit its buffer");
         return;
     }
-    font_canvas.clear(0x0000).text(16, 2, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count, color);
+    font_canvas.clear(0x0000).text(16, 2, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs,
+                                   brick_roboto_28_count, color);
     if (!font_canvas.present())
         services_.logger.error(kTag, "Font canvas present failed");
 }
@@ -85,8 +88,8 @@ void SdmmcTest::update()
         }
     }
 
-    std::size_t count = 0;
-    const bool touch_down = services_.touch.read(points_.data(), points_.size(), count) && count > 0;
+    std::size_t count      = 0;
+    const bool  touch_down = services_.touch.read(points_.data(), points_.size(), count) && count > 0;
     if (touch_down && !touch_was_down_)
     {
         const bool verified = write_read_verify();

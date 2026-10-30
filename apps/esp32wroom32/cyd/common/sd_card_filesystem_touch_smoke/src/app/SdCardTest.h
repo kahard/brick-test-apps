@@ -13,7 +13,8 @@ namespace cyd_sd_card_filesystem_touch_smoke
 class SdCardTest final
 {
 public:
-    SdCardTest(brick::interfaces::display::IDisplayDevice& display, brick::interfaces::storage::IRemovableFileSystem& filesystem,
+    SdCardTest(brick::interfaces::display::IDisplayDevice&       display,
+               brick::interfaces::storage::IRemovableFileSystem& filesystem,
                brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
                brick::interfaces::logging::ILogger& logger);
     bool initialize();
@@ -25,13 +26,13 @@ private:
     bool write_read_verify();
     void refresh_card_status();
 
-    brick::interfaces::storage::IRemovableFileSystem&             filesystem_;
-    brick::interfaces::display::ITouchscreen&            touch_;
-    brick::interfaces::time::ITimeProvider&              time_;
-    brick::interfaces::logging::ILogger&                 logger_;
-    brick::core::display::Screen                          screen_;
+    brick::interfaces::storage::IRemovableFileSystem& filesystem_;
+    brick::interfaces::display::ITouchscreen&         touch_;
+    brick::interfaces::time::ITimeProvider&           time_;
+    brick::interfaces::logging::ILogger&              logger_;
+    brick::core::display::Screen                      screen_;
     // Pixels of every canvas, sized for the largest status strip.
-    std::array<std::uint16_t, 320U * 72U> canvas_pixels_{};
+    std::array<std::uint16_t, 320U * 72U>                 canvas_pixels_{};
     brick::core::time::Timer                              card_timer_;
     std::array<brick::interfaces::display::TouchPoint, 5> points_{};
     bool                                                  touch_was_down_ = false;

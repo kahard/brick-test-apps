@@ -1,8 +1,8 @@
 #include "SpiBenchmarkTest.h"
 #include "assets/joy_tears_240_rgb565.h"
 #include "assets/sweat_smile_240_rgb565.h"
-#include "brick/interfaces/display/PixelBuffer.h"
 #include "brick/core/memory/ProgramMemory.h"
+#include "brick/interfaces/display/PixelBuffer.h"
 namespace esp12f_st7789_spi_benchmark_smoke
 {
 SpiBenchmarkTest::SpiBenchmarkTest(DisplayDevice& d, TimeProvider& t, Logger& l) : display_(d), time_(t), logger_(l)

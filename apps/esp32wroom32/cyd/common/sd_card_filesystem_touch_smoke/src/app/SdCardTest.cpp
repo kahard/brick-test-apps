@@ -15,7 +15,7 @@ namespace
     constexpr std::int32_t kStatusHeight = 72;
 }  // namespace
 
-SdCardTest::SdCardTest(brick::interfaces::display::IDisplayDevice& display,
+SdCardTest::SdCardTest(brick::interfaces::display::IDisplayDevice&       display,
                        brick::interfaces::storage::IRemovableFileSystem& filesystem,
                        brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
                        brick::interfaces::logging::ILogger& logger)

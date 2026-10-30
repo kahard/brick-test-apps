@@ -2,7 +2,8 @@
 
 namespace esp12f_st7789_button_smoke
 {
-Application::Application(const Services& services) : test_{ services.display, services.button, services.time, services.logger }
+Application::Application(const Services& services)
+    : test_{ services.display, services.button, services.time, services.logger }
 {
 }
 

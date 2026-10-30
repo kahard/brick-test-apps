@@ -14,7 +14,8 @@ constexpr std::int32_t kStatusStripHeight = 32;
 }  // namespace
 
 SdmmcTest::SdmmcTest(const Services& services)
-    : services_(services), screen_(services.display), touch_timer_(services.time), touch_diagnostic_timer_(services.time)
+    : services_(services), screen_(services.display), touch_timer_(services.time),
+      touch_diagnostic_timer_(services.time)
 {
 }
 
@@ -101,7 +102,7 @@ void SdmmcTest::update()
     if (touch_down && !touch_was_down_)
     {
         services_.logger.info(kTag, "Touch: count=%u x=%d y=%d", static_cast<unsigned>(count), points_[0].x,
-                             points_[0].y);
+                              points_[0].y);
         services_.logger.info(kTag, "Touch: write/read test requested");
         const bool verified = write_read_verify();
         services_.logger.info(kTag, "%s", verified ? "WRITE READ OK" : "WRITE READ FAIL");

@@ -6,8 +6,8 @@ namespace display_framebuffer_smoke
 {
 namespace
 {
-constexpr char          TAG[]       = "brick_st7701s_framebuffer";
-constexpr std::uint32_t kIntervalMs = 500;
+    constexpr char          TAG[]       = "brick_st7701s_framebuffer";
+    constexpr std::uint32_t kIntervalMs = 500;
 }  // namespace
 
 FramebufferTest::FramebufferTest(const Services& services)

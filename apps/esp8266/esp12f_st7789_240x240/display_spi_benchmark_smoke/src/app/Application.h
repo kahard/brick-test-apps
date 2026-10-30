@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SpiBenchmarkTest.h"
 #include "Services.h"
+#include "SpiBenchmarkTest.h"
 
 namespace esp12f_st7789_spi_benchmark_smoke
 {

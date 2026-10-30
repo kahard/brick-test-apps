@@ -1,7 +1,7 @@
 #pragma once
 
-#include "TouchTest.h"
 #include "Services.h"
+#include "TouchTest.h"
 
 namespace display_touch_smoke
 {

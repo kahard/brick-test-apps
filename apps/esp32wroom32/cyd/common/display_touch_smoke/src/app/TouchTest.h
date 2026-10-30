@@ -3,8 +3,8 @@
 #include <array>
 
 #include "ColorPattern.h"
-#include "TouchMarker.h"
 #include "Services.h"
+#include "TouchMarker.h"
 #include "brick/core/display/Screen.h"
 #include "brick/core/time/Timer.h"
 #include "brick/interfaces/display/ITouchscreen.h"

@@ -2,7 +2,8 @@
 
 namespace cyd_sd_card_filesystem_touch_smoke
 {
-Application::Application(const Services& services) : test_{ services.display, services.sd, services.touch, services.time, services.logger }
+Application::Application(const Services& services)
+    : test_{ services.display, services.sd, services.touch, services.time, services.logger }
 {
 }
 

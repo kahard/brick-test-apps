@@ -7,7 +7,7 @@
 
 namespace
 {
-using Board = brick::boards::Panel480BoardTemplate<asset_stream_smoke::Features>;
+using Board           = brick::boards::Panel480BoardTemplate<asset_stream_smoke::Features>;
 constexpr char kTag[] = "brick_st7701s_asset_api_fb";
 }  // namespace
 
