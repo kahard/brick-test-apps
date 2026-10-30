@@ -38,7 +38,7 @@ format:
 format-check:
 	$(PYTHON) tools/format.py check
 
-.PHONY: pc pc-test rules
+.PHONY: pc pc-test rules rules-check
 
 # PC simulator variants of the applications (see pc/CMakeLists.txt).
 pc:
@@ -50,3 +50,7 @@ pc-test:
 # Embedded coding rules report (docs/embedded-coding-rules.md in the framework).
 rules:
 	$(PYTHON) libs/brick/libs/rules/brick_rules.py --summary apps
+
+# The same check failing on any finding, as in CI.
+rules-check:
+	$(PYTHON) libs/brick/libs/rules/brick_rules.py --strict apps

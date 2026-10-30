@@ -109,6 +109,7 @@ make pc                                      # build all simulators (CMake)
 make pc-test                                 # run them headless in CTest
 python tools/pc.py run <name> [options...]   # e.g. cyd_display_touch_smoke
 make rules                                   # embedded coding rules report
+make rules-check                             # the same, failing on any finding (CI)
 ```
 
 The simulator opens an SDL2 window when SDL2 is installed (mouse = touch,
