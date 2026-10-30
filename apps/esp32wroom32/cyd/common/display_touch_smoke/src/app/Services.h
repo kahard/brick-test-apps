@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ApplicationConfig.h"
-#include "brick/boards/esp32/wroom32/CydBoard.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/display/TouchscreenTypes.h"
@@ -15,5 +13,14 @@ using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TouchPoint    = brick::interfaces::display::TouchPoint;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;
 using Logger        = brick::interfaces::logging::ILogger;
-using Board         = brick::boards::CydTemplate<TouchFeatures>;
+
+/// What the application needs from a board. The target entry point fills it
+/// from the CYD board or from the PC simulator.
+struct Services
+{
+    DisplayDevice& display;
+    Touchscreen&   touch;
+    TimeProvider&  time;
+    Logger&        logger;
+};
 }  // namespace cyd_display_touch_smoke

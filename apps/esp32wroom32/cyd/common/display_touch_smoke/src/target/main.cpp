@@ -1,0 +1,31 @@
+// CYD entry point: builds the board, hands its peripherals to the portable
+// application and runs the loop.
+#include "../app/Application.h"
+#include "BoardFeatures.h"
+#include "brick/boards/esp32/wroom32/CydBoard.h"
+
+namespace
+{
+using Board = brick::boards::CydBoardTemplate<cyd_display_touch_smoke::TouchFeatures>;
+}
+
+extern "C" void app_main()
+{
+    static Board board;
+    if (!board.begin())
+    {
+        board.logger().error("brick_cyd_touch", "CYD display or touch initialization failed");
+        return;
+    }
+    board.logger().info("brick_cyd_touch", "CYD display and touch initialized");
+
+    static cyd_display_touch_smoke::Application application(
+        { board.display(), board.touch(), board.time(), board.logger() });
+    if (!application.initialize())
+        return;
+    while (true)
+    {
+        application.update();
+        board.time().delay_ms(1);
+    }
+}
