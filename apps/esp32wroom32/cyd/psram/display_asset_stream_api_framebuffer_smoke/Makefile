@@ -12,7 +12,7 @@ assets:
 	$(PYTHON) $(ASSET_TOOLS)/generate_image_asset.py --input ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/sweat_smile.png --symbol brick_sweat_smile_320 --format rgb565 --resize 320x240 --binary assets/generated/sweat_smile_320_rgb565.bin
 	$(PYTHON) $(ASSET_TOOLS)/generate_solid_rgb565.py --width 320 --height 240 --color FF0000 --output assets/generated/red_background_rgb565.bin
 	$(PYTHON) $(ASSET_TOOLS)/generate_solid_rgb565.py --width 320 --height 240 --color 0000FF --output assets/generated/blue_background_rgb565.bin
-	$(PYTHON) $(ASSET_TOOLS)/bundle_assets.py --output assets/generated/assets.bin --header src/generated_assets.h --manifest assets/generated/assets.tsv --asset joy_tears=assets/generated/joy_tears_320_rgb565.bin,320x240,rgb565 --asset sweat_smile=assets/generated/sweat_smile_320_rgb565.bin,320x240,rgb565 --asset red_background=assets/generated/red_background_rgb565.bin,320x240,rgb565 --asset blue_background=assets/generated/blue_background_rgb565.bin,320x240,rgb565
+	$(PYTHON) $(ASSET_TOOLS)/bundle_assets.py --output assets/generated/assets.bin --header assets/generated/generated_assets.h --manifest assets/generated/assets.tsv --asset joy_tears=assets/generated/joy_tears_320_rgb565.bin,320x240,rgb565 --asset sweat_smile=assets/generated/sweat_smile_320_rgb565.bin,320x240,rgb565 --asset red_background=assets/generated/red_background_rgb565.bin,320x240,rgb565 --asset blue_background=assets/generated/blue_background_rgb565.bin,320x240,rgb565
 
 compile: assets
 	$(PIO) run -e $(ENV)

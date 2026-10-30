@@ -5,7 +5,7 @@
 
 namespace display_touch_smoke
 {
-FrameBuffer::FrameBuffer(brick::interfaces::display::IDisplayDevice& display) : screen_(display)
+FrameBuffer::FrameBuffer(DisplayDevice& display, MemoryProvider& memory) : screen_(display), memory_(memory)
 {
 }
 
@@ -14,7 +14,7 @@ bool FrameBuffer::initialize()
     const brick::interfaces::display::DisplaySize size = screen_.size();
     const std::size_t                             bytes =
         static_cast<std::size_t>(size.width) * static_cast<std::size_t>(size.height) * sizeof(std::uint16_t);
-    if (!memory_.allocate(bytes))
+    if (!memory_.allocate(bytes, brick::interfaces::memory::MemoryKind::external))
         return false;
 
     pixels_ = { memory_.data(),

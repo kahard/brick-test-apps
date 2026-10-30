@@ -6,6 +6,8 @@
 #    define BRICK_PANEL_ROTATION 0
 #endif
 
+namespace display_touch_smoke
+{
 #if BRICK_PANEL_ROTATION == 0
 constexpr brick::interfaces::display::Rotation kRotation = brick::interfaces::display::Rotation::rotate_0;
 constexpr std::uint16_t                        kWidth    = 800;
@@ -37,3 +39,4 @@ struct Features
 };
 
 static_assert(Features::display && Features::touch, "This demo requires display and touch.");
+}  // namespace display_touch_smoke

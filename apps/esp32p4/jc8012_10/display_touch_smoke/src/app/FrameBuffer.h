@@ -1,15 +1,16 @@
 #pragma once
 
-#include "PixelMemory.h"
+#include "Types.h"
 #include "brick/core/display/Screen.h"
-#include "brick/interfaces/display/IDisplayDevice.h"
+#include "brick/core/memory/MemoryBlock.h"
 
 namespace display_touch_smoke
 {
+/// One full-screen render buffer in external RAM.
 class FrameBuffer final
 {
 public:
-    explicit FrameBuffer(brick::interfaces::display::IDisplayDevice& display);
+    FrameBuffer(DisplayDevice& display, MemoryProvider& memory);
 
     bool initialize();
     bool present();
@@ -18,7 +19,7 @@ public:
 
 private:
     brick::core::display::Screen                    screen_;
-    PixelMemory                                     memory_;
+    brick::core::memory::MemoryBlock                memory_;
     brick::interfaces::display::WritablePixelBuffer pixels_{};
 };
 }  // namespace display_touch_smoke

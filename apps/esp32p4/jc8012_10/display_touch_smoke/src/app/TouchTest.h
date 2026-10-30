@@ -6,14 +6,13 @@
 #include "FrameBuffer.h"
 #include "TouchMarker.h"
 #include "Types.h"
-#include "brick/interfaces/logging/ILogger.h"
 
 namespace display_touch_smoke
 {
 class TouchTest final
 {
 public:
-    TouchTest(DisplayDevice& display, Touchscreen& touch, Logger& logger);
+    explicit TouchTest(const Services& services);
 
     bool initialize();
     void update();

@@ -17,10 +17,12 @@ namespace
 void TouchMarker::draw(brick::interfaces::display::WritablePixelBuffer& pixels, const TouchPoint& point,
                        bool active) const
 {
-    const std::int32_t      left = point.x < kMarkerSize / 2 ? 0 : point.x - kMarkerSize / 2;
-    const std::int32_t      top  = point.y < kMarkerSize / 2 ? 0 : point.y - kMarkerSize / 2;
-    const std::int32_t      x0   = left + kMarkerSize > pixels.width ? pixels.width - kMarkerSize : left;
-    const std::int32_t      y0   = top + kMarkerSize > pixels.height ? pixels.height - kMarkerSize : top;
+    const std::int32_t      width  = static_cast<std::int32_t>(pixels.width);
+    const std::int32_t      height = static_cast<std::int32_t>(pixels.height);
+    const std::int32_t      left   = point.x < kMarkerSize / 2 ? 0 : point.x - kMarkerSize / 2;
+    const std::int32_t      top    = point.y < kMarkerSize / 2 ? 0 : point.y - kMarkerSize / 2;
+    const std::int32_t      x0     = left + kMarkerSize > width ? width - kMarkerSize : left;
+    const std::int32_t      y0     = top + kMarkerSize > height ? height - kMarkerSize : top;
     constexpr std::uint16_t half = kMarkerSize / 2;
     constexpr std::uint16_t arm  = kMarkerArm / 2;
     std::uint16_t* const    data = reinterpret_cast<std::uint16_t*>(pixels.data);

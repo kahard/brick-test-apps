@@ -9,8 +9,8 @@ namespace
     constexpr char TAG[] = "brick_jc8012_touch";
 }
 
-TouchTest::TouchTest(DisplayDevice& display, Touchscreen& touch, Logger& logger)
-    : touch_(touch), logger_(logger), frame_buffer_(display)
+TouchTest::TouchTest(const Services& services)
+    : touch_(services.touch), logger_(services.logger), frame_buffer_(services.display, services.memory)
 {
 }
 
