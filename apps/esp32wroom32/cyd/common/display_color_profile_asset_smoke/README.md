@@ -9,10 +9,12 @@ Demonstrator laduje portret z tablica ColorChecker z partycji `assets`. Lewa cze
 ## Uzycie profilu z kalibratora
 
 1. W `display_color_calibration` zapisz konfiguracje i profil C++.
-2. Skopiuj wyeksportowany plik `.h` do tego katalogu jako `src/ColorProfile.h`, zastepujac plik domyslny.
+2. Skopiuj wyeksportowany plik `.h` do tego katalogu jako `src/app/CydColorCalibration.h`, zastepujac obecny profil.
 3. Wykonaj `make PORT=COM20 upload`.
 
-Domyslny `ColorProfile.h` zwraca profil identycznosciowy, dlatego obie strony obrazu beda wtedy takie same.
+Profil identycznosciowy daje dwie identyczne polowy obrazu.
+
+Wariant na PC (`make pc-test` w katalogu glownym) czyta ten sam `assets/generated/assets.bin` zamiast partycji.
 
 ## Zrodlo obrazu
 

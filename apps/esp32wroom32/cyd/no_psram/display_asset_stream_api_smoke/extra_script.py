@@ -11,6 +11,9 @@ env.Append(CPPPATH=[
     str(brick_root / "libs" / "core" / "include"),
     str(brick_root / "platforms" / "esp32" / "include"),
     str(boards_root / "include"),
+    str(project_dir / "src" / "app"),
+    # generated_assets.h, written by `make assets` next to assets.bin.
+    str(project_dir / "assets" / "generated"),
 ])
 
 brick_build_dir = Path(env.subst("$BUILD_DIR")) / "brick"
