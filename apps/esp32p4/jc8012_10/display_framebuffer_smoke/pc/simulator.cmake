@@ -1,0 +1,1 @@
+brick_app_simulator(jc8012_display_framebuffer_smoke)

@@ -1,0 +1,18 @@
+// PC simulator entry point: the same application on a simulated CYD screen.
+#include "../src/app/Application.h"
+#include "brick/boards/pc/SimulatorBoard.h"
+
+int main(int argc, char** argv)
+{
+    brick::platform::pc::SimulatorOptions options;
+    if (!brick::platform::pc::SimulatorOptions::parse(argc, argv, options))
+        return 2;
+
+    brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::cyd(), options);
+    if (!board.begin())
+        return 1;
+
+    cyd_display_framebuffer_smoke::Application application(
+        { board.display(), board.memory(), board.time(), board.logger() });
+    return brick::platform::pc::run(application, board.simulator());
+}

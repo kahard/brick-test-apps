@@ -1,0 +1,1 @@
+brick_app_simulator(panel480_display_framebuffer_smoke)

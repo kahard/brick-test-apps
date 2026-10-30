@@ -1,0 +1,1 @@
+brick_app_simulator(jc1060_display_framebuffer_smoke)

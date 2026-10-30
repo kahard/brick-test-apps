@@ -1,0 +1,1 @@
+brick_app_simulator(cyd_display_framebuffer_smoke)

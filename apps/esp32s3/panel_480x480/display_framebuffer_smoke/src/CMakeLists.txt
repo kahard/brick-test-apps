@@ -1,12 +1,13 @@
+set(BRICK_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../../libs/brick")
 idf_component_register(
     SRCS
-        "main.cpp"
-        "Application.cpp"
-        "FramebufferTest.cpp"
-        "../../../../../libs/brick/libs/core/src/TouchMapper.cpp"
-        "../../../../../libs/brick/platforms/esp32/src/Gt911Touchscreen.cpp"
-        "../../../../../libs/brick/platforms/esp32/src/St7701sRgbDisplay.cpp"
-        "../../../../../libs/brick/platforms/esp32/src/FreeRtosTime.cpp"
-        "../../../../../libs/brick/platforms/esp32/src/EspIdfLogger.cpp"
-    INCLUDE_DIRS "."
+        "target/main.cpp"
+        "app/Application.cpp"
+        "app/FramebufferTest.cpp"
+        "${BRICK_ROOT}/libs/core/src/TouchMapper.cpp"
+        "${BRICK_ROOT}/platforms/esp32/src/Gt911Touchscreen.cpp"
+        "${BRICK_ROOT}/platforms/esp32/src/St7701sRgbDisplay.cpp"
+        "${BRICK_ROOT}/platforms/esp32/src/FreeRtosTime.cpp"
+        "${BRICK_ROOT}/platforms/esp32/src/EspIdfLogger.cpp"
+    INCLUDE_DIRS "." "app"
 )
