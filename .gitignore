@@ -1,3 +1,5 @@
+.venv/
+**/__pycache__/
 **/.pio/
 **/managed_components/
 **/assets/generated/
@@ -5,7 +7,7 @@
 **/generated*.h
 **/.pytest_cache/
 **/sdkconfig*
-!apps/esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/sdkconfig.defaults
+!**/sdkconfig.defaults
 **/CMakeLists.txt
 **/CMakeListsPrivate.txt
 .vscode/
@@ -18,10 +20,12 @@
 !apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/CMakeLists.txt
 !apps/esp32s3/panel_480x480/display_lvgl_framebuffer_touch_smoke/src/CMakeLists.txt
 
-# JC1060 build descriptions and defaults are maintained project sources.
+# JC1060 build descriptions are maintained project sources.
 !apps/esp32p4/jc1060_7/**/CMakeLists.txt
-!apps/esp32p4/jc1060_7/**/sdkconfig.defaults
 
-# JC8012 build descriptions and defaults are maintained project sources.
+# JC8012 build descriptions are maintained project sources.
 !apps/esp32p4/jc8012_10/**/CMakeLists.txt
-!apps/esp32p4/jc8012_10/**/sdkconfig.defaults
+
+# PC simulator build description and output.
+!/pc/CMakeLists.txt
+/build/
