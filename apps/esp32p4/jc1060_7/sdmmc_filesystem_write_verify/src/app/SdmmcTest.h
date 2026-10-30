@@ -22,6 +22,8 @@ private:
 
     Services services_;
     brick::core::display::Screen screen_;
+    // Pixels of every canvas, sized for the largest status strip.
+    std::array<std::uint16_t, 1024U * 32U> canvas_pixels_{};
     brick::core::time::Timer touch_timer_;
     std::array<brick::interfaces::display::TouchPoint, 5> points_{};
     bool touch_was_down_ = false;

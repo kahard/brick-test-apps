@@ -29,7 +29,7 @@ bool FontTest::clear_display()
     constexpr std::int32_t stripe_height = 24;
     for (std::int32_t y = 0; y < 240; y += stripe_height)
     {
-        auto canvas = screen_.create_canvas({ 0, y, 240, stripe_height });
+        auto canvas = screen_.create_canvas({ 0, y, 240, stripe_height }, canvas_pixels_);
         if (!canvas || !canvas.clear(0x0000).present())
         {
             return false;
@@ -41,7 +41,7 @@ bool FontTest::clear_display()
 bool FontTest::draw_line(std::int32_t y, std::int32_t height, const char* value, const char* characters,
                          const BrickBitmapGlyph* glyphs, std::size_t glyph_count, std::uint16_t color)
 {
-    auto canvas = screen_.create_canvas({ 0, y, 240, height });
+    auto canvas = screen_.create_canvas({ 0, y, 240, height }, canvas_pixels_);
     if (!canvas)
     {
         return false;

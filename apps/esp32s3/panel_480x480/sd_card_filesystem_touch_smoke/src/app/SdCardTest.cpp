@@ -19,7 +19,7 @@ SdCardTest::SdCardTest(const Services& services) : services_(services), screen_(
 void SdCardTest::show_status(std::uint16_t color, const char* message)
 {
     brick::core::display::Screen::Canvas canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 480, 96 });
+        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 480, 96 }, canvas_pixels_);
     if (!canvas.valid())
         return;
     canvas.clear(0x0000)

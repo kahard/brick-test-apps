@@ -25,16 +25,21 @@ SdCardTest::SdCardTest(brick::interfaces::display::IDisplayDevice& display,
 
 void SdCardTest::clear_screen()
 {
-    brick::core::display::Screen::Canvas canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 320, 240 });
-    if (canvas.valid())
-        canvas.clear(0x0000).present();
+    // In status-height strips through the one canvas buffer.
+    for (std::int32_t y = 0; y < 240; y += kStatusHeight)
+    {
+        const std::int32_t                   height = y + kStatusHeight <= 240 ? kStatusHeight : 240 - y;
+        brick::core::display::Screen::Canvas canvas =
+            screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, y, 320, height }, canvas_pixels_);
+        if (canvas.valid())
+            canvas.clear(0x0000).present();
+    }
 }
 
 void SdCardTest::show_status(std::uint16_t color, const char* message)
 {
     brick::core::display::Screen::Canvas canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 320, kStatusHeight });
+        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 320, kStatusHeight }, canvas_pixels_);
     if (!canvas.valid())
         return;
     canvas.clear(0x0000)

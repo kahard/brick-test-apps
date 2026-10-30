@@ -30,6 +30,8 @@ private:
     brick::interfaces::time::ITimeProvider&              time_;
     brick::interfaces::logging::ILogger&                 logger_;
     brick::core::display::Screen                          screen_;
+    // Pixels of every canvas, sized for the largest status strip.
+    std::array<std::uint16_t, 320U * 72U> canvas_pixels_{};
     brick::core::time::Timer                              card_timer_;
     std::array<brick::interfaces::display::TouchPoint, 5> points_{};
     bool                                                  touch_was_down_ = false;

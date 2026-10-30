@@ -21,10 +21,10 @@ SdmmcTest::SdmmcTest(const Services& services)
 void SdmmcTest::show_status(std::uint16_t color, const char* message)
 {
     brick::core::display::Screen::Canvas message_canvas =
-        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 800, kStatusStripHeight });
+        screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 800, kStatusStripHeight }, canvas_pixels_);
     if (!message_canvas.valid())
     {
-        services_.logger.error(kTag, "Status canvas allocation failed");
+        services_.logger.error(kTag, "Status canvas does not fit its buffer");
         return;
     }
     message_canvas.clear(0x0000).text(16, 2, message, brick_roboto_20_chars, brick_roboto_20_glyphs,
@@ -33,10 +33,10 @@ void SdmmcTest::show_status(std::uint16_t color, const char* message)
         services_.logger.error(kTag, "Status canvas present failed");
 
     brick::core::display::Screen::Canvas font_canvas = screen_.create_canvas(
-        brick::interfaces::display::DisplayRect{ 0, kStatusStripHeight, 800, kStatusStripHeight });
+        brick::interfaces::display::DisplayRect{ 0, kStatusStripHeight, 800, kStatusStripHeight }, canvas_pixels_);
     if (!font_canvas.valid())
     {
-        services_.logger.error(kTag, "Font canvas allocation failed");
+        services_.logger.error(kTag, "Font canvas does not fit its buffer");
         return;
     }
     font_canvas.clear(0x0000).text(16, 2, "FONT 28 PX", brick_roboto_28_chars, brick_roboto_28_glyphs,

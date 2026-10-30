@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
+
 #include "Types.h"
 #include "brick/core/display/Screen.h"
 #include "brick/interfaces/display/WritablePixelBuffer.h"
@@ -27,6 +30,8 @@ private:
                           std::int32_t y, std::uint16_t color);
 
     brick::core::display::Screen screen_;
+    // Pixels of every canvas, sized for the largest text line.
+    std::array<std::uint16_t, 240U * 52U> canvas_pixels_{};
     brick::interfaces::input::IButton& button_;
     bool pressed_ = false;
     bool alternate_ = false;
