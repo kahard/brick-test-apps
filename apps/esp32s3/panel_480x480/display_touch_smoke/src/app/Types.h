@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ApplicationConfig.h"
-#include "brick/boards/esp32/s3/Panel480Board.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/display/TouchscreenTypes.h"
@@ -15,5 +14,4 @@ using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TouchPoint    = brick::interfaces::display::TouchPoint;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;
 using Logger        = brick::interfaces::logging::ILogger;
-using Board         = brick::boards::Panel480BoardTemplate<DisplayTouchFeatures>;
 }  // namespace display_touch_smoke

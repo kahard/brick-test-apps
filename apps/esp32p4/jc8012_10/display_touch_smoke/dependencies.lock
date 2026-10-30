@@ -12,7 +12,7 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.5.4
+    version: 5.5.5
 direct_dependencies:
 - espressif/esp_lcd_touch
 manifest_hash: f35a6c313ff943d717ad0b95f6aa7deeeeb784eef3a844cc5914499656462948

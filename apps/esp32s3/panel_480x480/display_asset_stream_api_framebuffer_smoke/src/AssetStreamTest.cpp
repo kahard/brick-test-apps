@@ -15,7 +15,7 @@ constexpr char kTag[] = "brick_st7701s_asset_api_fb";
 struct AssetStreamTest::Impl
 {
     explicit Impl(Board& board)
-        : board(board), display(board.display()), touch(board.touch()), sources(board.sd_card()),
+        : board(board), display(board.display()), touch(board.touch()), sources(board.sd()),
           presenter(display, display), touch_input(touch), playback(sources, presenter)
     {
     }

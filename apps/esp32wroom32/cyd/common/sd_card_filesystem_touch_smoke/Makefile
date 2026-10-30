@@ -17,6 +17,6 @@ monitor:
 	$(PIO) device monitor -e $(ENV) -p $(PORT)
 
 font:
-	$(PYTHON) -c "from pathlib import Path; Path('src/generated').mkdir(parents=True, exist_ok=True)"
-	$(PYTHON) $(ASSET_TOOLS)/generate_bitmap_font.py --font $(FONT_SOURCE) --output src/generated/generated_font.h --name brick_roboto_16 --size 16
-	$(PYTHON) $(ASSET_TOOLS)/generate_bitmap_font.py --font $(FONT_SOURCE) --output src/generated/generated_font_large.h --name brick_roboto_22 --size 22
+	$(PYTHON) -c "from pathlib import Path; Path('src/app/generated').mkdir(parents=True, exist_ok=True)"
+	$(PYTHON) $(ASSET_TOOLS)/generate_bitmap_font.py --font $(FONT_SOURCE) --output src/app/generated/generated_font.h --name brick_roboto_16 --size 16
+	$(PYTHON) $(ASSET_TOOLS)/generate_bitmap_font.py --font $(FONT_SOURCE) --output src/app/generated/generated_font_large.h --name brick_roboto_22 --size 22

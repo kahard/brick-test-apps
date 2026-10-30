@@ -8,7 +8,7 @@ namespace
 }  // namespace
 
 AssetStreamTest::AssetStreamTest(brick::interfaces::display::IDisplayDevice& display,
-                                 brick::interfaces::storage::IFileSystem& filesystem,
+                                 brick::interfaces::storage::IRemovableFileSystem& filesystem,
                                  brick::interfaces::display::ITouchscreen& touch,
                                  brick::interfaces::time::ITimeProvider& time,
                                  brick::interfaces::logging::ILogger& logger)

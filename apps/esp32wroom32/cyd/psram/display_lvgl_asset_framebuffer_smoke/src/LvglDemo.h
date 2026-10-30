@@ -2,8 +2,8 @@
 
 #include "LvglBuffers.h"
 #include "PartitionAssets.h"
-#include "brick/platform/esp32/LvglDisplayAdapter.h"
-#include "brick/platform/esp32/LvglTouchAdapter.h"
+#include "brick/lvgl/LvglDisplayAdapter.h"
+#include "brick/lvgl/LvglTouchAdapter.h"
 #include "brick/interfaces/logging/ILogger.h"
 #include "brick/interfaces/time/ITimeProvider.h"
 #include "lvgl.h"
@@ -27,8 +27,8 @@ private:
     brick::interfaces::logging::ILogger&       logger_;
     PartitionAssets                            assets_;
     LvglBuffers                                buffers_;
-    brick::platform::esp32::LvglDisplayAdapter display_adapter_;
-    brick::platform::esp32::LvglTouchAdapter   touch_adapter_;
+    brick::lvgl::LvglDisplayAdapter display_adapter_;
+    brick::lvgl::LvglTouchAdapter   touch_adapter_;
     lv_image_dsc_t                             image_descriptor_{};
     lv_obj_t*                                  image_    = nullptr;
     lv_obj_t*                                  status_   = nullptr;

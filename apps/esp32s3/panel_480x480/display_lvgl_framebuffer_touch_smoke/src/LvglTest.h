@@ -6,8 +6,8 @@
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/logging/ILogger.h"
 #include "brick/interfaces/time/ITimeProvider.h"
-#include "brick/platform/esp32/LvglDisplayAdapter.h"
-#include "brick/platform/esp32/LvglTouchAdapter.h"
+#include "brick/lvgl/LvglDisplayAdapter.h"
+#include "brick/lvgl/LvglTouchAdapter.h"
 #include "lvgl.h"
 
 class LvglTest final
@@ -29,8 +29,8 @@ private:
     brick::interfaces::display::IFrameBufferDisplay& framebuffers_;
     brick::interfaces::display::ITouchscreen&        touch_;
     brick::interfaces::logging::ILogger&             logger_;
-    brick::platform::esp32::LvglDisplayAdapter       display_adapter_;
-    brick::platform::esp32::LvglTouchAdapter         touch_adapter_;
+    brick::lvgl::LvglDisplayAdapter       display_adapter_;
+    brick::lvgl::LvglTouchAdapter         touch_adapter_;
     brick::core::time::Timer                         tick_timer_;
     brick::core::time::Timer                         frame_timer_;
     lv_obj_t*                                        title_         = nullptr;

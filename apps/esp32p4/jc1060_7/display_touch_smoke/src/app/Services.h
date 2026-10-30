@@ -1,0 +1,24 @@
+#pragma once
+
+#include "brick/interfaces/display/IDisplayDevice.h"
+#include "brick/interfaces/display/ITouchscreen.h"
+#include "brick/interfaces/time/ITimeProvider.h"
+#include "brick/interfaces/logging/ILogger.h"
+
+namespace display_touch_smoke
+{
+using DisplayDevice = brick::interfaces::display::IDisplayDevice;
+using Touchscreen = brick::interfaces::display::ITouchscreen;
+using TimeProvider = brick::interfaces::time::ITimeProvider;
+using Logger = brick::interfaces::logging::ILogger;
+
+/// What the application needs from a board, filled by the target entry point
+/// (hardware board or PC simulator).
+struct Services
+{
+    DisplayDevice& display;
+    Touchscreen& touch;
+    TimeProvider& time;
+    Logger& logger;
+};
+}  // namespace display_touch_smoke

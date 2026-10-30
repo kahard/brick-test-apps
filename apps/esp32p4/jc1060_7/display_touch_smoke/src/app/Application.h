@@ -1,18 +1,20 @@
 #pragma once
 
-#include "ApplicationConfig.h"
 #include "TouchTest.h"
+#include "Services.h"
 
 namespace display_touch_smoke
 {
+/// Portable application; the board is started by the target entry point.
 class Application final
 {
 public:
+    explicit Application(const Services& services);
+
     bool initialize();
     void update();
 
 private:
-    Board     board_;
-    TouchTest test_{ board_.display(), board_.touch(), board_.time(), board_.logger() };
+    TouchTest test_;
 };
 }  // namespace display_touch_smoke

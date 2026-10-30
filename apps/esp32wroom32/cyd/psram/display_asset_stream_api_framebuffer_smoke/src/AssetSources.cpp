@@ -33,7 +33,7 @@ namespace
     class SdAssetSource final : public brick::interfaces::display::IAssetSource
     {
     public:
-        explicit SdAssetSource(brick::interfaces::storage::IFileSystem& filesystem) : filesystem_(filesystem) {}
+        explicit SdAssetSource(brick::interfaces::storage::IRemovableFileSystem& filesystem) : filesystem_(filesystem) {}
 
         bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
                   std::uint8_t* destination, std::size_t bytes) override
@@ -48,13 +48,13 @@ namespace
         }
 
     private:
-        brick::interfaces::storage::IFileSystem& filesystem_;
+        brick::interfaces::storage::IRemovableFileSystem& filesystem_;
     };
 }  // namespace
 
 struct AssetSources::Impl
 {
-    explicit Impl(brick::interfaces::storage::IFileSystem& filesystem)
+    explicit Impl(brick::interfaces::storage::IRemovableFileSystem& filesystem)
         : filesystem(filesystem), flash_source("assets"), sd_source(filesystem),
           repository(&flash_source, &psram_source, &sd_source)
     {
@@ -86,7 +86,7 @@ struct AssetSources::Impl
         return true;
     }
 
-    brick::interfaces::storage::IFileSystem&     filesystem;
+    brick::interfaces::storage::IRemovableFileSystem&     filesystem;
     brick::platform::esp32::PartitionAssetSource flash_source;
     PsramAssetSource                             psram_source;
     SdAssetSource                                sd_source;
@@ -95,7 +95,7 @@ struct AssetSources::Impl
     bool                                         psram_ready  = false;
 };
 
-AssetSources::AssetSources(brick::interfaces::storage::IFileSystem& filesystem) : impl_(std::make_unique<Impl>(filesystem))
+AssetSources::AssetSources(brick::interfaces::storage::IRemovableFileSystem& filesystem) : impl_(std::make_unique<Impl>(filesystem))
 {
 }
 AssetSources::~AssetSources() = default;

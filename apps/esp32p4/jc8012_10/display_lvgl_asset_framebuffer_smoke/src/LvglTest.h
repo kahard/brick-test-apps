@@ -1,7 +1,7 @@
 #pragma once
 #include "LvglRuntime.h"
 #include "TouchView.h"
-#include "brick/platform/esp32/LvglTouchAdapter.h"
+#include "brick/lvgl/LvglTouchAdapter.h"
 
 class LvglTest final
 {
@@ -15,5 +15,5 @@ private:
     LvglRuntime                              runtime_;
     LvglAssets                               assets_;
     TouchView                                view_;
-    brick::platform::esp32::LvglTouchAdapter touch_adapter_;
+    brick::lvgl::LvglTouchAdapter touch_adapter_;
 };

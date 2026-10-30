@@ -10,23 +10,56 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 enable_testing()
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../libs/brick" brick)
+# BRICK_ROOT may point at a framework checkout under development.
+set(BRICK_ROOT "${CMAKE_CURRENT_LIST_DIR}/../libs/brick" CACHE PATH "BRICK framework sources")
+add_subdirectory("${BRICK_ROOT}" brick)
 
 # GNU make runs an application's own generators (fonts, assets) before its
 # simulator is compiled, exactly as for the embedded build.
 find_program(BRICK_MAKE NAMES make gmake mingw32-make)
 
-# brick_app_simulator(<name> [FRAMES n] [DEFINES name=value...] [PREBUILD make-targets...]
-#                     [SMOKE_ARGS args...] [SOURCES files...])
+# LVGL for applications that use it, at the version pinned for the embedded
+# builds in platformio-versions.ini, with the same default configuration
+# (LV_CONF_SKIP). Fonts the applications enable on the target are all built in.
+function(brick_pc_lvgl)
+  if(TARGET brick_pc_lvgl)
+    return()
+  endif()
+  file(STRINGS "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../platformio-versions.ini" lvgl_pin REGEX "^lvgl *=")
+  string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" lvgl_version "${lvgl_pin}")
+  if(NOT lvgl_version)
+    message(FATAL_ERROR "No lvgl version in platformio-versions.ini")
+  endif()
+  include(FetchContent)
+  # SOURCE_SUBDIR points nowhere so LVGL's own CMake project is not configured.
+  FetchContent_Declare(lvgl
+    GIT_REPOSITORY https://github.com/lvgl/lvgl.git
+    GIT_TAG v${lvgl_version}
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR brick-no-cmake)
+  FetchContent_MakeAvailable(lvgl)
+  file(GLOB_RECURSE lvgl_sources CONFIGURE_DEPENDS "${lvgl_SOURCE_DIR}/src/*.c")
+  add_library(brick_pc_lvgl STATIC ${lvgl_sources})
+  target_include_directories(brick_pc_lvgl SYSTEM PUBLIC "${lvgl_SOURCE_DIR}")
+  set(fonts)
+  foreach(size 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48)
+    list(APPEND fonts LV_FONT_MONTSERRAT_${size}=1)
+  endforeach()
+  target_compile_definitions(brick_pc_lvgl PUBLIC LV_CONF_SKIP=1 ${fonts})
+  message(STATUS "BRICK test apps: LVGL ${lvgl_version} for the simulators")
+endfunction()
+
+# brick_app_simulator(<name> [LVGL] [FRAMES n] [DEFINES name=value...]
+#                     [PREBUILD make-targets...] [SMOKE_ARGS args...] [SOURCES files...])
 #
 # Call from an application's pc/simulator.cmake. Builds every .cpp/.c under
 # src/app plus pc/main.cpp (and SOURCES) into <name> and adds a CTest that runs
 # it headless with deterministic time for FRAMES updates (default 120),
 # passing SMOKE_ARGS (scripted touches, presses) and saving a screenshot.
 # PREBUILD names targets of the application's Makefile (e.g. fonts) to run
-# first.
+# first. LVGL links LVGL and the BRICK LVGL adapters.
 function(brick_app_simulator name)
-  cmake_parse_arguments(ARG "" "FRAMES" "DEFINES;PREBUILD;SMOKE_ARGS;SOURCES" ${ARGN})
+  cmake_parse_arguments(ARG "LVGL" "FRAMES" "DEFINES;PREBUILD;SMOKE_ARGS;SOURCES" ${ARGN})
   set(pc_dir "${CMAKE_CURRENT_LIST_DIR}")
   get_filename_component(app_dir "${pc_dir}/.." ABSOLUTE)
   file(GLOB_RECURSE app_sources CONFIGURE_DEPENDS "${app_dir}/src/app/*.cpp" "${app_dir}/src/app/*.c")
@@ -34,6 +67,10 @@ function(brick_app_simulator name)
   target_include_directories(${name} PRIVATE "${app_dir}/src/app")
   # Values the embedded build passes with -D in platformio.ini.
   target_compile_definitions(${name} PRIVATE ${ARG_DEFINES})
+  if(ARG_LVGL)
+    brick_pc_lvgl()
+    target_link_libraries(${name} PRIVATE brick_pc_lvgl BRICK::Lvgl)
+  endif()
   if(ARG_PREBUILD)
     if(NOT BRICK_MAKE)
       message(FATAL_ERROR "${name} needs GNU make to run: ${ARG_PREBUILD}")
@@ -48,8 +85,11 @@ function(brick_app_simulator name)
   if(NOT ARG_FRAMES)
     set(ARG_FRAMES 120)
   endif()
+  # Every run gets its own empty directory as the SD card.
+  set(card "${CMAKE_BINARY_DIR}/sdcard/${name}")
+  file(MAKE_DIRECTORY "${card}")
   add_test(NAME ${name}
-           COMMAND ${name} --headless --manual-time --frames ${ARG_FRAMES}
+           COMMAND ${name} --headless --manual-time --frames ${ARG_FRAMES} --fs "${card}"
                    --screenshot "${CMAKE_BINARY_DIR}/screenshots/${name}.ppm" ${ARG_SMOKE_ARGS})
 endfunction()
 

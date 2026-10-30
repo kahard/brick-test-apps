@@ -9,7 +9,7 @@
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/logging/ILogger.h"
-#include "brick/interfaces/storage/IFileSystem.h"
+#include "brick/interfaces/storage/IRemovableFileSystem.h"
 #include "brick/interfaces/time/ITimeProvider.h"
 
 namespace cyd_asset_stream_smoke
@@ -18,7 +18,7 @@ class AssetStreamTest final
 {
 public:
     AssetStreamTest(brick::interfaces::display::IDisplayDevice& display,
-                    brick::interfaces::storage::IFileSystem& filesystem,
+                    brick::interfaces::storage::IRemovableFileSystem& filesystem,
                     brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
                     brick::interfaces::logging::ILogger& logger);
     bool initialize();

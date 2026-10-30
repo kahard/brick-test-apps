@@ -3,14 +3,14 @@
 #include <memory>
 
 #include "brick/interfaces/display/AssetDescriptor.h"
-#include "brick/interfaces/storage/IFileSystem.h"
+#include "brick/interfaces/storage/IRemovableFileSystem.h"
 
 namespace cyd_asset_stream_smoke
 {
 class AssetSources final
 {
 public:
-    explicit AssetSources(brick::interfaces::storage::IFileSystem& filesystem);
+    explicit AssetSources(brick::interfaces::storage::IRemovableFileSystem& filesystem);
     ~AssetSources();
 
     bool                                      initialize();

@@ -19,8 +19,8 @@ idf_component_register(
         "${BRICK_ROOT}/platforms/esp32/src/FreeRtosTime.cpp"
         "${BRICK_ROOT}/platforms/esp32/src/EspIdfLogger.cpp"
         "${BRICK_ROOT}/platforms/esp32/src/PartitionAssetSource.cpp"
-        "${BRICK_ROOT}/platforms/esp32/src/LvglDisplayAdapter.cpp"
-        "${BRICK_ROOT}/platforms/esp32/src/LvglTouchAdapter.cpp"
+        "${BRICK_ROOT}/libs/lvgl/src/LvglDisplayAdapter.cpp"
+        "${BRICK_ROOT}/libs/lvgl/src/LvglTouchAdapter.cpp"
         "${BRICK_ROOT}/libs/core/src/TouchMapper.cpp"
     INCLUDE_DIRS "." "../generated"
 )

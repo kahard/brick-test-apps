@@ -11,6 +11,7 @@ env.Append(CPPPATH=[
     str(brick / "libs" / "interfaces" / "include"),
     str(brick / "libs" / "core" / "include"),
     str(brick / "platforms" / "esp32" / "include"),
+    str(brick / "libs" / "lvgl" / "include"),
     str(repo / "libs" / "brick" / "boards" / "include"),
     str(project_dir / "generated"),
 ])
