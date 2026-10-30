@@ -1,18 +1,16 @@
-PIO ?= platformio
-PORT ?= COM17
+include ../../../../../tools/app.mk
 ENV ?= cyd_display_color_calibration
-PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../../tools/platformio.ps1)"
 
 .PHONY: clean compile upload monitor
 
 clean:
-	$(PIO_RUN) run -e $(ENV) -t clean
+	$(PIO) run -e $(ENV) -t clean
 
 compile:
-	$(PIO_RUN) run -e $(ENV)
+	$(PIO) run -e $(ENV)
 
 upload:
-	$(PIO_RUN) run -e $(ENV) -t upload --upload-port $(PORT)
+	$(PIO) run -e $(ENV) -t upload --upload-port $(PORT)
 
 monitor:
 	$(PIO) device monitor -e $(ENV) -p $(PORT)

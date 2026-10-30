@@ -1,19 +1,13 @@
-PIO ?= platformio
+include ../../../../tools/app.mk
 ENV ?= jc8012_10_display_lvgl_asset_framebuffer_smoke
-PORT ?=
-JOBS ?= 2
-PYTHON ?= python
-PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
-UPLOAD_PORT = $(if $(strip $(PORT)),--upload-port $(PORT),)
-MONITOR_PORT = $(if $(strip $(PORT)),-p $(PORT),)
 
 .PHONY: clean compile upload monitor assets
 clean:
-	$(PIO_RUN) run -e $(ENV) -t clean
+	$(PIO) run -e $(ENV) -t clean
 compile:
-	$(PIO_RUN) run -e $(ENV) -j $(JOBS)
+	$(PIO) run -e $(ENV) -j $(JOBS)
 upload:
-	$(PIO_RUN) run -e $(ENV) -j $(JOBS) -t upload $(UPLOAD_PORT)
+	$(PIO) run -e $(ENV) -j $(JOBS) -t upload $(UPLOAD_PORT)
 monitor:
 	$(PIO) device monitor -e $(ENV) $(MONITOR_PORT)
 assets:

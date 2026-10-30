@@ -6,7 +6,7 @@ się przycisk `DOTKNIJ` i licznik kliknięć; każde kliknięcie jest również
 wypisywane w monitorze szeregowym. Test zawiera również własny asset fontu
 Arial 24 px z zakresem Unicode obejmującym polskie znaki.
 
-```powershell
+```text
 make compile
 make upload
 make monitor

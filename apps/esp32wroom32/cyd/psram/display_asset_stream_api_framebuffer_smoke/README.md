@@ -11,7 +11,7 @@ do framebuffer'a i dla jego prezentacji przez SPI. Na tym panelu czas prezentacj
 ogranicza interfejs ILI9341, dlatego nie należy porównywać samego FPS jako wydajności
 nośnika danych.
 
-```powershell
+```text
 make PORT=COM20 upload monitor
 ```
 

@@ -11,7 +11,7 @@ assetami; offsety i rozmiary generuje `bundle_assets.py` do
 diagnostyki i narzędzi uploadujących. Adapter `PartitionAssetSource` tłumaczy
 offset względny assetu na adres w partycji.
 
-```powershell
+```text
 make assets
 make compile
 make upload

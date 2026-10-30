@@ -1,21 +1,17 @@
-PIO ?= platformio
-PORT ?= COM17
+include ../../../../../tools/app.mk
 ENV ?= cyd_sd_card_filesystem_touch_smoke
-PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../../tools/platformio.ps1)"
-PYTHON ?= python
-ASSET_TOOLS ?= ../../../../../../brick_framework/tools/assets
 FONT_SOURCE ?= ../../../../esp32s3/panel_480x480/display_asset_stream_api_framebuffer_smoke/assets/Roboto-Regular.ttf
 
 .PHONY: clean compile upload monitor font
 
 clean:
-	$(PIO_RUN) run -e $(ENV) -t clean
+	$(PIO) run -e $(ENV) -t clean
 
 compile: font
-	$(PIO_RUN) run -e $(ENV)
+	$(PIO) run -e $(ENV)
 
 upload: font
-	$(PIO_RUN) run -e $(ENV) -t upload --upload-port $(PORT)
+	$(PIO) run -e $(ENV) -t upload --upload-port $(PORT)
 
 monitor:
 	$(PIO) device monitor -e $(ENV) -p $(PORT)

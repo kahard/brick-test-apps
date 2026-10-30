@@ -1,24 +1,21 @@
-PIO ?= platformio
+include ../../../../tools/app.mk
 ENV ?= esp32s3_480_sd_card_filesystem_touch_smoke
-PIO_RUN = powershell -NoProfile -ExecutionPolicy Bypass -File "$(abspath ../../../../tools/platformio.ps1)"
 
 .PHONY: clean compile upload monitor font
 
-PYTHON ?= python
-ASSET_TOOLS ?= ../../../../../brick_framework/tools/assets
 FONT_SOURCE ?= ../display_asset_stream_api_framebuffer_smoke/assets/Roboto-Regular.ttf
 FONT_OUTPUT ?= src/generated/generated_font.h
 FONT_LARGE_SOURCE ?= $(FONT_SOURCE)
 FONT_LARGE_OUTPUT ?= src/generated/generated_font_large.h
 
 clean:
-	$(PIO_RUN) run -e $(ENV) -t clean
+	$(PIO) run -e $(ENV) -t clean
 
 compile: font
-	$(PIO_RUN) run -e $(ENV)
+	$(PIO) run -e $(ENV)
 
 upload: font
-	$(PIO_RUN) run -e $(ENV) -t upload
+	$(PIO) run -e $(ENV) -t upload
 
 monitor:
 	$(PIO) device monitor -e $(ENV)

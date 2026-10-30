@@ -1,0 +1,6 @@
+# Pinned host tools for building, flashing and formatting the test apps.
+# Install with `make setup`; bump versions deliberately in a separate commit.
+platformio==6.2.0
+pillow==13.0.0
+esptool==4.12.0
+clang-format==17.0.6

@@ -64,7 +64,7 @@ CMake descriptors and sdkconfig.defaults are versioned; generated sdkconfig,
 PlatformIO build results and asset output remain ignored.
 
 The asset projects regenerate with the framework tools before a build, including
-direct `platformio run`. Python with Pillow is required by the image generator.
+direct `platformio run`. Pillow is installed into `.venv` by `make setup`.
 `make assets` regenerates without compiling.
 Output is local to `generated/`; source PNGs belong to each demo.
 Upload includes both firmware and the single BIN at the assets partition's

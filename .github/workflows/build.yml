@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: make setup
+      - run: make format-check
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        apps:
+          - esp32p4/jc1060_7
+          - esp32p4/jc8012_10
+          - esp32s3/panel_480x480
+          - esp32wroom32/cyd
+          - esp8266/esp12f_st7789_240x240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: platformio-${{ matrix.apps }}-${{ hashFiles('requirements.txt', 'platformio-versions.ini') }}
+      - run: make setup
+      - run: make build-all FILTER=${{ matrix.apps }} JOBS=4

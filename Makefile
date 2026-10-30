@@ -1,18 +1,52 @@
-.PHONY: all clean-all build-all setup-vscode format format-check
+include tools/app.mk
+
+# Python used only to create .venv; everything else runs from .venv.
+ifeq ($(OS),Windows_NT)
+BOOTSTRAP_PYTHON ?= py -3
+else
+BOOTSTRAP_PYTHON ?= python3
+endif
+
+.PHONY: all setup setup-packages doctor list build-all clean-all setup-vscode format format-check
 
 all: build-all
 
-clean-all:
-	powershell -NoProfile -ExecutionPolicy Bypass -File tools/clean-all.ps1
+setup:
+	$(BOOTSTRAP_PYTHON) tools/setup.py
+
+setup-packages:
+	$(BOOTSTRAP_PYTHON) tools/setup.py --packages
+
+doctor:
+	$(BOOTSTRAP_PYTHON) tools/doctor.py
+
+list:
+	$(PYTHON) tools/apps.py list
 
 build-all:
-	powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-all.ps1
+	$(PYTHON) tools/apps.py build $(if $(FILTER),--filter $(FILTER),) -j $(JOBS)
+
+clean-all:
+	$(PYTHON) tools/apps.py clean $(if $(FILTER),--filter $(FILTER),)
 
 setup-vscode:
-	powershell -NoProfile -ExecutionPolicy Bypass -File tools/setup-vscode.ps1
+	$(PYTHON) tools/vscode.py
 
 format:
-	bash ./tools/clang.sh format
+	$(PYTHON) tools/format.py format
 
 format-check:
-	bash ./tools/clang.sh format-check
+	$(PYTHON) tools/format.py check
+
+.PHONY: pc pc-test rules
+
+# PC simulator variants of the applications (see pc/CMakeLists.txt).
+pc:
+	$(PYTHON) tools/pc.py build
+
+pc-test:
+	$(PYTHON) tools/pc.py test
+
+# Embedded coding rules report (docs/embedded-coding-rules.md in the framework).
+rules:
+	$(PYTHON) libs/brick/libs/rules/brick_rules.py --summary apps
