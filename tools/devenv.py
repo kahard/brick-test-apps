@@ -39,8 +39,8 @@ MSYS_VARIABLES = (
 
 # Not formatted or searched for projects: third-party ESP-IDF components kept
 # as published (components/, managed_components/) and generated sources
-# (generated/, image arrays in assets/).
-SKIPPED_DIRS = {".git", ".pio", "assets", "components", "managed_components", "generated", "node_modules"}
+# (generated/, image arrays in assets/, LVGL fonts in fonts/).
+SKIPPED_DIRS = {".git", ".pio", "assets", "components", "fonts", "managed_components", "generated", "node_modules"}
 
 
 def venv_bin() -> Path:
