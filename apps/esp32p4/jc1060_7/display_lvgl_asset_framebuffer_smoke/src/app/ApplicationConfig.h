@@ -1,12 +1,16 @@
 #pragma once
+
+namespace lvgl_asset_smoke
+{
 struct Features
 {
     static constexpr bool display   = true;
     static constexpr bool touch     = true;
     static constexpr bool backlight = true;
-    static constexpr bool sd     = false;
+    static constexpr bool sd        = false;
     static constexpr bool logging   = true;
     static constexpr int  log_level = 0;
 };
 static_assert(Features::display && Features::backlight, "This demo requires the display and backlight.");
 static_assert(Features::touch, "This demo requires touch.");
+}  // namespace lvgl_asset_smoke

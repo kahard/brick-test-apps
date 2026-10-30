@@ -1,22 +1,26 @@
 #pragma once
+
 #include "FrameBuffers.h"
-#include "brick/interfaces/time/ITimeProvider.h"
+#include "Services.h"
 #include "brick/lvgl/LvglDisplayAdapter.h"
 
-// The only display-specific LVGL setup: FULL render buffers + MIPI transfer.
-// Unlike the S3 RGB driver, MipiDsiDisplay does not expose IFrameBufferDisplay.
+namespace lvgl_asset_smoke
+{
+/// The only display-specific LVGL setup: FULL render buffers + MIPI transfer.
+/// Unlike the S3 RGB driver, MipiDsiDisplay does not expose IFrameBufferDisplay.
 class LvglRuntime final
 {
 public:
-    LvglRuntime(brick::interfaces::display::IDisplayDevice& display, brick::interfaces::time::ITimeProvider& time);
+    LvglRuntime(DisplayDevice& display, MemoryProvider& memory, TimeProvider& time);
     bool          initialize();
     void          update();
     lv_display_t* display() const { return display_; }
 
 private:
-    FrameBuffers                               buffers_;
+    FrameBuffers                    buffers_;
     brick::lvgl::LvglDisplayAdapter adapter_;
-    brick::interfaces::time::ITimeProvider&    time_;
-    lv_display_t*                              display_       = nullptr;
-    std::uint32_t                              previous_tick_ = 0;
+    TimeProvider&                   time_;
+    lv_display_t*                   display_       = nullptr;
+    std::uint32_t                   previous_tick_ = 0;
 };
+}  // namespace lvgl_asset_smoke

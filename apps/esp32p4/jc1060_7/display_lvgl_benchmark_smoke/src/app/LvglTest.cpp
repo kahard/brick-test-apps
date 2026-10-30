@@ -1,8 +1,10 @@
 #include "LvglTest.h"
 
-LvglTest::LvglTest(brick::interfaces::display::IDisplayDevice& display, brick::interfaces::time::ITimeProvider& time,
-                   brick::interfaces::logging::ILogger& logger)
-    : display_(display), logger_(logger), runtime_(display, time), series_(time, logger)
+namespace lvgl_benchmark_smoke
+{
+LvglTest::LvglTest(const Services& services)
+    : display_(services.display), logger_(services.logger), runtime_(services.display, services.memory, services.time),
+      assets_(services.assets, services.memory), series_(services.time, services.logger)
 {
 }
 
@@ -28,3 +30,4 @@ void LvglTest::update()
     runtime_.update();
     series_.update();
 }
+}  // namespace lvgl_benchmark_smoke

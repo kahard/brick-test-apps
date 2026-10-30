@@ -1,18 +1,18 @@
 #include "Application.h"
 
+namespace lvgl_asset_smoke
+{
+Application::Application(const Services& services) : test_(services)
+{
+}
+
 bool Application::initialize()
 {
-    board_.logger().info("application", "Starting JC1060 7-inch display_lvgl_asset_framebuffer_smoke");
-    if (!board_.begin() || !test_.initialize())
-    {
-        board_.logger().error("application", "Initialization failed: check preceding logs, memory and assets");
-        return false;
-    }
-    board_.logger().info("application", "Demo initialized");
-    return true;
+    return test_.initialize();
 }
+
 void Application::update()
 {
     test_.update();
-    board_.time().delay_ms(1);
 }
+}  // namespace lvgl_asset_smoke

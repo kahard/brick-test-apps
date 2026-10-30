@@ -1,8 +1,9 @@
 #include "LvglRuntime.h"
 
-LvglRuntime::LvglRuntime(brick::interfaces::display::IDisplayDevice& display,
-                         brick::interfaces::time::ITimeProvider&     time)
-    : buffers_(display), adapter_(display), time_(time)
+namespace lvgl_benchmark_smoke
+{
+LvglRuntime::LvglRuntime(DisplayDevice& display, MemoryProvider& memory, TimeProvider& time)
+    : buffers_(display, memory), adapter_(display), time_(time)
 {
 }
 
@@ -25,3 +26,4 @@ void LvglRuntime::update()
     previous_tick_ = now;
     lv_timer_handler();
 }
+}  // namespace lvgl_benchmark_smoke

@@ -1,6 +1,8 @@
 #include "TouchView.h"
 
-TouchView::TouchView(LvglAssets& assets, brick::interfaces::logging::ILogger& logger) : assets_(assets), logger_(logger)
+namespace lvgl_asset_smoke
+{
+TouchView::TouchView(LvglAssets& assets, Logger& logger) : assets_(assets), logger_(logger)
 {
 }
 
@@ -42,3 +44,4 @@ void TouchView::change_image()
     lv_label_set_text_fmt(status_, "Klikniecia: %u", static_cast<unsigned>(clicks_));
     logger_.info("lvgl", "Button clicked count=%u", static_cast<unsigned>(clicks_));
 }
+}  // namespace lvgl_asset_smoke

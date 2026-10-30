@@ -1,8 +1,8 @@
 #include "BenchmarkSeries.h"
 
-BenchmarkSeries::BenchmarkSeries(brick::interfaces::time::ITimeProvider& time,
-                                 brick::interfaces::logging::ILogger&    logger)
-    : time_(time), logger_(logger)
+namespace lvgl_benchmark_smoke
+{
+BenchmarkSeries::BenchmarkSeries(TimeProvider& time, Logger& logger) : time_(time), logger_(logger)
 {
 }
 
@@ -39,10 +39,14 @@ void BenchmarkSeries::update()
     if (++frames_ < 60)
         return;
     const std::uint64_t elapsed = time_.micros() - started_;
-    logger_.info("lvgl_benchmark", "%s FULL frames=%u elapsed=%lluus fps=%.2f", colors_ ? "colors" : "preloaded assets",
-                 static_cast<unsigned>(frames_), static_cast<unsigned long long>(elapsed),
-                 elapsed ? frames_ * 1000000.0 / elapsed : 0.0);
+    // Frames per second with two decimals, in integer arithmetic.
+    const std::uint64_t fps_x100 = elapsed ? frames_ * 100000000ULL / elapsed : 0;
+    logger_.info("lvgl_benchmark", "%s FULL frames=%u elapsed=%lluus fps=%u.%02u",
+                 colors_ ? "colors" : "preloaded assets", static_cast<unsigned>(frames_),
+                 static_cast<unsigned long long>(elapsed), static_cast<unsigned>(fps_x100 / 100),
+                 static_cast<unsigned>(fps_x100 % 100));
     frames_      = 0;
     colors_      = !colors_;
     next_series_ = time_.millis() + 2000;
 }
+}  // namespace lvgl_benchmark_smoke
