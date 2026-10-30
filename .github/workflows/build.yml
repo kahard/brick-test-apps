@@ -45,3 +45,21 @@ jobs:
           key: platformio-${{ matrix.apps }}-${{ hashFiles('requirements.txt', 'platformio-versions.ini') }}
       - run: make setup
       - run: make build-all FILTER=${{ matrix.apps }} JOBS=4
+
+  pc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build libsdl2-dev
+      - run: make setup
+      - run: make pc-test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-screenshots
+          path: build/pc/screenshots/
