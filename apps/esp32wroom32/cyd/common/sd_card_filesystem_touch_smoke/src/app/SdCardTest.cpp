@@ -1,7 +1,5 @@
 #include "SdCardTest.h"
 
-#include <vector>
-
 #include "brick/core/storage/StorageWriteVerify.h"
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -60,8 +58,8 @@ void SdCardTest::refresh_card_status()
     }
     if (!filesystem_.mounted() && filesystem_.mount())
     {
-        const std::vector<std::string> files = filesystem_.list_files(kMountPoint);
-        logger_.info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+        const std::size_t files = filesystem_.list_files(kMountPoint, nullptr, 0);
+        logger_.info(kTag, "Root files: %u", static_cast<unsigned>(files));
         show_status(0x07E0, "SD INSERTED");
     }
 }

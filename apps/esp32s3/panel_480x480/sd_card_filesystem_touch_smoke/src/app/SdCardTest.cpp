@@ -1,7 +1,5 @@
 #include "SdCardTest.h"
 
-#include <vector>
-
 #include "brick/core/storage/StorageWriteVerify.h"
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -44,8 +42,8 @@ bool SdCardTest::initialize()
         show_status(0xF800, "SD MOUNT FAIL");
         return false;
     }
-    const std::vector<std::string> files = services_.sd.list_files(kMountPoint);
-    services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+    const std::size_t files = services_.sd.list_files(kMountPoint, nullptr, 0);
+    services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files));
     const bool verified = write_read_verify();
     show_status(verified ? 0x07E0 : 0xF800, verified ? "SD READY" : "WRITE READ FAIL");
     card_timer_.start(1000);

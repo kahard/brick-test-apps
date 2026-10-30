@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 
 #include "Services.h"
 #include "brick/core/image/AssetRepository.h"
@@ -38,13 +37,13 @@ private:
     public:
         explicit SdSource(RemovableFileSystem& filesystem) : filesystem_(filesystem) {}
         bool begin();
-        void close() { file_.reset(); }
+        void close() { file_.close(); }
         bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
                   std::uint8_t* destination, std::size_t bytes) override;
 
     private:
-        RemovableFileSystem&                               filesystem_;
-        std::unique_ptr<brick::interfaces::storage::IFile> file_;
+        RemovableFileSystem&                   filesystem_;
+        brick::interfaces::storage::FileHandle file_;
     };
 
     bool prepare_ram_copy();

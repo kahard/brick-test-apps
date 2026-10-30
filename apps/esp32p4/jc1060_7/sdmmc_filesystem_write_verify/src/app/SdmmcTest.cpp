@@ -1,7 +1,5 @@
 #include "SdmmcTest.h"
 
-#include <vector>
-
 #include "brick/core/storage/StorageWriteVerify.h"
 #include "generated/generated_font.h"
 #include "generated/generated_font_large.h"
@@ -60,8 +58,8 @@ bool SdmmcTest::initialize()
         touch_timer_.start(1000);
         return true;
     }
-    const std::vector<std::string> files = services_.sd.list_files(kMountPoint);
-    services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+    const std::size_t files = services_.sd.list_files(kMountPoint, nullptr, 0);
+    services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files));
     const bool verified = write_read_verify();
     services_.logger.info(kTag, "%s", verified ? "WRITE READ OK" : "WRITE READ FAIL");
     show_status(verified ? 0x07E0 : 0xF800, verified ? "SDMMC READY" : "WRITE READ FAIL");
@@ -81,8 +79,8 @@ void SdmmcTest::update()
         }
         else if (!services_.sd.mounted() && services_.sd.mount())
         {
-            const std::vector<std::string> files = services_.sd.list_files(kMountPoint);
-            services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files.size()));
+            const std::size_t files = services_.sd.list_files(kMountPoint, nullptr, 0);
+            services_.logger.info(kTag, "Root files: %u", static_cast<unsigned>(files));
             show_status(0x07E0, "SDMMC INSERTED");
         }
     }

@@ -20,7 +20,7 @@ bool AssetSources::RamSource::read(const brick::interfaces::display::AssetDescri
 bool AssetSources::SdSource::begin()
 {
     close();
-    file_ = filesystem_.open("/sdcard/ASSETS.BIN", "rb");
+    filesystem_.open("/sdcard/ASSETS.BIN", "rb", file_);
     // The S3 and LVGL bundles have different sizes. Reject them before
     // displaying even the first frame; this demo requires its own bundle.
     std::uint8_t byte = 0;
