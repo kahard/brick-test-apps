@@ -1,0 +1,1 @@
+brick_app_simulator(esp12f_display_spi_benchmark_smoke DEFINES BRICK_STREAM_STRIPE_HEIGHT=40)

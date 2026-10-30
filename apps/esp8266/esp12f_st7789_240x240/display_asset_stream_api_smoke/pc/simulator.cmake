@@ -1,0 +1,1 @@
+brick_app_simulator(esp12f_display_asset_stream_api_smoke)

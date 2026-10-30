@@ -1,0 +1,18 @@
+// PC simulator entry point: the same application on a simulated ESP-12F
+// ST7789 screen (space = the touch button).
+#include "../src/app/Application.h"
+#include "brick/boards/pc/SimulatorBoard.h"
+
+int main(int argc, char** argv)
+{
+    brick::platform::pc::SimulatorOptions options;
+    if (!brick::platform::pc::SimulatorOptions::parse(argc, argv, options))
+        return 2;
+
+    brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::esp12f_st7789(), options);
+    if (!board.begin())
+        return 1;
+
+    esp12f_st7789_button_smoke::Application application({ board.display(), board.button(), board.time(), board.logger() });
+    return brick::platform::pc::run(application, board.simulator());
+}

@@ -27,6 +27,10 @@ def configure() -> int:
     if (BUILD_DIR / "CMakeCache.txt").exists():
         return 0
     command = ["cmake", "-S", str(SOURCE_DIR), "-B", str(BUILD_DIR), "-DCMAKE_BUILD_TYPE=Debug"]
+    make = shutil.which("make")
+    if make:
+        # The make the other tools use; CMake's own search may find shell wrappers.
+        command.append(f"-DBRICK_MAKE={make}")
     if shutil.which("ninja"):
         command += ["-G", "Ninja"]
     elif os.name == "nt" and shutil.which("mingw32-make"):

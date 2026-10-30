@@ -3,7 +3,7 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-src/generated_assets.h
-src/assets/*.bin
+src/app/generated_assets.h
+src/app/assets/*.bin
 assets/generated
-src/bundle.cpp
+src/app/bundle.cpp
