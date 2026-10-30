@@ -53,12 +53,10 @@ def venv_python() -> Path:
 
 
 def clean_env() -> dict[str, str]:
-    env = {key: value for key, value in os.environ.items() if key not in MSYS_VARIABLES}
-    # Put the virtual environment first so PlatformIO and its scripts find
-    # the pinned Python packages (Pillow, esptool, ...).
-    env["PATH"] = str(venv_bin()) + os.pathsep + env.get("PATH", "")
-    env["VIRTUAL_ENV"] = str(VENV_DIR)
-    return env
+    # The virtual environment is deliberately not put on PATH: its esptool.py
+    # script would shadow the esptool package ESP-IDF runs during a build.
+    # PlatformIO already runs extra scripts with the .venv Python.
+    return {key: value for key, value in os.environ.items() if key not in MSYS_VARIABLES}
 
 
 def require_venv_tool(name: str) -> Path:
