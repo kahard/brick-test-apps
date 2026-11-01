@@ -19,6 +19,10 @@ brick_test_apps/
 └── README.md
 ```
 
+Logic shared by the applications of several boards lives in `apps/shared`
+(for now the network test, `apps/shared/network`); each board still has its
+own application with `src/app`, `src/target` and `pc/`.
+
 Use names in the form:
 
 ```text

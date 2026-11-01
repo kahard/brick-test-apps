@@ -1,0 +1,6 @@
+# CYD (ESP32-2432S028R): 2 MB flash layout of partitions.csv, one large
+# application partition (Wi-Fi makes the image about 1 MB).
+CONFIG_ESPTOOLPY_FLASHSIZE_2MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="2MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"

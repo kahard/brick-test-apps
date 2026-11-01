@@ -22,6 +22,13 @@
 # JC8012 build descriptions are maintained project sources.
 !apps/esp32p4/jc8012_10/**/CMakeLists.txt
 
+# CYD network test build descriptions are maintained project sources.
+!apps/esp32wroom32/cyd/common/network_*/CMakeLists.txt
+!apps/esp32wroom32/cyd/common/network_*/src/CMakeLists.txt
+
+# Wi-Fi credentials compiled into the network tests (tools/wifi_credentials.py).
+/wifi-credentials.txt
+
 # PC simulator build description and output.
 !/pc/CMakeLists.txt
 /build/
