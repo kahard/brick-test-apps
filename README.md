@@ -117,8 +117,10 @@ make rules-check                             # the same, failing on any finding 
 ```
 
 The simulator opens an SDL2 window when SDL2 is installed (mouse = touch,
-space = button); `--headless --frames N --touch X,Y@MS --screenshot F.ppm`
-runs it without a window. The reference application is
+space = button). `--web` shows the screen in a web browser instead
+(http://localhost:8080/, mouse or finger = touch; add `--web-lan` to open it
+from a phone on the same network). `--headless --frames N --touch X,Y@MS
+--screenshot F.ppm` runs it without a window. The reference application is
 `apps/esp32wroom32/cyd/common/display_touch_smoke`.
 
 Each application keeps its own `Makefile` (`make compile`, `make upload`,
