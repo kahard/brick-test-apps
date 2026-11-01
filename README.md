@@ -116,14 +116,18 @@ make rules                                   # embedded coding rules report
 make rules-check                             # the same, failing on any finding (CI)
 ```
 
-The simulator opens an SDL2 window when SDL2 is installed (mouse = touch,
-space = button). `--web` shows the screen in a web browser instead
-(http://localhost:8080/, mouse or finger = touch; add `--web-lan` to open it
-from a phone on the same network). `--headless --frames N --touch X,Y@MS
---screenshot F.ppm` runs it without a window. The reference application is
+In an application's directory, `make sim` builds and opens its simulator in
+an SDL2 window (mouse = touch, space = button) and `make sim-web` shows it in a
+web browser instead, at http://localhost:8080/ (`WEB_PORT=...` to change it).
+`SIM_ARGS` passes more simulator options, e.g. `make sim-web SIM_ARGS=--web-lan`
+to open the screen from a phone on the same network, or `SIM_ARGS=--offline`.
+Ctrl+C stops it. Without SDL2 only `make sim-web` shows the screen.
+`--headless --frames N --touch X,Y@MS --screenshot F.ppm` runs a simulator
+without a window, as the smoke tests do. The reference application is
 `apps/esp32wroom32/cyd/common/display_touch_smoke`.
 
 Each application keeps its own `Makefile` (`make compile`, `make upload`,
+`make sim`, `make sim-web`,
 `make monitor`, `PORT=...`). They include `tools/app.mk`, which runs PlatformIO
 and Python from `.venv` through `tools/pio.py`. The tools are plain Python, so
 the same commands work on Windows, Linux and macOS.

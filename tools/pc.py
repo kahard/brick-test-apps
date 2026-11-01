@@ -5,7 +5,12 @@ Examples:
   python tools/pc.py build                 # configure + build every simulator
   python tools/pc.py test                  # build + run the headless smoke tests
   python tools/pc.py run cyd_display_touch_smoke [simulator options...]
+  python tools/pc.py app [simulator options...]   # the application in the current directory
   python tools/pc.py list
+
+`app` builds only the simulator of the application in the current directory
+(the name in its pc/simulator.cmake) and runs it; the application Makefiles
+use it for `make sim` (SDL window) and `make sim-web` (web browser).
 
 Requires CMake and a C++17 compiler; SDL2 (optional) enables the window.
 """
@@ -13,14 +18,17 @@ Requires CMake and a C++17 compiler; SDL2 (optional) enables the window.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 import devenv
 
 SOURCE_DIR = devenv.REPO_ROOT / "pc"
 BUILD_DIR = devenv.REPO_ROOT / "build" / "pc"
+SIMULATOR_NAME = re.compile(r"brick_app_simulator\(\s*([A-Za-z0-9_]+)")
 
 
 def configure() -> int:
@@ -38,16 +46,37 @@ def configure() -> int:
     return subprocess.call(command)
 
 
-def build() -> int:
-    return configure() or subprocess.call(["cmake", "--build", str(BUILD_DIR), "--parallel"])
+def build(target: str | None = None) -> int:
+    command = ["cmake", "--build", str(BUILD_DIR), "--parallel"]
+    if target:
+        command += ["--target", target]
+    return configure() or subprocess.call(command)
 
 
 def executable(name: str) -> str:
     return str(BUILD_DIR / (name + (".exe" if os.name == "nt" else "")))
 
 
+def simulator_of(app_dir: Path) -> str:
+    """The simulator target an application declares in pc/simulator.cmake."""
+    description = app_dir / "pc" / "simulator.cmake"
+    if not description.is_file():
+        sys.exit(f"error: {app_dir} has no pc/simulator.cmake")
+    match = SIMULATOR_NAME.search(description.read_text(encoding="utf-8"))
+    if match is None:
+        sys.exit(f"error: no brick_app_simulator() in {description}")
+    return match.group(1)
+
+
+def run(name: str, options: list[str]) -> int:
+    try:
+        return subprocess.call([executable(name), *options])
+    except KeyboardInterrupt:  # Ctrl+C ends an interactive run
+        return 0
+
+
 def main() -> int:
-    if len(sys.argv) < 2 or sys.argv[1] not in ("build", "test", "run", "list"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("build", "test", "run", "app", "list"):
         print(__doc__)
         return 2
     command = sys.argv[1]
@@ -57,6 +86,9 @@ def main() -> int:
         if configure() != 0:
             return 1
         return subprocess.call(["ctest", "--test-dir", str(BUILD_DIR), "-N"])
+    if command == "app":
+        name = simulator_of(Path.cwd())
+        return build(name) or run(name, sys.argv[2:])
     if build() != 0:
         return 1
     if command == "test":
@@ -64,7 +96,7 @@ def main() -> int:
     if command == "run":
         if len(sys.argv) < 3:
             sys.exit("usage: python tools/pc.py run <simulator> [options...]")
-        return subprocess.call([executable(sys.argv[2]), *sys.argv[3:]])
+        return run(sys.argv[2], sys.argv[3:])
     return 0
 
 

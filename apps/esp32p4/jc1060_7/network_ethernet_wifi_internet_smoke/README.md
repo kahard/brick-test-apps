@@ -16,6 +16,7 @@ Credentials come from `BRICK_WIFI_SSID` / `BRICK_WIFI_PASSWORD` or from
 `wifi-credentials.txt` in the repository root; without them only the hotspot
 `BRICK-JC1060` (password `brick-setup`) runs.
 
-PC simulator (from the repository root: `make pc`, then run the executable):
-it joins the simulated "BRICK-LAB", `--wifi SSID:PASS:RSSI` changes the
-networks in range, `--offline` cuts the internet.
+PC simulator: `make sim` (SDL window) or `make sim-web` (web browser,
+http://localhost:8080/). It joins the simulated "BRICK-LAB";
+`SIM_ARGS="--wifi SSID:PASS:RSSI"` changes the networks in range,
+`SIM_ARGS=--offline` cuts the internet.
