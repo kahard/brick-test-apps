@@ -14,7 +14,7 @@ extern "C" void app_main()
     using namespace display_touch_smoke;
     static Board board;
     board.logger().info("brick_display_touch_smoke", "Starting JC1060 display/touch smoke test");
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_display_touch_smoke", "JC1060 board initialization failed");
         return;
@@ -23,8 +23,11 @@ extern "C" void app_main()
     board.time().delay_ms(2000);
 
     static Application application({ board.display(), board.touch(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_display_touch_smoke", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

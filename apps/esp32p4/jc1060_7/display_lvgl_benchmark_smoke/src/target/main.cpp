@@ -19,7 +19,7 @@ extern "C" void app_main()
     static brick::platform::esp32::PartitionAssetSource flash_assets{ "assets" };
     board.logger().info("application", "Starting JC1060 7-inch display_lvgl_benchmark_smoke");
     static Application application({ board.display(), flash_assets, board.memory(), board.time(), board.logger() });
-    if (!board.begin() || !flash_assets.begin() || !application.initialize())
+    if (!is_ok(board.begin()) || !is_ok(flash_assets.begin()) || !is_ok(application.initialize()))
     {
         board.logger().error("application", "Initialization failed: check preceding logs, memory and assets");
         return;

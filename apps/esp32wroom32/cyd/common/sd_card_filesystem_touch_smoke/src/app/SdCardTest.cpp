@@ -31,8 +31,11 @@ void SdCardTest::clear_screen()
         const std::int32_t                   height = y + kStatusHeight <= 240 ? kStatusHeight : 240 - y;
         brick::core::display::Screen::Canvas canvas =
             screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, y, 320, height }, canvas_pixels_);
-        if (canvas.valid())
-            canvas.clear(0x0000).present();
+        if (const Status status = canvas.clear(0x0000).present(); !is_ok(status))
+        {
+            logger_.error(kTag, "Screen clear failed: %s", to_string(status));
+            return;
+        }
     }
 }
 
@@ -40,15 +43,16 @@ void SdCardTest::show_status(std::uint16_t color, const char* message)
 {
     brick::core::display::Screen::Canvas canvas =
         screen_.create_canvas(brick::interfaces::display::DisplayRect{ 0, 0, 320, kStatusHeight }, canvas_pixels_);
-    if (!canvas.valid())
-        return;
-    canvas.clear(0x0000)
-        .text(6, 5, message, brick_roboto_16_chars, brick_roboto_16_glyphs, brick_roboto_16_count, color)
-        .text(6, 31, "FONT 22 PX", brick_roboto_22_chars, brick_roboto_22_glyphs, brick_roboto_22_count, color)
-        .present();
+    const Status status =
+        canvas.clear(0x0000)
+            .text(6, 5, message, brick_roboto_16_chars, brick_roboto_16_glyphs, brick_roboto_16_count, color)
+            .text(6, 31, "FONT 22 PX", brick_roboto_22_chars, brick_roboto_22_glyphs, brick_roboto_22_count, color)
+            .present();
+    if (!is_ok(status))
+        logger_.error(kTag, "Status canvas failed: %s", to_string(status));
 }
 
-bool SdCardTest::write_read_verify()
+Status SdCardTest::write_read_verify()
 {
     return brick::core::storage::write_verify(filesystem_, kTestPath, kPattern, sizeof(kPattern) - 1U);
 }
@@ -61,7 +65,7 @@ void SdCardTest::refresh_card_status()
         show_status(0xF800, "SD REMOVED");
         return;
     }
-    if (!filesystem_.mounted() && filesystem_.mount())
+    if (!filesystem_.mounted() && is_ok(filesystem_.mount()))
     {
         const std::size_t files = filesystem_.list_files(kMountPoint, nullptr, 0);
         logger_.info(kTag, "Root files: %u", static_cast<unsigned>(files));
@@ -69,7 +73,7 @@ void SdCardTest::refresh_card_status()
     }
 }
 
-bool SdCardTest::initialize()
+Status SdCardTest::initialize()
 {
     logger_.info(kTag, "CYD SD card filesystem and font smoke");
     clear_screen();
@@ -77,13 +81,13 @@ bool SdCardTest::initialize()
     refresh_card_status();
     if (filesystem_.mounted())
     {
-        const bool verified = write_read_verify();
+        const bool verified = is_ok(write_read_verify());
         show_status(verified ? 0x07E0 : 0xF800, verified ? "SD READY" : "WRITE READ FAIL");
     }
     else
         show_status(0xF800, "INSERT SD CARD");
     card_timer_.start(1000);
-    return true;
+    return Status::ok;
 }
 
 void SdCardTest::update()
@@ -95,10 +99,10 @@ void SdCardTest::update()
     }
 
     std::size_t count      = 0;
-    const bool  touch_down = touch_.read(points_.data(), points_.size(), count) && count > 0;
+    const bool  touch_down = is_ok(touch_.read(points_.data(), points_.size(), count)) && count > 0;
     if (touch_down && !touch_was_down_)
     {
-        const bool verified = filesystem_.mounted() && write_read_verify();
+        const bool verified = filesystem_.mounted() && is_ok(write_read_verify());
         show_status(verified ? 0x07E0 : 0xF800, verified ? "WRITE READ OK" : "INSERT SD CARD");
     }
     touch_was_down_ = touch_down;

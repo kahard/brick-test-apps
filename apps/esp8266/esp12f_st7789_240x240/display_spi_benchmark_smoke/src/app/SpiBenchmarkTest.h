@@ -1,4 +1,5 @@
 #pragma once
+#include "Services.h"
 #include "Types.h"
 #include "assets/joy_tears_240_rgb565.h"
 #include <array>
@@ -8,11 +9,11 @@ class SpiBenchmarkTest final
 {
 public:
     SpiBenchmarkTest(DisplayDevice&, TimeProvider&, Logger&);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool                                                             stream(const brick_image_asset_t&);
+    Status                                                           stream(const brick_image_asset_t&);
     DisplayDevice&                                                   display_;
     TimeProvider&                                                    time_;
     Logger&                                                          logger_;

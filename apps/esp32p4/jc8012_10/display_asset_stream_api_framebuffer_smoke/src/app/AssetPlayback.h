@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "AssetModeController.h"
+#include "Services.h"
 
 namespace asset_stream_smoke
 {
@@ -15,9 +16,9 @@ class AssetPlayback final
 public:
     AssetPlayback(AssetSources& sources, FramebufferPresenter& presenter);
 
-    bool initialize();
-    bool advance_mode();
-    bool present_next();
+    Status initialize();
+    Status advance_mode();
+    Status present_next();
 
     std::uint8_t storage() const;
     bool         backgrounds() const;

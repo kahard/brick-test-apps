@@ -17,20 +17,23 @@ LvglDemo::LvglDemo(const Services& services)
 {
 }
 
-bool LvglDemo::load_selected_asset()
+Status LvglDemo::load_selected_asset()
 {
     const generated_assets::Id id =
         selected_ == 0U ? generated_assets::Id::joy_tears : generated_assets::Id::sweat_smile;
     const brick::interfaces::display::AssetDescriptor* asset = generated_assets::get(id);
-    return asset != nullptr && asset->size == LvglBuffers::image_bytes()
-           && assets_.read(*asset, 0, buffers_.image(), asset->size);
+    if (asset == nullptr)
+        return Status::not_found;
+    if (asset->size != LvglBuffers::image_bytes())
+        return Status::no_memory;
+    return assets_.read(*asset, 0, buffers_.image(), asset->size);
 }
 
 void LvglDemo::on_button_clicked(lv_event_t* event)
 {
     LvglDemo* demo = static_cast<LvglDemo*>(lv_event_get_user_data(event));
     demo->selected_ ^= 1U;
-    if (!demo->load_selected_asset())
+    if (!is_ok(demo->load_selected_asset()))
     {
         demo->logger_.error(kTag, "Unable to load selected asset");
         return;
@@ -73,13 +76,13 @@ void LvglDemo::create_widgets()
     lv_obj_align(status_, LV_ALIGN_BOTTOM_MID, 0, -88);
 }
 
-bool LvglDemo::initialize()
+Status LvglDemo::initialize()
 {
     logger_.info(kTag, "Initializing CYD no-PSRAM LVGL partial-buffer asset demo");
-    if (!load_selected_asset())
+    if (!is_ok(load_selected_asset()))
     {
         logger_.error(kTag, "Assets partition unavailable");
-        return false;
+        return Status::error;
     }
 
     image_descriptor_.header.cf     = LV_COLOR_FORMAT_RGB565;
@@ -96,13 +99,13 @@ bool LvglDemo::initialize()
         || touch_adapter_.create() == nullptr)
     {
         logger_.error(kTag, "Unable to initialize LVGL adapters");
-        return false;
+        return Status::error;
     }
 
     create_widgets();
     previous_tick_ = time_.millis();
     logger_.info(kTag, "LVGL partial-buffer demo ready");
-    return true;
+    return Status::ok;
 }
 
 void LvglDemo::update()

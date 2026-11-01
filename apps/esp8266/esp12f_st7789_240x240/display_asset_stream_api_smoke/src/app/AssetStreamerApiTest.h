@@ -1,4 +1,5 @@
 #pragma once
+#include "Services.h"
 #include "Types.h"
 #include "brick/core/image/AssetStreamer.h"
 #include <array>
@@ -7,17 +8,17 @@ namespace esp12f_st7789_asset_stream_api_smoke
 class SolidColorReader final : public brick::interfaces::display::IAssetReader
 {
 public:
-    bool read(const brick::interfaces::display::ImageAsset&, std::size_t, std::uint8_t*, std::size_t) override;
+    Status read(const brick::interfaces::display::ImageAsset&, std::size_t, std::uint8_t*, std::size_t) override;
 };
 class AssetStreamerApiTest final
 {
 public:
     AssetStreamerApiTest(DisplayDevice&, TimeProvider&, Logger&);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool                                      stream_color(const std::uint8_t* color, const char* name);
+    Status                                    stream_color(const std::uint8_t* color, const char* name);
     DisplayDevice&                            display_;
     TimeProvider&                             time_;
     Logger&                                   logger_;

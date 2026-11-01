@@ -16,13 +16,13 @@ class FramebufferTest final
 public:
     explicit FramebufferTest(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool present(const std::uint8_t* framebuffer, std::uint64_t& transfer_us);
-    void fill_frame(std::uint8_t* framebuffer, std::uint16_t color);
-    void present_next_color();
+    Status present(const std::uint8_t* framebuffer, std::uint64_t& transfer_us);
+    void   fill_frame(std::uint8_t* framebuffer, std::uint16_t color);
+    void   present_next_color();
 
     DisplayDevice&                   display_;
     TimeProvider&                    time_;

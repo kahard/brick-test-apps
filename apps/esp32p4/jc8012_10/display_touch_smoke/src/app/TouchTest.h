@@ -14,8 +14,8 @@ class TouchTest final
 public:
     explicit TouchTest(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     Touchscreen&              touch_;

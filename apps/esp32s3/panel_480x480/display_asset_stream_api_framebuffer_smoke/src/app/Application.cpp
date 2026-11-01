@@ -9,7 +9,7 @@ Application::Application(const Services& services)
 {
 }
 
-bool Application::initialize()
+Status Application::initialize()
 {
     return test_.initialize();
 }

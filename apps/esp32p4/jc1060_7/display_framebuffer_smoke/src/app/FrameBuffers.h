@@ -16,9 +16,9 @@ class FrameBuffers final
 {
 public:
     FrameBuffers(DisplayDevice& display, MemoryProvider& memory);
-    bool                                            initialize();
+    Status                                          initialize();
     brick::interfaces::display::WritablePixelBuffer buffer(std::uint8_t index);
-    bool                                            present(std::uint8_t index);
+    Status                                          present(std::uint8_t index);
     std::size_t                                     size_bytes() const { return pixels_[0].size(); }
 
 private:

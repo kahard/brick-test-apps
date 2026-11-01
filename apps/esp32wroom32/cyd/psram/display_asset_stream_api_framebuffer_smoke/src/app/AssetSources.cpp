@@ -7,39 +7,43 @@
 
 namespace cyd_asset_stream_smoke
 {
-bool AssetSources::RamSource::read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
-                                   std::uint8_t* destination, std::size_t bytes)
+Status AssetSources::RamSource::read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
+                                     std::uint8_t* destination, std::size_t bytes)
 {
     if (data_ == nullptr || destination == nullptr || offset > asset.size || bytes > asset.size - offset
         || asset.offset > generated_assets::bundle_size || asset.size > generated_assets::bundle_size - asset.offset)
-        return false;
+        return Status::error;
     std::memcpy(destination, data_ + asset.offset + offset, bytes);
-    return true;
+    return Status::ok;
 }
 
-bool AssetSources::SdSource::begin()
+Status AssetSources::SdSource::begin()
 {
     close();
-    filesystem_.open("/sdcard/ASSETS.BIN", "rb", file_);
+    if (const Status status = filesystem_.open("/sdcard/ASSETS.BIN", "rb", file_); !is_ok(status))
+        return status;
     // The S3 and LVGL bundles have different sizes. Reject them before
     // displaying even the first frame; this demo requires its own bundle.
     std::uint8_t byte = 0;
-    if (!file_ || !file_->seek(static_cast<long>(generated_assets::bundle_size - 1), SEEK_SET)
+    if (!is_ok(file_->seek(static_cast<long>(generated_assets::bundle_size - 1), SEEK_SET))
         || file_->read(&byte, 1, 1) != 1 || file_->read(&byte, 1, 1) != 0)
     {
         close();
-        return false;
+        return Status::error;
     }
-    return true;
+    return Status::ok;
 }
 
-bool AssetSources::SdSource::read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
-                                  std::uint8_t* destination, std::size_t bytes)
+Status AssetSources::SdSource::read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
+                                    std::uint8_t* destination, std::size_t bytes)
 {
-    if (!file_ || destination == nullptr || offset > asset.size || bytes > asset.size - offset
-        || !file_->seek(static_cast<long>(asset.offset + offset), SEEK_SET))
-        return false;
-    return file_->read(destination, 1, bytes) == bytes;
+    if (!file_)
+        return Status::not_ready;
+    if (destination == nullptr || offset > asset.size || bytes > asset.size - offset)
+        return Status::invalid_argument;
+    if (const Status status = file_->seek(static_cast<long>(asset.offset + offset), SEEK_SET); !is_ok(status))
+        return status;
+    return file_->read(destination, 1, bytes) == bytes ? Status::ok : Status::error;
 }
 
 AssetSources::AssetSources(AssetSource& flash, RemovableFileSystem& sd, MemoryProvider& memory)
@@ -47,21 +51,21 @@ AssetSources::AssetSources(AssetSource& flash, RemovableFileSystem& sd, MemoryPr
 {
 }
 
-bool AssetSources::prepare_ram_copy()
+Status AssetSources::prepare_ram_copy()
 {
     if (ram_ready_)
-        return true;
-    if (!ram_bundle_.allocate(generated_assets::bundle_size, brick::interfaces::memory::MemoryKind::external))
-        return false;
+        return Status::ok;
+    if (!is_ok(ram_bundle_.allocate(generated_assets::bundle_size, brick::interfaces::memory::MemoryKind::external)))
+        return Status::error;
     for (std::size_t index = 0; index < generated_assets::entry_count; ++index)
     {
         const brick::interfaces::display::AssetDescriptor& asset = generated_assets::entries[index];
-        if (!flash_.read(asset, 0, ram_bundle_.data() + asset.offset, asset.size))
-            return false;
+        if (!is_ok(flash_.read(asset, 0, ram_bundle_.data() + asset.offset, asset.size)))
+            return Status::error;
     }
     ram_source_.set_data(ram_bundle_.data());
     ram_ready_ = true;
-    return true;
+    return Status::ok;
 }
 
 void AssetSources::close_sd()
@@ -78,11 +82,11 @@ AssetSource* AssetSources::select(std::uint8_t storage)
         return nullptr;
     if (storage != 2 && sd_ready_)
         close_sd();
-    if (storage == 1 && !prepare_ram_copy())
+    if (storage == 1 && !is_ok(prepare_ram_copy()))
         return nullptr;
     if (storage == 2 && !sd_ready_)
     {
-        if (!sd_.mount() || !sd_source_.begin())
+        if (!is_ok(sd_.mount()) || !is_ok(sd_source_.begin()))
         {
             close_sd();
             return nullptr;

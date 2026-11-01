@@ -13,12 +13,15 @@ extern "C" void app_main()
 {
     using namespace cyd_sd_card_filesystem_touch_smoke;
     static Board board;
-    if (!board.begin())
+    if (!is_ok(board.begin()))
         return;
 
     static Application application({ board.display(), board.sd(), board.touch(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("application", "Application initialization failed: %s", to_string(status));
         return;
+    }
     // The application's update() does not block; the loop paces it.
     while (true)
     {

@@ -16,7 +16,7 @@ FramebufferPresenter::FramebufferPresenter(brick::interfaces::display::IDisplayD
 {
 }
 
-bool FramebufferPresenter::present()
+Status FramebufferPresenter::present()
 {
     const brick::interfaces::display::WritablePixelBuffer source = buffers_.back_buffer();
     for (std::uint16_t y = 0; y < kHeight; y += kStripeHeight)
@@ -25,12 +25,12 @@ bool FramebufferPresenter::present()
             kHeight - y < kStripeHeight ? static_cast<std::uint16_t>(kHeight - y) : kStripeHeight;
         const std::size_t bytes = static_cast<std::size_t>(height) * kWidth * 2U;
         std::memcpy(buffers_.scratch(), source.data + static_cast<std::size_t>(y) * source.stride_bytes, bytes);
-        if (!display_.draw_buffer({ 0, y, kWidth, height }, buffers_.stripe_buffer(height)))
-            return false;
+        if (!is_ok(display_.draw_buffer({ 0, y, kWidth, height }, buffers_.stripe_buffer(height))))
+            return Status::error;
     }
-    if (!display_.wait_for_transfer_complete(1000))
-        return false;
+    if (!is_ok(display_.wait_for_transfer_complete(1000)))
+        return Status::error;
     buffers_.swap();
-    return true;
+    return Status::ok;
 }
 }  // namespace cyd_asset_stream_smoke

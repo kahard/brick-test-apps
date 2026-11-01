@@ -19,7 +19,7 @@ extern "C" void app_main()
     board.logger().info(kTag, "Starting partition AssetStreamer framebuffer test");
     static Application application({ board.display(), board.display(), board.touch(), flash_assets, board.sd(),
                                      board.memory(), board.time(), board.logger() });
-    if (!board.begin() || !flash_assets.begin() || !application.initialize())
+    if (!is_ok(board.begin()) || !is_ok(flash_assets.begin()) || !is_ok(application.initialize()))
     {
         board.logger().error(kTag, "Initialization failed: check preceding logs, memory and assets");
         return;

@@ -13,7 +13,7 @@ bool TouchInput::pressed()
     brick::interfaces::display::TouchPoint point{};
     std::size_t                            count = 0;
     // No new sample is not a release. Preserve the edge detector state.
-    if (!touch_.read(&point, 1, count))
+    if (!is_ok(touch_.read(&point, 1, count)))
         return false;
     const bool is_down = count > 0 && point.state != brick::interfaces::display::TouchState::released;
     const bool pressed = is_down && !was_down_;

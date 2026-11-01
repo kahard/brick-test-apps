@@ -11,12 +11,12 @@ class SdCardTest final
 {
 public:
     explicit SdCardTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    void show_status(std::uint16_t color, const char* message);
-    bool write_read_verify();
+    void   show_status(std::uint16_t color, const char* message);
+    Status write_read_verify();
 
     Services                     services_;
     brick::core::display::Screen screen_;

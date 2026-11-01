@@ -18,10 +18,12 @@ class TouchTest final
 public:
     TouchTest(DisplayDevice& display, Touchscreen& touch, TimeProvider& time, Logger& logger);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
+    void draw_marker(bool active);
+
     Touchscreen&                 touch_;
     Logger&                      logger_;
     brick::core::display::Screen screen_;

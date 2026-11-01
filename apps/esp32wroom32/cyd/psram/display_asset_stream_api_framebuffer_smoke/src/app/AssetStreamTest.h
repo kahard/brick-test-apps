@@ -15,8 +15,8 @@ class AssetStreamTest final
 {
 public:
     explicit AssetStreamTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     Logger&              logger_;

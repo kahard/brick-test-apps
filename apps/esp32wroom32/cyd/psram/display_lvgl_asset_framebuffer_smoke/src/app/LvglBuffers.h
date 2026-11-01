@@ -13,7 +13,7 @@ class LvglBuffers final
 {
 public:
     explicit LvglBuffers(MemoryProvider& memory);
-    bool          initialize();
+    Status        initialize();
     void*         first() const { return first_.data(); }
     void*         second() const { return second_.data(); }
     std::uint8_t* image() const { return image_.data(); }

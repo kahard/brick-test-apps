@@ -7,23 +7,29 @@ FramebufferPresenter::FramebufferPresenter(DisplayDevice& display, FrameBufferDi
 {
 }
 
-bool FramebufferPresenter::initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source)
+Status FramebufferPresenter::initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source)
 {
-    if (frame_buffers_.frame_buffer_count() != 2 || !frame_buffers_.get_frame_buffer(0, buffers_[0])
-        || !frame_buffers_.get_frame_buffer(1, buffers_[1]))
-        return false;
-    return streamer_.stream_to_buffer(asset, source, buffers_[0], scratch_.data(), scratch_.size())
-           && streamer_.stream_to_buffer(asset, source, buffers_[1], scratch_.data(), scratch_.size())
-           && frame_buffers_.present_frame_buffer(0);
+    if (frame_buffers_.frame_buffer_count() != 2)
+        return Status::not_supported;
+    for (std::uint8_t index = 0; index < 2; ++index)
+    {
+        if (const Status status = frame_buffers_.get_frame_buffer(index, buffers_[index]); !is_ok(status))
+            return status;
+        if (const Status status =
+                streamer_.stream_to_buffer(asset, source, buffers_[index], scratch_.data(), scratch_.size());
+            !is_ok(status))
+            return status;
+    }
+    return frame_buffers_.present_frame_buffer(0);
 }
 
-bool FramebufferPresenter::present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source)
+Status FramebufferPresenter::present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source)
 {
     const std::uint8_t back = active_ ^ 1U;
-    if (!streamer_.stream_to_buffer(asset, source, buffers_[back], scratch_.data(), scratch_.size())
-        || !display_.wait_for_vsync(100) || !frame_buffers_.present_frame_buffer(back))
-        return false;
+    if (!is_ok(streamer_.stream_to_buffer(asset, source, buffers_[back], scratch_.data(), scratch_.size()))
+        || !is_ok(display_.wait_for_vsync(100)) || !is_ok(frame_buffers_.present_frame_buffer(back)))
+        return Status::error;
     active_ = back;
-    return true;
+    return Status::ok;
 }
 }  // namespace asset_stream_smoke

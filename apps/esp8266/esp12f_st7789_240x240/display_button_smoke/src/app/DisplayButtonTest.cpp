@@ -17,15 +17,15 @@ DisplayButtonTest::DisplayButtonTest(DisplayDevice& display, Button& button, Tim
 {
 }
 
-bool DisplayButtonTest::initialize()
+Status DisplayButtonTest::initialize()
 {
-    if (!draw_pattern())
-        return false;
+    if (!is_ok(draw_pattern()))
+        return Status::error;
     last_pressed_ = button_.is_pressed();
-    if (!draw_button_state(last_pressed_))
-        return false;
+    if (!is_ok(draw_button_state(last_pressed_)))
+        return Status::error;
     logger_.info("button_smoke", "ready; GPIO4 pressed=%u", last_pressed_ ? 1U : 0U);
-    return true;
+    return Status::ok;
 }
 
 void DisplayButtonTest::update()
@@ -38,11 +38,11 @@ void DisplayButtonTest::update()
     if (pressed == last_pressed_)
         return;
     last_pressed_ = pressed;
-    if (draw_button_state(pressed))
+    if (is_ok(draw_button_state(pressed)))
         logger_.info("button_smoke", "GPIO4 %s", pressed ? "pressed" : "released");
 }
 
-bool DisplayButtonTest::draw_rows(std::uint16_t y, std::uint16_t height, std::uint16_t color)
+Status DisplayButtonTest::draw_rows(std::uint16_t y, std::uint16_t height, std::uint16_t color)
 {
     for (std::size_t index = 0; index < static_cast<std::size_t>(kWidth) * height; ++index)
     {
@@ -59,16 +59,16 @@ bool DisplayButtonTest::draw_rows(std::uint16_t y, std::uint16_t height, std::ui
     return display_.draw_buffer({ 0, y, kWidth, height }, buffer);
 }
 
-bool DisplayButtonTest::draw_pattern()
+Status DisplayButtonTest::draw_pattern()
 {
     constexpr std::array<std::uint16_t, 6> colors{ 0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF };
     for (std::uint16_t index = 0; index < colors.size(); ++index)
-        if (!draw_rows(index * kStripeHeight, kStripeHeight, colors[index]))
-            return false;
-    return true;
+        if (!is_ok(draw_rows(index * kStripeHeight, kStripeHeight, colors[index])))
+            return Status::error;
+    return Status::ok;
 }
 
-bool DisplayButtonTest::draw_button_state(bool pressed)
+Status DisplayButtonTest::draw_button_state(bool pressed)
 {
     return draw_rows(kWidth - kStatusHeight, kStatusHeight, pressed ? 0x07E0 : 0x4208);
 }

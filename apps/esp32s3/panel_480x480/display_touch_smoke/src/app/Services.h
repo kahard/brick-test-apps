@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/logging/ILogger.h"
@@ -7,6 +8,7 @@
 
 namespace display_touch_smoke
 {
+using Status        = brick::Status;
 using DisplayDevice = brick::interfaces::display::IDisplayDevice;
 using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TimeProvider  = brick::interfaces::time::ITimeProvider;

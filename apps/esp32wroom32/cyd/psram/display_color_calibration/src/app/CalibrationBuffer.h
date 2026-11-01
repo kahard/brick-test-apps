@@ -15,7 +15,7 @@ class CalibrationBuffer final
 public:
     explicit CalibrationBuffer(MemoryProvider& memory) : block_(memory) {}
 
-    bool           initialize();
+    Status         initialize();
     std::uint16_t* pixels() const;
 
     static constexpr std::uint16_t width() { return kWidth; }

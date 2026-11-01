@@ -14,14 +14,17 @@ extern "C" void app_main()
     using namespace lvgl_framebuffer_touch_smoke;
     static Board board{ Board::double_buffered_config() };
     board.logger().info("brick_st7701s_lvgl_fb", "Starting ESP32-S3 ST7701S LVGL framebuffer + GT911 smoke test");
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_st7701s_lvgl_fb", "Board initialization failed");
         return;
     }
     static Application application({ board.display(), board.display(), board.touch(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_st7701s_lvgl_fb", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

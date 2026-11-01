@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/logging/ILogger.h"
@@ -8,6 +9,7 @@
 
 namespace cyd_sd_card_filesystem_touch_smoke
 {
+using Status        = brick::Status;
 using DisplayDevice = brick::interfaces::display::IDisplayDevice;
 using SdCard        = brick::interfaces::storage::IRemovableFileSystem;
 using Touchscreen   = brick::interfaces::display::ITouchscreen;

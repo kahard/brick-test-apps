@@ -14,8 +14,8 @@ class FramebufferPresenter final
 {
 public:
     FramebufferPresenter(DisplayDevice& display, FrameBufferDisplay& frame_buffers);
-    bool initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
-    bool present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
+    Status initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
+    Status present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
 
 private:
     static constexpr std::size_t kScratchBytes = 480U * 20U * 2U;

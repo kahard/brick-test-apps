@@ -7,13 +7,13 @@ AssetStreamTest::AssetStreamTest(AssetPlayback& playback, Touchscreen& touch, Ti
 {
 }
 
-bool AssetStreamTest::initialize()
+Status AssetStreamTest::initialize()
 {
-    if (!playback_.initialize())
-        return false;
+    if (!is_ok(playback_.initialize()))
+        return Status::error;
     log_mode();
     benchmark_.reset();
-    return true;
+    return Status::ok;
 }
 
 void AssetStreamTest::log_mode()
@@ -29,13 +29,13 @@ void AssetStreamTest::update()
         return;
     if (touch_.pressed())
     {
-        if (!playback_.advance_mode())
+        if (!is_ok(playback_.advance_mode()))
             logger_.warning("assets", "Requested source unavailable; falling back to flash");
         log_mode();
         benchmark_.reset();
     }
     const std::uint8_t previous_storage = playback_.storage();
-    if (!playback_.present_next())
+    if (!is_ok(playback_.present_next()))
     {
         failed_ = true;
         logger_.error("assets", "Asset read or display transfer failed");

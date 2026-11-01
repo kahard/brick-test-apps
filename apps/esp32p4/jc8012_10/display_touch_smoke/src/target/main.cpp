@@ -17,7 +17,7 @@ extern "C" void app_main()
     static Board board{ kRotation };
     board.logger().info("brick_jc8012_touch", "Starting JC8012 display/touch test: %ux%u rotation=%d",
                         static_cast<unsigned>(kWidth), static_cast<unsigned>(kHeight), BRICK_PANEL_ROTATION);
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_jc8012_touch", "JC8012 board initialization failed");
         return;
@@ -25,8 +25,11 @@ extern "C" void app_main()
     board.logger().info("brick_jc8012_touch", "Display and touch initialized");
 
     static Application application({ board.display(), board.touch(), board.memory(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_jc8012_touch", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

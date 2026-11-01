@@ -8,12 +8,14 @@ FrameBuffers::FrameBuffers(DisplayDevice& display, MemoryProvider& memory)
 {
 }
 
-bool FrameBuffers::initialize()
+Status FrameBuffers::initialize()
 {
     const brick::interfaces::display::DisplaySize size  = screen_.size();
     const std::size_t                             bytes = static_cast<std::size_t>(size.width) * size.height * 2;
-    return pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external)
-           && pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
+    if (const Status status = pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
+        !is_ok(status))
+        return status;
+    return pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
 }
 
 brick::interfaces::display::WritablePixelBuffer FrameBuffers::buffer(std::uint8_t index)
@@ -29,13 +31,15 @@ brick::interfaces::display::WritablePixelBuffer FrameBuffers::buffer(std::uint8_
              false };
 }
 
-bool FrameBuffers::present(std::uint8_t index)
+Status FrameBuffers::present(std::uint8_t index)
 {
     const brick::interfaces::display::WritablePixelBuffer writable = buffer(index);
     if (!writable.valid())
-        return false;
+        return Status::error;
     const brick::interfaces::display::PixelBuffer pixels{ writable.data,         writable.width,  writable.height,
                                                           writable.stride_bytes, writable.format, false };
-    return screen_.present(pixels) && screen_.wait_for_transfer_complete(1000);
+    if (const Status status = screen_.present(pixels); !is_ok(status))
+        return status;
+    return screen_.wait_for_transfer_complete(1000);
 }
 }  // namespace asset_stream_smoke

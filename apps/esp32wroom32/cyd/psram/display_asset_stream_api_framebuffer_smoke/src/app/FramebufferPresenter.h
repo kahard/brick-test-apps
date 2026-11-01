@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FrameBuffers.h"
+#include "Services.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 
 namespace cyd_asset_stream_smoke
@@ -9,7 +10,7 @@ class FramebufferPresenter final
 {
 public:
     FramebufferPresenter(brick::interfaces::display::IDisplayDevice& display, FrameBuffers& buffers);
-    bool present();
+    Status present();
 
 private:
     brick::interfaces::display::IDisplayDevice& display_;

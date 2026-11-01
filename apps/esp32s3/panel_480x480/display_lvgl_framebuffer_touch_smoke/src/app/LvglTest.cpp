@@ -15,18 +15,18 @@ LvglTest::LvglTest(const Services& services)
 {
 }
 
-bool LvglTest::initialize()
+Status LvglTest::initialize()
 {
     lv_init();
     if (display_adapter_.create_framebuffer(framebuffers_) == nullptr || touch_adapter_.create() == nullptr)
-        return false;
+        return Status::error;
 
     create_user_interface_();
     tick_timer_.start(10);
     frame_timer_.start(1000);
     logger_.info(kTag, "LVGL initialized: mode=DIRECT framebuffers=%u pclk=12MHz touch=GT911",
                  framebuffers_.frame_buffer_count());
-    return true;
+    return Status::ok;
 }
 
 void LvglTest::update()

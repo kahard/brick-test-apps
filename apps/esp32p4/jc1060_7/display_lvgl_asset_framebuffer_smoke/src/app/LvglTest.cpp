@@ -8,13 +8,13 @@ LvglTest::LvglTest(const Services& services)
 {
 }
 
-bool LvglTest::initialize()
+Status LvglTest::initialize()
 {
-    if (!assets_.initialize() || !runtime_.initialize() || touch_adapter_.create() == nullptr)
-        return false;
+    if (!is_ok(assets_.initialize()) || !is_ok(runtime_.initialize()) || touch_adapter_.create() == nullptr)
+        return Status::error;
     view_.create();
     lv_refr_now(runtime_.display());
-    return true;
+    return Status::ok;
 }
 
 void LvglTest::update()

@@ -19,13 +19,13 @@ class CalibrationTest final
 public:
     explicit CalibrationTest(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool          render();
-    bool          render_image_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels);
-    bool          render_cached_image();
+    Status        render();
+    Status        render_image_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels);
+    Status        render_cached_image();
     std::uint16_t source_pixel(std::uint16_t x, std::uint16_t y) const;
     void          apply_pending_commands();
     void          update_image_divider();

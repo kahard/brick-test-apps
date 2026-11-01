@@ -12,7 +12,7 @@ class LvglRuntime final
 {
 public:
     LvglRuntime(DisplayDevice& display, MemoryProvider& memory, TimeProvider& time);
-    bool          initialize();
+    Status        initialize();
     void          update();
     lv_display_t* display() const { return display_; }
 

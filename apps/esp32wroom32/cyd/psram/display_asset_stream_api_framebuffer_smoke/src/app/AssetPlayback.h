@@ -7,6 +7,7 @@
 #include "AssetSources.h"
 #include "FrameBuffers.h"
 #include "FramebufferPresenter.h"
+#include "Services.h"
 #include "brick/core/image/AssetStreamer.h"
 
 namespace cyd_asset_stream_smoke
@@ -18,9 +19,9 @@ public:
                   brick::interfaces::display::IDisplayDevice& display, brick::interfaces::time::ITimeProvider& time,
                   brick::interfaces::logging::ILogger& logger);
 
-    bool initialize();
-    bool advance_mode();
-    bool present_next();
+    Status initialize();
+    Status advance_mode();
+    Status present_next();
 
     const char* storage_name() const;
     bool        backgrounds() const;

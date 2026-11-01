@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/communication/ISerialPort.h"
 #include "brick/interfaces/display/IBacklight.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
@@ -10,6 +11,7 @@
 
 namespace cyd_color_calibration
 {
+using Status = brick::Status;
 
 using DisplayDevice  = brick::interfaces::display::IDisplayDevice;
 using Backlight      = brick::interfaces::display::IBacklight;

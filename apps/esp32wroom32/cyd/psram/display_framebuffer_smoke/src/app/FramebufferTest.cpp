@@ -20,19 +20,19 @@ FramebufferTest::FramebufferTest(const Services& services)
 {
 }
 
-bool FramebufferTest::initialize()
+Status FramebufferTest::initialize()
 {
-    if (!frames_[0].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external)
-        || !frames_[1].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external))
+    if (!is_ok(frames_[0].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external))
+        || !is_ok(frames_[1].allocate(kFrameBytes, brick::interfaces::memory::MemoryKind::external)))
     {
         logger_.error(kTag, "PSRAM framebuffer allocation failed");
-        return false;
+        return Status::no_memory;
     }
 
     logger_.info(kTag, "PSRAM framebuffer test ready: frame=%u bytes, buffers=2", static_cast<unsigned>(kFrameBytes));
     present_next_color();
     next_color_ms_ = time_.millis() + kColorIntervalMs;
-    return true;
+    return Status::ok;
 }
 
 void FramebufferTest::update()
@@ -53,7 +53,7 @@ void FramebufferTest::fill_frame(std::uint8_t* framebuffer, std::uint16_t color)
     }
 }
 
-bool FramebufferTest::present(const std::uint8_t* framebuffer, std::uint64_t& transfer_us)
+Status FramebufferTest::present(const std::uint8_t* framebuffer, std::uint64_t& transfer_us)
 {
     const std::uint64_t                           started = time_.micros();
     const brick::interfaces::display::PixelBuffer buffer{ framebuffer,
@@ -62,10 +62,10 @@ bool FramebufferTest::present(const std::uint8_t* framebuffer, std::uint64_t& tr
                                                           static_cast<std::size_t>(kWidth) * 2,
                                                           brick::interfaces::display::PixelFormat::rgb565,
                                                           false };
-    if (!display_.draw_buffer({ 0, 0, kWidth, kHeight }, buffer))
-        return false;
+    if (!is_ok(display_.draw_buffer({ 0, 0, kWidth, kHeight }, buffer)))
+        return Status::error;
     transfer_us = time_.micros() - started;
-    return true;
+    return Status::ok;
 }
 
 void FramebufferTest::present_next_color()
@@ -74,7 +74,7 @@ void FramebufferTest::present_next_color()
     constexpr std::size_t   color_count = sizeof(colors) / sizeof(colors[0]);
     fill_frame(frames_[0].data(), colors[color_index_]);
     std::uint64_t transfer_us = 0;
-    if (!present(frames_[0].data(), transfer_us))
+    if (!is_ok(present(frames_[0].data(), transfer_us)))
     {
         logger_.error(kTag, "SPI transfer failed");
         return;

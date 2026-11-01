@@ -30,24 +30,24 @@ AssetPlayback::AssetPlayback(AssetSources& sources, FrameBuffers& buffers, Frame
 {
 }
 
-bool AssetPlayback::initialize()
+Status AssetPlayback::initialize()
 {
-    return sources_.select(0U) != nullptr;
+    return sources_.select(0U) != nullptr ? Status::ok : Status::not_ready;
 }
 
-bool AssetPlayback::advance_mode()
+Status AssetPlayback::advance_mode()
 {
     mode_.advance();
     if (sources_.select(mode_.storage()) != nullptr)
     {
         benchmark_.reset();
-        return true;
+        return Status::ok;
     }
     fallback_to_flash();
-    return false;
+    return Status::error;
 }
 
-bool AssetPlayback::present_next()
+Status AssetPlayback::present_next()
 {
     const bool                 second = (frame_ & 1U) != 0U;
     const generated_assets::Id id =
@@ -56,14 +56,14 @@ bool AssetPlayback::present_next()
     const brick::interfaces::display::AssetDescriptor* asset  = generated_assets::get(id);
     brick::interfaces::display::IAssetSource*          source = sources_.select(mode_.storage());
     if (asset == nullptr || source == nullptr)
-        return false;
+        return Status::error;
 
     const std::uint64_t load_started = time_.micros();
-    const bool          loaded = streamer_.stream_to_buffer(*asset, *source, buffers_.back_buffer(), buffers_.scratch(),
-                                                            buffers_.scratch_bytes());
+    const bool loaded = is_ok(streamer_.stream_to_buffer(*asset, *source, buffers_.back_buffer(), buffers_.scratch(),
+                                                         buffers_.scratch_bytes()));
     const std::uint64_t load_us         = time_.micros() - load_started;
     const std::uint64_t present_started = time_.micros();
-    const bool          presented       = loaded && presenter_.present();
+    const bool          presented       = loaded && is_ok(presenter_.present());
     const std::uint64_t present_us      = time_.micros() - present_started;
 
     if (!presented && mode_.storage() == 2U)
@@ -72,11 +72,11 @@ bool AssetPlayback::present_next()
         return present_next();
     }
     if (!presented)
-        return false;
+        return Status::error;
 
     benchmark_.frame(storage_name(), load_us, present_us);
     ++frame_;
-    return true;
+    return Status::ok;
 }
 
 const char* AssetPlayback::storage_name() const

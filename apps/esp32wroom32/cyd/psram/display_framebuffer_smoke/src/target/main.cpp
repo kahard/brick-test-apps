@@ -12,7 +12,7 @@ using Board = brick::boards::CydBoardTemplate<cyd_display_framebuffer_smoke::Fra
 extern "C" void app_main()
 {
     static Board board;
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_cyd_framebuffer", "CYD display initialization failed");
         return;
@@ -20,8 +20,11 @@ extern "C" void app_main()
 
     static cyd_display_framebuffer_smoke::Application application(
         { board.display(), board.memory(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_cyd_framebuffer", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

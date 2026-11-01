@@ -6,7 +6,7 @@ Application::Application(const Services& services) : demo_(services)
 {
 }
 
-bool Application::initialize()
+Status Application::initialize()
 {
     return demo_.initialize();
 }

@@ -9,8 +9,8 @@ class Application final
 public:
     explicit Application(const Services& services) : test_(services) {}
 
-    bool initialize() { return test_.initialize(); }
-    void update() { test_.update(); }
+    Status initialize() { return test_.initialize(); }
+    void   update() { test_.update(); }
 
 private:
     SdCardTest test_;

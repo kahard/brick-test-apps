@@ -14,7 +14,7 @@ extern "C" void app_main()
 {
     static Board                                        board;
     static brick::platform::esp32::PartitionAssetSource flash_assets{ "assets" };
-    if (!board.begin() || !flash_assets.begin())
+    if (!is_ok(board.begin()) || !is_ok(flash_assets.begin()))
     {
         board.logger().error("brick_cyd_color_profile", "CYD board or assets partition initialization failed");
         return;
@@ -22,8 +22,11 @@ extern "C" void app_main()
 
     static cyd_color_profile_asset_smoke::Application application(
         { board.display(), board.touch(), flash_assets, board.memory(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_cyd_color_profile", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

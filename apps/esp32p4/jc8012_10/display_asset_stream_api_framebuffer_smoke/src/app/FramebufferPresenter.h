@@ -14,8 +14,8 @@ class FramebufferPresenter final
 {
 public:
     FramebufferPresenter(DisplayDevice& display, MemoryProvider& memory);
-    bool initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
-    bool present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
+    Status initialize(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
+    Status present(const brick::interfaces::display::AssetDescriptor& asset, AssetSource& source);
 
 private:
     FrameBuffers                        buffers_;

@@ -15,27 +15,27 @@ AssetStreamTest::AssetStreamTest(const Services& services)
 {
 }
 
-bool AssetStreamTest::initialize()
+Status AssetStreamTest::initialize()
 {
     logger_.info(kTag, "CYD asset benchmark: flash, PSRAM and SD");
-    if (!buffers_.initialize() || !playback_.initialize())
+    if (!is_ok(buffers_.initialize()) || !is_ok(playback_.initialize()))
     {
         logger_.error(kTag, "PSRAM buffers or assets partition unavailable");
-        return false;
+        return Status::error;
     }
-    return true;
+    return Status::ok;
 }
 
 void AssetStreamTest::update()
 {
     if (touch_.pressed())
     {
-        if (!playback_.advance_mode())
+        if (!is_ok(playback_.advance_mode()))
             logger_.warning(kTag, "Requested storage unavailable; using flash");
         logger_.info(kTag, "touch: storage=%s mode=%s", playback_.storage_name(),
                      playback_.backgrounds() ? "red/blue" : "smiles");
     }
-    if (!playback_.present_next())
+    if (!is_ok(playback_.present_next()))
         logger_.error(kTag, "asset presentation failed");
 }
 }  // namespace cyd_asset_stream_smoke

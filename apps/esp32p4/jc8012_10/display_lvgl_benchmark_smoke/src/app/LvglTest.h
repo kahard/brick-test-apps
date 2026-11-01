@@ -10,8 +10,8 @@ class LvglTest final
 {
 public:
     explicit LvglTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     DisplayDevice&  display_;

@@ -15,21 +15,27 @@ TouchTest::TouchTest(DisplayDevice& display, Touchscreen& touch, TimeProvider& t
 {
 }
 
-bool TouchTest::initialize()
+Status TouchTest::initialize()
 {
-    if (!color_pattern_.draw())
+    if (const Status status = color_pattern_.draw(); !is_ok(status))
     {
-        logger_.error(TAG, "Color pattern transfer failed");
-        return false;
+        logger_.error(TAG, "Color pattern transfer failed: %s", to_string(status));
+        return status;
     }
     frame_timer_.start(16);
-    return true;
+    return Status::ok;
+}
+
+void TouchTest::draw_marker(bool active)
+{
+    if (const Status status = touch_marker_.draw(marker_point_, active); !is_ok(status))
+        logger_.error(TAG, "Touch marker draw failed: %s", to_string(status));
 }
 
 void TouchTest::update()
 {
     std::size_t count = 0;
-    if (touch_.read(points_.data(), points_.size(), count))
+    if (is_ok(touch_.read(points_.data(), points_.size(), count)))
     {
         for (std::size_t index = 0; index < count; ++index)
         {
@@ -39,16 +45,16 @@ void TouchTest::update()
             if (!active)
             {
                 if (marker_visible_)
-                    touch_marker_.draw(marker_point_, false);
+                    draw_marker(false);
                 marker_visible_ = false;
             }
             else if (moved)
             {
                 if (marker_visible_)
-                    touch_marker_.draw(marker_point_, false);
+                    draw_marker(false);
                 marker_point_   = point;
                 marker_visible_ = true;
-                touch_marker_.draw(marker_point_, true);
+                draw_marker(true);
             }
             logger_.info(TAG, "touch id=%u x=%d y=%d raw=(%d,%d) pressure=%d state=%u", point.id, point.x, point.y,
                          point.raw_x, point.raw_y, point.pressure, static_cast<unsigned>(point.state));

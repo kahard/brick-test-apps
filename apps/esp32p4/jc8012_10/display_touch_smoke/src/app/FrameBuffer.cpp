@@ -9,13 +9,13 @@ FrameBuffer::FrameBuffer(DisplayDevice& display, MemoryProvider& memory) : scree
 {
 }
 
-bool FrameBuffer::initialize()
+Status FrameBuffer::initialize()
 {
     const brick::interfaces::display::DisplaySize size = screen_.size();
     const std::size_t                             bytes =
         static_cast<std::size_t>(size.width) * static_cast<std::size_t>(size.height) * sizeof(std::uint16_t);
-    if (!memory_.allocate(bytes, brick::interfaces::memory::MemoryKind::external))
-        return false;
+    if (const Status status = memory_.allocate(bytes, brick::interfaces::memory::MemoryKind::external); !is_ok(status))
+        return status;
 
     pixels_ = { memory_.data(),
                 size.width,
@@ -23,13 +23,15 @@ bool FrameBuffer::initialize()
                 static_cast<std::size_t>(size.width) * sizeof(std::uint16_t),
                 brick::interfaces::display::PixelFormat::rgb565,
                 false };
-    return pixels_.valid();
+    return pixels_.valid() ? Status::ok : Status::error;
 }
 
-bool FrameBuffer::present()
+Status FrameBuffer::present()
 {
     const brick::interfaces::display::PixelBuffer read_only{ pixels_.data,         pixels_.width,  pixels_.height,
                                                              pixels_.stride_bytes, pixels_.format, false };
-    return screen_.present(read_only) && screen_.wait_for_transfer_complete(2000);
+    if (const Status status = screen_.present(read_only); !is_ok(status))
+        return status;
+    return screen_.wait_for_transfer_complete(2000);
 }
 }  // namespace display_touch_smoke

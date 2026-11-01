@@ -17,7 +17,7 @@ extern "C" void app_main()
     static Board board;
     board.logger().info("application", "Starting JC8012 10-inch display_framebuffer_smoke");
     static Application application({ board.display(), board.memory(), board.time(), board.logger() });
-    if (!board.begin() || !application.initialize())
+    if (!is_ok(board.begin()) || !is_ok(application.initialize()))
     {
         board.logger().error("application", "Initialization failed: check preceding logs, memory and assets");
         return;

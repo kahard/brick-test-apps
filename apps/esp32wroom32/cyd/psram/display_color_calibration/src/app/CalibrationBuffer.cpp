@@ -3,7 +3,7 @@
 namespace cyd_color_calibration
 {
 
-bool CalibrationBuffer::initialize()
+Status CalibrationBuffer::initialize()
 {
     return block_.allocate(kPixelCount * sizeof(std::uint16_t), brick::interfaces::memory::MemoryKind::dma);
 }

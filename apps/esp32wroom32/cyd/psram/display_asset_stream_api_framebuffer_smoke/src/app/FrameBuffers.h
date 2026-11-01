@@ -16,7 +16,7 @@ class FrameBuffers final
 {
 public:
     explicit FrameBuffers(MemoryProvider& memory);
-    bool                                            initialize();
+    Status                                          initialize();
     brick::interfaces::display::WritablePixelBuffer back_buffer() const;
     brick::interfaces::display::PixelBuffer         stripe_buffer(std::uint16_t height) const;
     std::uint8_t*                                   scratch() const;

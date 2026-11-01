@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 
+#include "Services.h"
 #include "Types.h"
 
 namespace esp12f_st7789_button_smoke
@@ -11,13 +12,13 @@ class DisplayButtonTest final
 {
 public:
     DisplayButtonTest(DisplayDevice& display, Button& button, TimeProvider& time, Logger& logger);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool draw_rows(std::uint16_t y, std::uint16_t height, std::uint16_t color);
-    bool draw_pattern();
-    bool draw_button_state(bool pressed);
+    Status draw_rows(std::uint16_t y, std::uint16_t height, std::uint16_t color);
+    Status draw_pattern();
+    Status draw_button_state(bool pressed);
 
     DisplayDevice&                            display_;
     Button&                                   button_;

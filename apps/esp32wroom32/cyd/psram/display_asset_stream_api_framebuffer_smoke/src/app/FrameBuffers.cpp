@@ -8,12 +8,13 @@ FrameBuffers::FrameBuffers(MemoryProvider& memory)
 {
 }
 
-bool FrameBuffers::initialize()
+Status FrameBuffers::initialize()
 {
     using brick::interfaces::memory::MemoryKind;
-    return buffers_[0].allocate(kFrameBytes, MemoryKind::external)
-           && buffers_[1].allocate(kFrameBytes, MemoryKind::external)
-           && scratch_.allocate(kStripeBytes, MemoryKind::dma);
+    for (brick::core::memory::MemoryBlock& buffer : buffers_)
+        if (const Status status = buffer.allocate(kFrameBytes, MemoryKind::external); !is_ok(status))
+            return status;
+    return scratch_.allocate(kStripeBytes, MemoryKind::dma);
 }
 
 brick::interfaces::display::WritablePixelBuffer FrameBuffers::back_buffer() const

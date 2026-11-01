@@ -12,11 +12,11 @@ class FramebufferTest final
 {
 public:
     explicit FramebufferTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool fill_and_present(std::uint8_t index, std::uint16_t color);
+    Status fill_and_present(std::uint8_t index, std::uint16_t color);
 
     DisplayDevice&           display_;
     FrameBufferDisplay&      frame_buffers_;

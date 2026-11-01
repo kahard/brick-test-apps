@@ -10,7 +10,7 @@ int main(int argc, char** argv)
         return 2;
 
     brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::esp12f_st7789(), options);
-    if (!board.begin())
+    if (!is_ok(board.begin()))
         return 1;
 
     esp12f_st7789_spi_benchmark_smoke::Application application({ board.display(), board.time(), board.logger() });

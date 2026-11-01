@@ -11,7 +11,7 @@ int main(int argc, char** argv)
         return 2;
 
     brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::panel480(), options);
-    if (!board.begin())
+    if (!is_ok(board.begin()))
         return 1;
 
     Application application({ board.display(), board.display(), board.touch(), board.time(), board.logger() });

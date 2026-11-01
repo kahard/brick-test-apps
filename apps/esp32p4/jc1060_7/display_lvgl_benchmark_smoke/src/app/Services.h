@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/AssetDescriptor.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/logging/ILogger.h"
@@ -8,6 +9,7 @@
 
 namespace lvgl_benchmark_smoke
 {
+using Status         = brick::Status;
 using DisplayDevice  = brick::interfaces::display::IDisplayDevice;
 using AssetSource    = brick::interfaces::display::IAssetSource;
 using MemoryProvider = brick::interfaces::memory::IMemoryProvider;

@@ -30,13 +30,13 @@ ColorProfileAssetTest::ColorProfileAssetTest(const Services& services)
 {
 }
 
-bool ColorProfileAssetTest::initialize()
+Status ColorProfileAssetTest::initialize()
 {
     logger_.info(kTag, "Color profile asset: left=source, right=corrected; drag divider, double-tap=center");
-    if (!stripe_.allocate(kStripeBytes, brick::interfaces::memory::MemoryKind::dma))
+    if (!is_ok(stripe_.allocate(kStripeBytes, brick::interfaces::memory::MemoryKind::dma)))
     {
         logger_.error(kTag, "DMA stripe allocation failed");
-        return false;
+        return Status::error;
     }
     return render();
 }
@@ -46,7 +46,7 @@ void ColorProfileAssetTest::update()
     update_divider();
 }
 
-bool ColorProfileAssetTest::render()
+Status ColorProfileAssetTest::render()
 {
     std::uint8_t* const                            stripe  = stripe_.data();
     const brick::core::display::Rgb565ColorProfile profile = cyd_color_profile::profile();
@@ -54,14 +54,13 @@ bool ColorProfileAssetTest::render()
         stripe, kWidth, kStripeHeight, kWidth * sizeof(std::uint16_t), brick::interfaces::display::PixelFormat::rgb565,
         true
     };
-    bool success = true;
-    for (std::uint16_t y = 0U; y < kHeight && success; y += kStripeHeight)
+    Status status = Status::ok;
+    for (std::uint16_t y = 0U; y < kHeight && is_ok(status); y += kStripeHeight)
     {
-        if (!assets_.read(asset(), static_cast<std::size_t>(y) * kWidth * sizeof(std::uint16_t), stripe, kStripeBytes))
-        {
-            success = false;
+        status =
+            assets_.read(asset(), static_cast<std::size_t>(y) * kWidth * sizeof(std::uint16_t), stripe, kStripeBytes);
+        if (!is_ok(status))
             break;
-        }
         auto* pixels = reinterpret_cast<std::uint16_t*>(stripe);
         for (std::uint16_t row = 0U; row < kStripeHeight; ++row)
             for (std::uint16_t x = divider_x_; x < kWidth; ++x)
@@ -77,19 +76,24 @@ bool ColorProfileAssetTest::render()
             if (divider_x_ > 0U)
                 pixels[row_offset + divider_x_ - 1U] = 0x0000U;
         }
-        success =
-            display_.draw_buffer({ 0, y, kWidth, kStripeHeight }, buffer) && display_.wait_for_transfer_complete(1000U);
+        status = display_.draw_buffer({ 0, y, kWidth, kStripeHeight }, buffer);
+        if (is_ok(status))
+            status = display_.wait_for_transfer_complete(1000U);
     }
-    if (!success)
-        logger_.error(kTag, "Asset read or display transfer failed");
-    return success;
+    return status;
+}
+
+void ColorProfileAssetTest::redraw()
+{
+    if (const Status status = render(); !is_ok(status))
+        logger_.error(kTag, "Redraw failed: %s", to_string(status));
 }
 
 void ColorProfileAssetTest::update_divider()
 {
     std::array<brick::interfaces::display::TouchPoint, 1U> points{};
     std::size_t                                            count = 0U;
-    if (!touch_.read(points.data(), points.size(), count) || count == 0U)
+    if (!is_ok(touch_.read(points.data(), points.size(), count)) || count == 0U)
         return;
 
     constexpr std::int16_t maximum_x = kWidth - 1U;
@@ -106,7 +110,7 @@ void ColorProfileAssetTest::update_divider()
         {
             divider_x_   = kWidth / 2U;
             last_tap_ms_ = 0U;
-            render();
+            redraw();
         }
         else
             last_tap_ms_ = now;
@@ -128,7 +132,7 @@ void ColorProfileAssetTest::update_divider()
     if (next != divider_x_)
     {
         divider_x_ = next;
-        render();
+        redraw();
     }
 }
 

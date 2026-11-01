@@ -12,8 +12,8 @@ class AssetStreamTest final
 {
 public:
     AssetStreamTest(AssetPlayback& playback, Touchscreen& touch, TimeProvider& time, Logger& logger);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     void           log_mode();

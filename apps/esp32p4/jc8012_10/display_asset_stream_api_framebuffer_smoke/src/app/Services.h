@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/AssetDescriptor.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
@@ -10,6 +11,7 @@
 
 namespace asset_stream_smoke
 {
+using Status              = brick::Status;
 using DisplayDevice       = brick::interfaces::display::IDisplayDevice;
 using Touchscreen         = brick::interfaces::display::ITouchscreen;
 using AssetSource         = brick::interfaces::display::IAssetSource;

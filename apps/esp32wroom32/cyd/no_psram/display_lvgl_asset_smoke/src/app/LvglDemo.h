@@ -16,12 +16,12 @@ class LvglDemo final
 {
 public:
     explicit LvglDemo(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     static void on_button_clicked(lv_event_t* event);
-    bool        load_selected_asset();
+    Status      load_selected_asset();
     void        create_widgets();
 
     TimeProvider&                   time_;

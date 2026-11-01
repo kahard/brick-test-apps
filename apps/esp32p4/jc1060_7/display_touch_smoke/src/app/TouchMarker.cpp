@@ -16,7 +16,7 @@ namespace
     constexpr std::uint16_t kColors[]     = { 0xF800, 0x07E0, 0x001F, 0xFFE0, 0xF81F, 0x07FF };
 }  // namespace
 
-bool TouchMarker::draw(const TouchPoint& point, bool active)
+Status TouchMarker::draw(const TouchPoint& point, bool active)
 {
     static std::array<std::uint16_t, kMarkerSize * kMarkerSize> marker{};
     const std::int32_t      left = point.x < kMarkerSize / 2 ? 0 : point.x - kMarkerSize / 2;
@@ -43,6 +43,8 @@ bool TouchMarker::draw(const TouchPoint& point, bool active)
                                                           static_cast<std::size_t>(kMarkerSize) * sizeof(std::uint16_t),
                                                           brick::interfaces::display::PixelFormat::rgb565,
                                                           false };
-    return screen_.draw({ x0, y0, kMarkerSize, kMarkerSize }, buffer) && screen_.wait_for_transfer_complete(1000);
+    if (const Status status = screen_.draw({ x0, y0, kMarkerSize, kMarkerSize }, buffer); !is_ok(status))
+        return status;
+    return screen_.wait_for_transfer_complete(1000);
 }
 }  // namespace display_touch_smoke

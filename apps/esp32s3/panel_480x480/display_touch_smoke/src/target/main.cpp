@@ -14,7 +14,7 @@ extern "C" void app_main()
     using namespace display_touch_smoke;
     static Board board;
     board.logger().info("brick_st7701s_smoke", "Starting ESP32-S3 ST7701S/GT911 smoke test");
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_st7701s_smoke", "ST7701S RGB display initialization failed");
         return;
@@ -22,8 +22,11 @@ extern "C" void app_main()
     board.logger().info("brick_st7701s_smoke", "Display and touch initialized");
 
     static Application application({ board.display(), board.touch(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_st7701s_smoke", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

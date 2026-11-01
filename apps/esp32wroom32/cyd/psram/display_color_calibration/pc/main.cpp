@@ -10,7 +10,7 @@ int main(int argc, char** argv)
         return 2;
 
     brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::cyd(), options);
-    if (!board.begin())
+    if (!is_ok(board.begin()))
         return 1;
 
     cyd_color_calibration::Application application({ board.display(), board.backlight(), board.touch(), board.serial(),

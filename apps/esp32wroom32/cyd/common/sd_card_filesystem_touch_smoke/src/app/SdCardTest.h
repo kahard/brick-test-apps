@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "Services.h"
 #include "brick/core/display/Screen.h"
 #include "brick/core/time/Timer.h"
 #include "brick/interfaces/display/ITouchscreen.h"
@@ -17,14 +18,14 @@ public:
                brick::interfaces::storage::IRemovableFileSystem& filesystem,
                brick::interfaces::display::ITouchscreen& touch, brick::interfaces::time::ITimeProvider& time,
                brick::interfaces::logging::ILogger& logger);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    void clear_screen();
-    void show_status(std::uint16_t color, const char* message);
-    bool write_read_verify();
-    void refresh_card_status();
+    void   clear_screen();
+    void   show_status(std::uint16_t color, const char* message);
+    Status write_read_verify();
+    void   refresh_card_status();
 
     brick::interfaces::storage::IRemovableFileSystem& filesystem_;
     brick::interfaces::display::ITouchscreen&         touch_;

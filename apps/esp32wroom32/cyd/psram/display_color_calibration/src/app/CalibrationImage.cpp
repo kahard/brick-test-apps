@@ -5,22 +5,22 @@
 namespace cyd_color_calibration
 {
 
-bool CalibrationImage::initialize()
+Status CalibrationImage::initialize()
 {
     return block_.allocate(kImageSizeBytes, brick::interfaces::memory::MemoryKind::external);
 }
 
-bool CalibrationImage::store_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels)
+Status CalibrationImage::store_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels)
 {
     if (!block_ || pixels == nullptr || stripe_index >= stripe_count())
-        return false;
+        return Status::error;
 
     if (stripe_index == 0U)
         received_.fill(false);
     std::memcpy(block_.data() + static_cast<std::size_t>(stripe_index) * stripe_size_bytes(), pixels,
                 stripe_size_bytes());
     received_[stripe_index] = true;
-    return true;
+    return Status::ok;
 }
 
 bool CalibrationImage::complete() const

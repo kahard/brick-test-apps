@@ -12,8 +12,8 @@ class Application final
 public:
     explicit Application(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     FramebufferTest test_;

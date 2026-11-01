@@ -7,7 +7,7 @@ Application::Application(const Services& services)
 {
 }
 
-bool Application::initialize()
+Status Application::initialize()
 {
     services_.logger.info("brick_cyd_touch", "Starting CYD display and touch smoke test");
     return test_.initialize();

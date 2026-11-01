@@ -16,7 +16,7 @@ extern "C" void app_main()
 {
     static Board                               board;
     static brick::platform::esp32::EspUartPort uart{ UART_NUM_0, kUartReceiveBytes };
-    if (!board.begin() || !uart.begin())
+    if (!is_ok(board.begin()) || !is_ok(uart.begin()))
     {
         board.logger().error("brick_cyd_calibration", "CYD board or UART initialization failed");
         return;
@@ -24,8 +24,11 @@ extern "C" void app_main()
 
     static cyd_color_calibration::Application application(
         { board.display(), board.backlight(), board.touch(), uart, board.memory(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_cyd_calibration", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

@@ -11,7 +11,7 @@ class TouchMarker final
 public:
     explicit TouchMarker(brick::core::display::Screen& screen) : screen_(screen) {}
 
-    bool draw(const TouchPoint& point, bool active);
+    Status draw(const TouchPoint& point, bool active);
 
 private:
     brick::core::display::Screen& screen_;

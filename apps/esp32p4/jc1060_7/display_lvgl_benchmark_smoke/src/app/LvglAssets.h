@@ -12,7 +12,7 @@ class LvglAssets final
 {
 public:
     LvglAssets(AssetSource& source, MemoryProvider& memory);
-    bool                  initialize();
+    Status                initialize();
     const lv_image_dsc_t* image(bool second) const { return &descriptors_[second ? 1 : 0]; }
 
 private:

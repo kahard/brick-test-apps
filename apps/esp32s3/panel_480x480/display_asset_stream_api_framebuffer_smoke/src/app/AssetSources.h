@@ -24,9 +24,9 @@ private:
     class RamSource final : public AssetSource
     {
     public:
-        void set_data(const std::uint8_t* data) { data_ = data; }
-        bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
-                  std::uint8_t* destination, std::size_t bytes) override;
+        void   set_data(const std::uint8_t* data) { data_ = data; }
+        Status read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
+                    std::uint8_t* destination, std::size_t bytes) override;
 
     private:
         const std::uint8_t* data_ = nullptr;
@@ -36,18 +36,18 @@ private:
     {
     public:
         explicit SdSource(RemovableFileSystem& filesystem) : filesystem_(filesystem) {}
-        bool begin();
-        void close() { file_.close(); }
-        bool read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
-                  std::uint8_t* destination, std::size_t bytes) override;
+        Status begin();
+        void   close() { file_.close(); }
+        Status read(const brick::interfaces::display::AssetDescriptor& asset, std::size_t offset,
+                    std::uint8_t* destination, std::size_t bytes) override;
 
     private:
         RemovableFileSystem&                   filesystem_;
         brick::interfaces::storage::FileHandle file_;
     };
 
-    bool prepare_ram_copy();
-    void close_sd();
+    Status prepare_ram_copy();
+    void   close_sd();
 
     AssetSource&                        flash_;
     RemovableFileSystem&                sd_;

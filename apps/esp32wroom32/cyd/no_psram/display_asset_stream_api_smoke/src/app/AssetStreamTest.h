@@ -16,12 +16,13 @@ class AssetStreamTest final
 {
 public:
     explicit AssetStreamTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool show_selected_asset();
-    void select_next_asset();
+    Status show_selected_asset();
+    void   report(Status status);
+    void   select_next_asset();
 
     TimeProvider&                     time_;
     Logger&                           logger_;

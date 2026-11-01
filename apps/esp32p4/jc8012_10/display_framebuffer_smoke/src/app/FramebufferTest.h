@@ -12,11 +12,11 @@ class FramebufferTest final
 {
 public:
     explicit FramebufferTest(const Services& services);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool                         draw_next();
+    Status                       draw_next();
     FrameBuffers                 buffers_;
     brick::core::display::Screen screen_;
     TimeProvider&                time_;

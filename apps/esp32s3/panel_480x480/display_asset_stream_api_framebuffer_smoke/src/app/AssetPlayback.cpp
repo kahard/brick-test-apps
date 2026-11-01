@@ -11,23 +11,25 @@ AssetPlayback::AssetPlayback(AssetSources& sources, FramebufferPresenter& presen
 {
 }
 
-bool AssetPlayback::initialize()
+Status AssetPlayback::initialize()
 {
     const brick::interfaces::display::AssetDescriptor* asset = generated_assets::get(generated_assets::Id::joy_tears);
-    return asset != nullptr && presenter_.initialize(*asset, sources_.flash());
+    if (asset == nullptr)
+        return Status::not_found;
+    return presenter_.initialize(*asset, sources_.flash());
 }
 
-bool AssetPlayback::advance_mode()
+Status AssetPlayback::advance_mode()
 {
     mode_.advance();
     storage_ = mode_.storage();
     if (sources_.select(storage_) != nullptr)
-        return true;
+        return Status::ok;
     fallback_to_flash();
-    return false;
+    return Status::error;
 }
 
-bool AssetPlayback::present_next()
+Status AssetPlayback::present_next()
 {
     const bool                 second = (frame_ & 1U) != 0U;
     const generated_assets::Id id =
@@ -36,15 +38,18 @@ bool AssetPlayback::present_next()
     const brick::interfaces::display::AssetDescriptor* asset  = generated_assets::get(id);
     brick::interfaces::display::IAssetSource*          source = sources_.select(storage_);
 
-    bool presented = asset != nullptr && source != nullptr && presenter_.present(*asset, *source);
-    if (!presented && storage_ == 2U)
+    if (asset == nullptr)
+        return Status::not_found;
+    Status status = source != nullptr ? presenter_.present(*asset, *source) : Status::not_ready;
+    // The SD card can disappear; fall back to the flash copy.
+    if (!is_ok(status) && storage_ == 2U)
     {
         fallback_to_flash();
-        presented = asset != nullptr && presenter_.present(*asset, sources_.flash());
+        status = presenter_.present(*asset, sources_.flash());
     }
-    if (presented)
+    if (is_ok(status))
         ++frame_;
-    return presented;
+    return status;
 }
 
 std::uint8_t AssetPlayback::storage() const

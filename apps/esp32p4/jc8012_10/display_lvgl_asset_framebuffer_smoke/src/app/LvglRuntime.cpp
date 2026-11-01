@@ -7,15 +7,15 @@ LvglRuntime::LvglRuntime(DisplayDevice& display, MemoryProvider& memory, TimePro
 {
 }
 
-bool LvglRuntime::initialize()
+Status LvglRuntime::initialize()
 {
-    if (!buffers_.initialize())
-        return false;
+    if (const Status status = buffers_.initialize(); !is_ok(status))
+        return status;
     lv_init();
     display_       = adapter_.create(LV_DISPLAY_RENDER_MODE_FULL, buffers_.buffer(0).data, buffers_.buffer(1).data,
                                      buffers_.size_bytes());
     previous_tick_ = time_.millis();
-    return display_ != nullptr;
+    return display_ != nullptr ? Status::ok : Status::error;
 }
 
 void LvglRuntime::update()

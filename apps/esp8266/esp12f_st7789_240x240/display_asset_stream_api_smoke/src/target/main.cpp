@@ -18,14 +18,14 @@ void setup()
     Serial.begin(115200);
     delay(50);
     static Board board;
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("display_asset_stream_api_smoke", "board initialization failed");
         return;
     }
     static esp12f_st7789_asset_stream_api_smoke::Application instance(
         { board.display(), board.time(), board.logger() });
-    if (instance.initialize())
+    if (is_ok(instance.initialize()))
         application = &instance;
 }
 

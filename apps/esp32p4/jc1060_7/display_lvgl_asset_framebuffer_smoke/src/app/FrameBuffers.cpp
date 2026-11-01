@@ -8,12 +8,14 @@ FrameBuffers::FrameBuffers(DisplayDevice& display, MemoryProvider& memory)
 {
 }
 
-bool FrameBuffers::initialize()
+Status FrameBuffers::initialize()
 {
     const brick::interfaces::display::DisplaySize size  = screen_.size();
     const std::size_t                             bytes = static_cast<std::size_t>(size.width) * size.height * 2;
-    return pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external)
-           && pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
+    if (const Status status = pixels_[0].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
+        !is_ok(status))
+        return status;
+    return pixels_[1].allocate(bytes, brick::interfaces::memory::MemoryKind::external);
 }
 
 brick::interfaces::display::WritablePixelBuffer FrameBuffers::buffer(std::uint8_t index)

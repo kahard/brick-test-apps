@@ -12,8 +12,8 @@ class FrameBuffer final
 public:
     FrameBuffer(DisplayDevice& display, MemoryProvider& memory);
 
-    bool initialize();
-    bool present();
+    Status initialize();
+    Status present();
 
     brick::interfaces::display::WritablePixelBuffer& pixels() { return pixels_; }
 

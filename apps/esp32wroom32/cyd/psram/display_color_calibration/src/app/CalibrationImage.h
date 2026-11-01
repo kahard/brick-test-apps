@@ -21,8 +21,8 @@ public:
 
     explicit CalibrationImage(MemoryProvider& memory) : block_(memory) {}
 
-    bool initialize();
-    bool store_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels);
+    Status initialize();
+    Status store_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels);
 
     bool                complete() const;
     const std::uint8_t* stripe(std::uint8_t stripe_index) const;

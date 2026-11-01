@@ -7,7 +7,7 @@
 
 namespace esp12f_st7789_display_font_smoke
 {
-bool FontTest::initialize()
+Status FontTest::initialize()
 {
     pressed_ = button_.is_pressed();
     return draw_page();
@@ -19,32 +19,31 @@ void FontTest::update()
     if (now && !pressed_)
     {
         alternate_ = !alternate_;
-        draw_page();
+        if (const Status status = draw_page(); !is_ok(status))
+            logger_.error("display_font_smoke", "Page draw failed: %s", to_string(status));
     }
     pressed_ = now;
 }
 
-bool FontTest::clear_display()
+Status FontTest::clear_display()
 {
     constexpr std::int32_t stripe_height = 24;
     for (std::int32_t y = 0; y < 240; y += stripe_height)
     {
         auto canvas = screen_.create_canvas({ 0, y, 240, stripe_height }, canvas_pixels_);
-        if (!canvas || !canvas.clear(0x0000).present())
-        {
-            return false;
-        }
+        if (const Status status = canvas.clear(0x0000).present(); !is_ok(status))
+            return status;
     }
-    return true;
+    return Status::ok;
 }
 
-bool FontTest::draw_line(std::int32_t y, std::int32_t height, const char* value, const char* characters,
-                         const BrickBitmapGlyph* glyphs, std::size_t glyph_count, std::uint16_t color)
+Status FontTest::draw_line(std::int32_t y, std::int32_t height, const char* value, const char* characters,
+                           const BrickBitmapGlyph* glyphs, std::size_t glyph_count, std::uint16_t color)
 {
     auto canvas = screen_.create_canvas({ 0, y, 240, height }, canvas_pixels_);
     if (!canvas)
     {
-        return false;
+        return Status::error;
     }
 
     canvas.clear(0x0000);
@@ -53,19 +52,35 @@ bool FontTest::draw_line(std::int32_t y, std::int32_t height, const char* value,
     return canvas.present();
 }
 
-bool FontTest::draw_page()
+Status FontTest::draw_page()
 {
-    return clear_display()
-           && draw_line(0, 40, alternate_ ? "FONT DEMO B" : "FONT DEMO A", brick_roboto_20_chars,
-                        brick_roboto_20_glyphs, brick_roboto_20_count, 0xFFE0)
-           && draw_line(48, 28, "Roboto 12: ABC 123", brick_roboto_12_chars, brick_roboto_12_glyphs,
-                        brick_roboto_12_count, 0xFFFF)
-           && draw_line(84, 40, "Roboto 20: TEST", brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count,
-                        0x07E0)
-           && draw_line(132, 52, "Roboto 28", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count,
-                        0x07FF)
-           && draw_line(192, 32, "Button: change page", brick_roboto_12_chars, brick_roboto_12_glyphs,
-                        brick_roboto_12_count, 0xF81F);
+    struct TextLine
+    {
+        std::int32_t            y;
+        std::int32_t            height;
+        const char*             text;
+        const char*             characters;
+        const BrickBitmapGlyph* glyphs;
+        std::size_t             glyph_count;
+        std::uint16_t           color;
+    };
+    const TextLine lines[] = {
+        { 0, 40, alternate_ ? "FONT DEMO B" : "FONT DEMO A", brick_roboto_20_chars, brick_roboto_20_glyphs,
+          brick_roboto_20_count, 0xFFE0 },
+        { 48, 28, "Roboto 12: ABC 123", brick_roboto_12_chars, brick_roboto_12_glyphs, brick_roboto_12_count, 0xFFFF },
+        { 84, 40, "Roboto 20: TEST", brick_roboto_20_chars, brick_roboto_20_glyphs, brick_roboto_20_count, 0x07E0 },
+        { 132, 52, "Roboto 28", brick_roboto_28_chars, brick_roboto_28_glyphs, brick_roboto_28_count, 0x07FF },
+        { 192, 32, "Button: change page", brick_roboto_12_chars, brick_roboto_12_glyphs, brick_roboto_12_count,
+          0xF81F },
+    };
+    if (const Status status = clear_display(); !is_ok(status))
+        return status;
+    for (const TextLine& line : lines)
+        if (const Status status =
+                draw_line(line.y, line.height, line.text, line.characters, line.glyphs, line.glyph_count, line.color);
+            !is_ok(status))
+            return status;
+    return Status::ok;
 }
 
 void FontTest::draw_progmem_text(brick::interfaces::display::WritablePixelBuffer buffer, std::int32_t x, std::int32_t y,

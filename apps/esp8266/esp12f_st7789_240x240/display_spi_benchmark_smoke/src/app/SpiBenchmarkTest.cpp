@@ -8,12 +8,12 @@ namespace esp12f_st7789_spi_benchmark_smoke
 SpiBenchmarkTest::SpiBenchmarkTest(DisplayDevice& d, TimeProvider& t, Logger& l) : display_(d), time_(t), logger_(l)
 {
 }
-bool SpiBenchmarkTest::initialize()
+Status SpiBenchmarkTest::initialize()
 {
     start_ = time_.millis();
-    return true;
+    return Status::ok;
 }
-bool SpiBenchmarkTest::stream(const brick_image_asset_t& a)
+Status SpiBenchmarkTest::stream(const brick_image_asset_t& a)
 {
     for (std::uint16_t y = 0; y < 240; y += BRICK_STREAM_STRIPE_HEIGHT)
     {
@@ -21,16 +21,16 @@ bool SpiBenchmarkTest::stream(const brick_image_asset_t& a)
         brick::interfaces::display::PixelBuffer b{
             stripe_.data(), 240, BRICK_STREAM_STRIPE_HEIGHT, 480, brick::interfaces::display::PixelFormat::rgb565, false
         };
-        if (!display_.draw_buffer({ 0, y, 240, BRICK_STREAM_STRIPE_HEIGHT }, b))
-            return false;
+        if (!is_ok(display_.draw_buffer({ 0, y, 240, BRICK_STREAM_STRIPE_HEIGHT }, b)))
+            return Status::error;
     }
-    return true;
+    return Status::ok;
 }
 void SpiBenchmarkTest::update()
 {
     const auto& a = (frames_ & 1U) ? brick_sweat_smile_240 : brick_joy_tears_240;
     const auto  s = time_.micros();
-    if (!stream(a))
+    if (!is_ok(stream(a)))
     {
         logger_.error("spi", "transfer failed");
         return;

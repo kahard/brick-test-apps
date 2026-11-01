@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 
     brick::boards::SimulatorBoard          board(brick::boards::SimulatorBoardConfig::cyd(), options);
     brick::platform::pc::PcFileAssetSource flash_assets(BRICK_PC_ASSET_BUNDLE);
-    if (!board.begin() || !flash_assets.begin())
+    if (!is_ok(board.begin()) || !is_ok(flash_assets.begin()))
         return 1;
 
     cyd_lvgl_asset_smoke::Application application(

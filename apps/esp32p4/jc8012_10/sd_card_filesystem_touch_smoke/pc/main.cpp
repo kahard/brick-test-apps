@@ -10,7 +10,7 @@ int main(int argc, char** argv)
         return 2;
 
     brick::boards::SimulatorBoard board(brick::boards::SimulatorBoardConfig::jc8012(), options);
-    if (!board.begin())
+    if (!is_ok(board.begin()))
         return 1;
 
     Application application({ board.display(), board.touch(), board.sd(), board.time(), board.logger() });

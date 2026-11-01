@@ -12,7 +12,7 @@ using Board = brick::boards::CydBoardTemplate<cyd_display_touch_smoke::TouchFeat
 extern "C" void app_main()
 {
     static Board board;
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_cyd_touch", "CYD display or touch initialization failed");
         return;
@@ -21,8 +21,11 @@ extern "C" void app_main()
 
     static cyd_display_touch_smoke::Application application(
         { board.display(), board.touch(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_cyd_touch", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

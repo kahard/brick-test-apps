@@ -2,11 +2,11 @@
 
 namespace esp12f_st7789_display_font_smoke
 {
-Application::Application(const Services& services) : test_{ services.display, services.button }
+Application::Application(const Services& services) : test_{ services.display, services.button, services.logger }
 {
 }
 
-bool Application::initialize()
+Status Application::initialize()
 {
     return test_.initialize();
 }

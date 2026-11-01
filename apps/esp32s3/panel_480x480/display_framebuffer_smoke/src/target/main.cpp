@@ -14,14 +14,17 @@ extern "C" void app_main()
     using namespace display_framebuffer_smoke;
     static Board board{ Board::double_buffered_config() };
     board.logger().info("brick_st7701s_framebuffer", "Starting ESP32-S3 ST7701S framebuffer smoke test");
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("brick_st7701s_framebuffer", "Board initialization failed");
         return;
     }
     static Application application({ board.display(), board.display(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("brick_st7701s_framebuffer", "Application initialization failed: %s", to_string(status));
         return;
+    }
     while (true)
     {
         application.update();

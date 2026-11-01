@@ -15,12 +15,13 @@ class ColorProfileAssetTest final
 public:
     explicit ColorProfileAssetTest(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool render();
-    void update_divider();
+    Status render();
+    void   redraw();
+    void   update_divider();
 
     DisplayDevice&                   display_;
     TimeProvider&                    time_;

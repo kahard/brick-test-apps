@@ -1,4 +1,5 @@
 #pragma once
+#include "Services.h"
 #include "Types.h"
 #include "brick/core/image/AssetStreamer.h"
 #include <array>
@@ -10,11 +11,11 @@ class AssetStreamTest final
 {
 public:
     AssetStreamTest(DisplayDevice&, Button&, TimeProvider&, Logger&);
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
-    bool                                      show_asset(std::uint8_t);
+    Status                                    show_asset(std::uint8_t);
     DisplayDevice&                            display_;
     Button&                                   button_;
     TimeProvider&                             time_;

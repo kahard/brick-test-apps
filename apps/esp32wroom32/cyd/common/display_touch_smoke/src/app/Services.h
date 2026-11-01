@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/display/ITouchscreen.h"
 #include "brick/interfaces/display/TouchscreenTypes.h"
@@ -8,6 +9,7 @@
 
 namespace cyd_display_touch_smoke
 {
+using Status        = brick::Status;
 using DisplayDevice = brick::interfaces::display::IDisplayDevice;
 using Touchscreen   = brick::interfaces::display::ITouchscreen;
 using TouchPoint    = brick::interfaces::display::TouchPoint;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "brick/Status.h"
 #include "brick/interfaces/display/IDisplayDevice.h"
 #include "brick/interfaces/logging/ILogger.h"
 #include "brick/interfaces/memory/IMemoryProvider.h"
@@ -7,6 +8,7 @@
 
 namespace cyd_display_framebuffer_smoke
 {
+using Status         = brick::Status;
 using DisplayDevice  = brick::interfaces::display::IDisplayDevice;
 using MemoryProvider = brick::interfaces::memory::IMemoryProvider;
 using TimeProvider   = brick::interfaces::time::ITimeProvider;

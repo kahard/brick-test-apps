@@ -12,14 +12,18 @@ using Board = brick::boards::Panel480BoardTemplate<SdFeatures>;
 extern "C" void app_main()
 {
     static Board board;
-    if (!board.begin())
+    if (!is_ok(board.begin()))
     {
         board.logger().error("panel480_sd_card_filesystem_touch_smoke", "board initialization failed");
         return;
     }
     static Application application({ board.display(), board.touch(), board.sd(), board.time(), board.logger() });
-    if (!application.initialize())
+    if (const brick::Status status = application.initialize(); !is_ok(status))
+    {
+        board.logger().error("panel480_sd_card_filesystem_touch_smoke", "Application initialization failed: %s",
+                             to_string(status));
         return;
+    }
     // The application's update() does not block; the loop paces it.
     while (true)
     {

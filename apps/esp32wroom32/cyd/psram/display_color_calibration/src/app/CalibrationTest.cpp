@@ -20,15 +20,15 @@ CalibrationTest::CalibrationTest(const Services& services)
 {
 }
 
-bool CalibrationTest::initialize()
+Status CalibrationTest::initialize()
 {
-    if (!buffer_.initialize() || !image_.initialize())
+    if (!is_ok(buffer_.initialize()) || !is_ok(image_.initialize()))
     {
         logger_.error(kTag, "DMA buffer or PSRAM image cache unavailable");
-        return false;
+        return Status::error;
     }
     logger_.info(kTag, "Calibration ready: upload an image, then drag the black divider horizontally");
-    return true;
+    return Status::ok;
 }
 
 void CalibrationTest::update()
@@ -38,7 +38,7 @@ void CalibrationTest::update()
     update_image_divider();
 }
 
-bool CalibrationTest::render()
+Status CalibrationTest::render()
 {
     brick::interfaces::display::PixelBuffer buffer{ reinterpret_cast<const std::uint8_t*>(buffer_.pixels()),
                                                     CalibrationBuffer::width(),
@@ -54,20 +54,20 @@ bool CalibrationTest::render()
                 buffer_.pixels()[static_cast<std::size_t>(row) * CalibrationBuffer::width() + x] =
                     profile_.apply(source_pixel(x, static_cast<std::uint16_t>(y + row)));
 
-        if (!display_.draw_buffer({ 0, y, CalibrationBuffer::width(), CalibrationBuffer::height() }, buffer)
-            || !display_.wait_for_transfer_complete(1000U))
+        if (!is_ok(display_.draw_buffer({ 0, y, CalibrationBuffer::width(), CalibrationBuffer::height() }, buffer))
+            || !is_ok(display_.wait_for_transfer_complete(1000U)))
         {
             logger_.error(kTag, "Display transfer failed");
-            return false;
+            return Status::error;
         }
     }
-    return true;
+    return Status::ok;
 }
 
-bool CalibrationTest::render_image_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels)
+Status CalibrationTest::render_image_stripe(std::uint8_t stripe_index, const std::uint8_t* pixels)
 {
     if (pixels == nullptr)
-        return false;
+        return Status::error;
     for (std::size_t index = 0U; index < CalibrationBuffer::width() * CalibrationBuffer::height(); ++index)
     {
         const std::size_t   byte_index = index * 2U;
@@ -84,21 +84,24 @@ bool CalibrationTest::render_image_stripe(std::uint8_t stripe_index, const std::
                                                           brick::interfaces::display::PixelFormat::rgb565,
                                                           true };
     const std::uint16_t                           y = stripe_index * CalibrationBuffer::height();
-    return display_.draw_buffer({ 0, y, CalibrationBuffer::width(), CalibrationBuffer::height() }, buffer)
-           && display_.wait_for_transfer_complete(1000U);
+    if (const Status status =
+            display_.draw_buffer({ 0, y, CalibrationBuffer::width(), CalibrationBuffer::height() }, buffer);
+        !is_ok(status))
+        return status;
+    return display_.wait_for_transfer_complete(1000U);
 }
 
-bool CalibrationTest::render_cached_image()
+Status CalibrationTest::render_cached_image()
 {
     if (!image_.complete())
-        return false;
+        return Status::error;
 
     for (std::uint8_t stripe_index = 0U; stripe_index < CalibrationImage::stripe_count(); ++stripe_index)
     {
-        if (!render_image_stripe(stripe_index, image_.stripe(stripe_index)))
-            return false;
+        if (!is_ok(render_image_stripe(stripe_index, image_.stripe(stripe_index))))
+            return Status::error;
     }
-    return true;
+    return Status::ok;
 }
 
 std::uint16_t CalibrationTest::source_pixel(std::uint16_t x, std::uint16_t y) const
@@ -133,8 +136,10 @@ void CalibrationTest::apply_pending_commands()
     std::uint8_t brightness = 0U;
     if (protocol_.consume_brightness_percent(brightness))
     {
-        backlight_.set_brightness_percent(brightness);
-        logger_.info(kTag, "UART brightness=%u", brightness);
+        if (const Status status = backlight_.set_brightness_percent(brightness); is_ok(status))
+            logger_.info(kTag, "UART brightness=%u", brightness);
+        else
+            logger_.error(kTag, "UART brightness=%u rejected: %s", brightness, to_string(status));
     }
 
     bool redraw_pattern = false;
@@ -142,7 +147,7 @@ void CalibrationTest::apply_pending_commands()
     {
         redraw_pattern = !showing_custom_image_;
         logger_.info(kTag, "UART RGB565 profile received");
-        if (showing_custom_image_ && !render_cached_image())
+        if (showing_custom_image_ && !is_ok(render_cached_image()))
             logger_.error(kTag, "Cached image redraw failed or image is incomplete");
     }
 
@@ -160,17 +165,18 @@ void CalibrationTest::apply_pending_commands()
     {
         showing_custom_image_ = true;
         logger_.info(kTag, "UART image stripe=%u", stripe_index);
-        if (!image_.store_stripe(stripe_index, image_pixels))
+        if (!is_ok(image_.store_stripe(stripe_index, image_pixels)))
             logger_.error(kTag, "Image stripe cache failed");
         else if (image_.complete())
         {
             logger_.info(kTag, "Reference image complete; drag the black divider on CYD");
-            if (!render_cached_image())
+            if (!is_ok(render_cached_image()))
                 logger_.error(kTag, "Reference image render failed");
         }
     }
     if (redraw_pattern)
-        render();
+        if (const Status status = render(); !is_ok(status))
+            logger_.error(kTag, "Pattern render failed: %s", to_string(status));
 }
 
 void CalibrationTest::update_image_divider()
@@ -180,7 +186,7 @@ void CalibrationTest::update_image_divider()
 
     std::array<brick::interfaces::display::TouchPoint, 1U> points{};
     std::size_t                                            count = 0U;
-    if (!touch_.read(points.data(), points.size(), count) || count == 0U)
+    if (!is_ok(touch_.read(points.data(), points.size(), count)) || count == 0U)
         return;
 
     const std::int16_t maximum_x = static_cast<std::int16_t>(CalibrationImage::width() - 1U);
@@ -199,7 +205,7 @@ void CalibrationTest::update_image_divider()
             divider_x_   = CalibrationImage::width() / 2U;
             last_tap_ms_ = 0U;
             logger_.info(kTag, "Divider centered");
-            if (!render_cached_image())
+            if (!is_ok(render_cached_image()))
                 logger_.error(kTag, "Image divider redraw failed");
         }
         else
@@ -230,7 +236,7 @@ void CalibrationTest::update_image_divider()
 
     divider_x_ = requested_divider;
     logger_.info(kTag, "Divider x=%u", divider_x_);
-    if (!render_cached_image())
+    if (!is_ok(render_cached_image()))
         logger_.error(kTag, "Image divider redraw failed");
 }
 

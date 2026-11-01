@@ -17,8 +17,8 @@ class LvglTest final
 public:
     explicit LvglTest(const Services& services);
 
-    bool initialize();
-    void update();
+    Status initialize();
+    void   update();
 
 private:
     static void button_event_(lv_event_t* event);

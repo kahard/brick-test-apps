@@ -12,7 +12,7 @@ bool TouchInput::pressed()
 {
     brick::interfaces::display::TouchPoint point{};
     std::size_t                            count = 0;
-    if (!touch_.read(&point, 1, count) || count == 0)
+    if (!is_ok(touch_.read(&point, 1, count)) || count == 0)
         return false;
     if (point.state == brick::interfaces::display::TouchState::released)
     {

@@ -14,27 +14,27 @@ TouchTest::TouchTest(const Services& services)
 {
 }
 
-bool TouchTest::initialize()
+Status TouchTest::initialize()
 {
-    if (!frame_buffer_.initialize())
+    if (!is_ok(frame_buffer_.initialize()))
     {
         logger_.error(TAG, "Unable to allocate a PSRAM framebuffer");
-        return false;
+        return Status::error;
     }
 
     color_pattern_.fill(frame_buffer_.pixels());
-    if (!frame_buffer_.present())
+    if (!is_ok(frame_buffer_.present()))
     {
         logger_.error(TAG, "Initial color pattern presentation failed");
-        return false;
+        return Status::error;
     }
-    return true;
+    return Status::ok;
 }
 
 void TouchTest::update()
 {
     std::size_t count = 0;
-    if (!touch_.read(points_.data(), points_.size(), count))
+    if (!is_ok(touch_.read(points_.data(), points_.size(), count)))
         return;
 
     bool frame_dirty = false;
@@ -76,7 +76,7 @@ void TouchTest::update()
     for (std::size_t id = 0; id < marker_visible_.size(); ++id)
         if (marker_visible_[id])
             touch_marker_.draw(frame_buffer_.pixels(), marker_points_[id], true);
-    if (!frame_buffer_.present())
+    if (!is_ok(frame_buffer_.present()))
         logger_.warning(TAG, "Touch framebuffer presentation failed");
 }
 }  // namespace display_touch_smoke

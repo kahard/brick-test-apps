@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 
     brick::boards::SimulatorBoard          board(brick::boards::SimulatorBoardConfig::panel480(), options);
     brick::platform::pc::PcFileAssetSource flash_assets(BRICK_PC_ASSET_BUNDLE);
-    if (!board.begin() || !flash_assets.begin())
+    if (!is_ok(board.begin()) || !is_ok(flash_assets.begin()))
         return 1;
 
     Application application({ board.display(), board.display(), board.touch(), flash_assets, board.sd(), board.memory(),
