@@ -17,7 +17,7 @@ env.Append(CPPPATH=[
 ])
 
 brick_build_dir = Path(env.subst("$BUILD_DIR")) / "brick"
-env.BuildSources(str(brick_build_dir / "core"), str(brick_root / "libs" / "core" / "src"), "+<TouchMapper.cpp>")
+env.BuildSources(str(brick_build_dir / "core"), str(brick_root / "libs" / "core" / "src"), "+<TouchMapper.cpp>+<DragSlider.cpp>")
 env.BuildSources(str(brick_build_dir / "platform"), str(brick_root / "platforms" / "esp32" / "src"),
                  "+<Ili9341SpiDisplay.cpp>+<Xpt2046Touchscreen.cpp>+<FreeRtosTime.cpp>+<EspIdfLogger.cpp>+<PartitionAssetSource.cpp>")
 

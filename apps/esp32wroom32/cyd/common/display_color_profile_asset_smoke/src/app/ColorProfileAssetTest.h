@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "Services.h"
+#include "brick/core/input/DragSlider.h"
 #include "brick/core/memory/MemoryBlock.h"
 
 namespace cyd_color_profile_asset_smoke
@@ -29,10 +30,7 @@ private:
     Touchscreen&                     touch_;
     AssetSource&                     assets_;
     brick::core::memory::MemoryBlock stripe_;
-    std::uint16_t                    divider_x_    = 160U;
-    std::int16_t                     last_touch_x_ = 0;
-    std::uint32_t                    last_tap_ms_  = 0U;
-    bool                             dragging_     = false;
+    brick::core::input::DragSlider   divider_;
 };
 
 }  // namespace cyd_color_profile_asset_smoke

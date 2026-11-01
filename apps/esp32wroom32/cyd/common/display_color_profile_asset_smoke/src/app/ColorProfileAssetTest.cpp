@@ -17,6 +17,8 @@ namespace
     constexpr std::uint16_t kHeight       = 240U;
     constexpr std::uint16_t kStripeHeight = 16U;
     constexpr std::size_t   kStripeBytes  = static_cast<std::size_t>(kWidth) * kStripeHeight * sizeof(std::uint16_t);
+    // A second tap within this time centres the divider.
+    constexpr std::uint32_t kDoubleTapMs = 400U;
 
     const brick::interfaces::display::AssetDescriptor& asset()
     {
@@ -26,17 +28,18 @@ namespace
 
 ColorProfileAssetTest::ColorProfileAssetTest(const Services& services)
     : display_(services.display), time_(services.time), logger_(services.logger), touch_(services.touch),
-      assets_(services.assets), stripe_(services.memory)
+      assets_(services.assets), stripe_(services.memory), divider_(kWidth - 1U, kDoubleTapMs)
 {
 }
 
 Status ColorProfileAssetTest::initialize()
 {
     logger_.info(kTag, "Color profile asset: left=source, right=corrected; drag divider, double-tap=center");
-    if (!is_ok(stripe_.allocate(kStripeBytes, brick::interfaces::memory::MemoryKind::dma)))
+    if (const Status status = stripe_.allocate(kStripeBytes, brick::interfaces::memory::MemoryKind::dma);
+        !is_ok(status))
     {
-        logger_.error(kTag, "DMA stripe allocation failed");
-        return Status::error;
+        logger_.error(kTag, "DMA stripe allocation failed: %s", to_string(status));
+        return status;
     }
     return render();
 }
@@ -54,7 +57,8 @@ Status ColorProfileAssetTest::render()
         stripe, kWidth, kStripeHeight, kWidth * sizeof(std::uint16_t), brick::interfaces::display::PixelFormat::rgb565,
         true
     };
-    Status status = Status::ok;
+    const std::uint16_t divider_x = divider_.position();
+    Status              status    = Status::ok;
     for (std::uint16_t y = 0U; y < kHeight && is_ok(status); y += kStripeHeight)
     {
         status =
@@ -63,7 +67,7 @@ Status ColorProfileAssetTest::render()
             break;
         auto* pixels = reinterpret_cast<std::uint16_t*>(stripe);
         for (std::uint16_t row = 0U; row < kStripeHeight; ++row)
-            for (std::uint16_t x = divider_x_; x < kWidth; ++x)
+            for (std::uint16_t x = divider_x; x < kWidth; ++x)
             {
                 const std::size_t index = static_cast<std::size_t>(row) * kWidth + x;
                 pixels[index]           = profile.apply(pixels[index]);
@@ -71,10 +75,10 @@ Status ColorProfileAssetTest::render()
         for (std::uint16_t row = 0U; row < kStripeHeight; ++row)
         {
             const std::size_t row_offset = static_cast<std::size_t>(row) * kWidth;
-            if (divider_x_ < kWidth)
-                pixels[row_offset + divider_x_] = 0x0000U;
-            if (divider_x_ > 0U)
-                pixels[row_offset + divider_x_ - 1U] = 0x0000U;
+            if (divider_x < kWidth)
+                pixels[row_offset + divider_x] = 0x0000U;
+            if (divider_x > 0U)
+                pixels[row_offset + divider_x - 1U] = 0x0000U;
         }
         status = display_.draw_buffer({ 0, y, kWidth, kStripeHeight }, buffer);
         if (is_ok(status))
@@ -95,45 +99,8 @@ void ColorProfileAssetTest::update_divider()
     std::size_t                                            count = 0U;
     if (!is_ok(touch_.read(points.data(), points.size(), count)) || count == 0U)
         return;
-
-    constexpr std::int16_t maximum_x = kWidth - 1U;
-    const std::int16_t     x         = points[0].x < 0 ? 0 : (points[0].x > maximum_x ? maximum_x : points[0].x);
-    if (points[0].state == brick::interfaces::display::TouchState::released)
-    {
-        dragging_ = false;
-        return;
-    }
-    if (points[0].state == brick::interfaces::display::TouchState::pressed)
-    {
-        const std::uint32_t now = time_.millis();
-        if (last_tap_ms_ != 0U && now - last_tap_ms_ <= 400U)
-        {
-            divider_x_   = kWidth / 2U;
-            last_tap_ms_ = 0U;
-            redraw();
-        }
-        else
-            last_tap_ms_ = now;
-        last_touch_x_ = x;
-        dragging_     = true;
-        return;
-    }
-    if (!dragging_)
-    {
-        last_touch_x_ = x;
-        dragging_     = true;
-        return;
-    }
-    const std::int16_t delta      = static_cast<std::int16_t>(x - last_touch_x_);
-    last_touch_x_                 = x;
-    const std::int16_t  requested = static_cast<std::int16_t>(divider_x_) + delta;
-    const std::uint16_t next =
-        static_cast<std::uint16_t>(requested < 0 ? 0 : (requested > maximum_x ? maximum_x : requested));
-    if (next != divider_x_)
-    {
-        divider_x_ = next;
+    if (divider_.update(points[0], time_.millis()))
         redraw();
-    }
 }
 
 }  // namespace cyd_color_profile_asset_smoke
