@@ -62,6 +62,18 @@ function(brick_app_simulator name)
   cmake_parse_arguments(ARG "LVGL" "FRAMES" "DEFINES;PREBUILD;SMOKE_ARGS;SOURCES" ${ARGN})
   set(pc_dir "${CMAKE_CURRENT_LIST_DIR}")
   get_filename_component(app_dir "${pc_dir}/.." ABSOLUTE)
+  # Generated sources (e.g. LVGL fonts in src/app/fonts) must exist before the
+  # source list is collected, so PREBUILD also runs here at configure time.
+  if(ARG_PREBUILD)
+    if(NOT BRICK_MAKE)
+      message(FATAL_ERROR "${name} needs GNU make to run: ${ARG_PREBUILD}")
+    endif()
+    execute_process(COMMAND "${BRICK_MAKE}" -C "${app_dir}" ${ARG_PREBUILD}
+                    RESULT_VARIABLE prebuild_result OUTPUT_QUIET)
+    if(NOT prebuild_result EQUAL 0)
+      message(FATAL_ERROR "${name}: make ${ARG_PREBUILD} failed in ${app_dir}")
+    endif()
+  endif()
   file(GLOB_RECURSE app_sources CONFIGURE_DEPENDS "${app_dir}/src/app/*.cpp" "${app_dir}/src/app/*.c")
   brick_add_simulator(${name} ${app_sources} "${pc_dir}/main.cpp" ${ARG_SOURCES})
   target_include_directories(${name} PRIVATE "${app_dir}/src/app")
@@ -72,9 +84,7 @@ function(brick_app_simulator name)
     target_link_libraries(${name} PRIVATE brick_pc_lvgl BRICK::Lvgl)
   endif()
   if(ARG_PREBUILD)
-    if(NOT BRICK_MAKE)
-      message(FATAL_ERROR "${name} needs GNU make to run: ${ARG_PREBUILD}")
-    endif()
+    # And again before every build, so edited sources are regenerated.
     add_custom_target(${name}_prebuild
       COMMAND "${BRICK_MAKE}" -C "${app_dir}" ${ARG_PREBUILD}
       COMMENT "Generating sources for ${name}"

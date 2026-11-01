@@ -30,7 +30,8 @@ bool DisplayButtonTest::initialize()
 
 void DisplayButtonTest::update()
 {
-    if (time_.millis() < next_poll_ms_)
+    // Signed difference: still correct when millis() wraps after ~49.7 days.
+    if (static_cast<std::int32_t>(time_.millis() - next_poll_ms_) < 0)
         return;
     next_poll_ms_      = time_.millis() + kPollIntervalMs;
     const bool pressed = button_.is_pressed();

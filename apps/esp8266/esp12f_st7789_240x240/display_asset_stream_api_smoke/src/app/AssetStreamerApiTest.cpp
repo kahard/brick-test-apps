@@ -32,7 +32,8 @@ bool AssetStreamerApiTest::initialize()
 }
 void AssetStreamerApiTest::update()
 {
-    if (time_.millis() < next_frame_ms_)
+    // Signed difference: still correct when millis() wraps after ~49.7 days.
+    if (static_cast<std::int32_t>(time_.millis() - next_frame_ms_) < 0)
         return;
     blue_ = !blue_;
     stream_color(blue_ ? blue : red, blue_ ? "blue" : "red");

@@ -102,6 +102,5 @@ void SdCardTest::update()
         show_status(verified ? 0x07E0 : 0xF800, verified ? "WRITE READ OK" : "INSERT SD CARD");
     }
     touch_was_down_ = touch_down;
-    time_.delay_ms(30);
 }
 }  // namespace cyd_sd_card_filesystem_touch_smoke

@@ -96,5 +96,4 @@ void SdmmcTest::update()
         show_status(verified ? 0x07E0 : 0xF800, verified ? "WRITE READ OK" : "WRITE READ FAIL");
     }
     touch_was_down_ = touch_down;
-    services_.time.delay_ms(30);
 }

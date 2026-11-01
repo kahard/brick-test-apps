@@ -31,6 +31,8 @@ void setup()
 
 void loop()
 {
+    // The application's update() does not block; the loop paces it.
     if (application != nullptr)
         application->update();
+    delay(20);
 }

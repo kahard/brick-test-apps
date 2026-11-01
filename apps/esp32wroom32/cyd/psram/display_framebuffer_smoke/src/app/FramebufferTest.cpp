@@ -37,7 +37,8 @@ bool FramebufferTest::initialize()
 
 void FramebufferTest::update()
 {
-    if (time_.millis() < next_color_ms_)
+    // Signed difference: still correct when millis() wraps after ~49.7 days.
+    if (static_cast<std::int32_t>(time_.millis() - next_color_ms_) < 0)
         return;
     present_next_color();
     next_color_ms_ = time_.millis() + kColorIntervalMs;

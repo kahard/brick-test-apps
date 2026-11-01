@@ -19,8 +19,10 @@ extern "C" void app_main()
     static Application application({ board.display(), board.sd(), board.touch(), board.time(), board.logger() });
     if (!application.initialize())
         return;
+    // The application's update() does not block; the loop paces it.
     while (true)
     {
         application.update();
+        board.time().delay_ms(30);
     }
 }

@@ -33,7 +33,6 @@ void AssetStreamTest::update()
         show_asset(selected_);
     }
     last_pressed_ = pressed;
-    time_.delay_ms(20);
 }
 bool AssetStreamTest::show_asset(std::uint8_t id)
 {
