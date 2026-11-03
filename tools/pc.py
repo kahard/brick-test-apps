@@ -10,7 +10,8 @@ Examples:
 
 `app` builds only the simulator of the application in the current directory
 (the name in its pc/simulator.cmake) and runs it; the application Makefiles
-use it for `make sim` (SDL window) and `make sim-web` (web browser).
+use it for `make sim` (SDL window), `make sim-web` (web browser) and
+`make sim-lan` (web browser, also from other devices on the network).
 
 Requires CMake and a C++17 compiler; SDL2 (optional) enables the window.
 """
@@ -20,6 +21,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -68,7 +70,41 @@ def simulator_of(app_dir: Path) -> str:
     return match.group(1)
 
 
+def lan_addresses() -> list[str]:
+    """IPv4 addresses of this computer, the one of the default route first."""
+    addresses: list[str] = []
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("192.0.2.1", 9))  # sends nothing; picks the default route
+            addresses.append(probe.getsockname()[0])
+    except OSError:
+        pass
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            address = info[4][0]
+            if not address.startswith(("127.", "169.254.")) and address not in addresses:
+                addresses.append(address)
+    except OSError:
+        pass
+    return addresses
+
+
+def print_lan_urls(options: list[str]) -> None:
+    """Where other devices open the web screen; the simulator itself cannot know."""
+    port = "8080"
+    if "--web" in options:
+        following = options[options.index("--web") + 1 :]
+        if following and following[0].isdigit():
+            port = following[0]
+    for address in lan_addresses():
+        print(f"Web screen on the network: http://{address}:{port}/")
+    print("(if another device cannot connect, allow the simulator in the firewall)")
+    sys.stdout.flush()
+
+
 def run(name: str, options: list[str]) -> int:
+    if "--web-lan" in options:
+        print_lan_urls(options)
     try:
         return subprocess.call([executable(name), *options])
     except KeyboardInterrupt:  # Ctrl+C ends an interactive run

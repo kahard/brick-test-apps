@@ -18,19 +18,23 @@ MONITOR_PORT = $(if $(strip $(PORT)),-p $(PORT),)
 # PC simulator of the application (named in its pc/simulator.cmake):
 #   make sim        in an SDL window (mouse = touch, space = button)
 #   make sim-web    in a web browser at http://localhost:$(WEB_PORT)/
-# SIM_ARGS adds simulator options, e.g. SIM_ARGS="--offline" or
-# SIM_ARGS="--web-lan" (open the web screen from a phone on the network).
+#   make sim-lan    the same, also open to other devices on the network
+#                   (a phone, a tablet) at http://<this PC>:$(WEB_PORT)/
+# SIM_ARGS adds simulator options, e.g. SIM_ARGS="--offline".
 WEB_PORT ?= 8080
 SIM_ARGS ?=
 BRICK_APP_DEFAULT_GOAL := $(.DEFAULT_GOAL)
 
-.PHONY: sim sim-web
+.PHONY: sim sim-web sim-lan
 
 sim:
 	$(PYTHON) $(BRICK_REPO)/tools/pc.py app $(SIM_ARGS)
 
 sim-web:
 	$(PYTHON) $(BRICK_REPO)/tools/pc.py app --web $(WEB_PORT) $(SIM_ARGS)
+
+sim-lan:
+	$(PYTHON) $(BRICK_REPO)/tools/pc.py app --web $(WEB_PORT) --web-lan $(SIM_ARGS)
 
 # These rules do not change which target the including Makefile runs by default.
 .DEFAULT_GOAL := $(BRICK_APP_DEFAULT_GOAL)
