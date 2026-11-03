@@ -89,22 +89,29 @@ def lan_addresses() -> list[str]:
     return addresses
 
 
-def print_lan_urls(options: list[str]) -> None:
-    """Where other devices open the web screen; the simulator itself cannot know."""
+def print_web_urls(options: list[str]) -> None:
+    """Where to open the web screen: one URL per line, set apart by blank lines,
+    so a terminal turns each into a link. With --web-lan also the addresses
+    other devices can use, which the simulator itself cannot know."""
     port = "8080"
-    if "--web" in options:
-        following = options[options.index("--web") + 1 :]
-        if following and following[0].isdigit():
-            port = following[0]
-    for address in lan_addresses():
-        print(f"Web screen on the network: http://{address}:{port}/")
-    print("(if another device cannot connect, allow the simulator in the firewall)")
+    following = options[options.index("--web") + 1 :]
+    if following and following[0].isdigit():
+        port = following[0]
+    print()
+    print(f"  Web screen:      http://localhost:{port}/")
+    if "--web-lan" in options:
+        label = "  On the network:  "
+        for address in lan_addresses():
+            print(f"{label}http://{address}:{port}/")
+            label = " " * len(label)
+        print("  (if another device cannot connect, allow the simulator in the firewall)")
+    print()
     sys.stdout.flush()
 
 
 def run(name: str, options: list[str]) -> int:
-    if "--web-lan" in options:
-        print_lan_urls(options)
+    if "--web" in options:
+        print_web_urls(options)
     try:
         return subprocess.call([executable(name), *options])
     except KeyboardInterrupt:  # Ctrl+C ends an interactive run
