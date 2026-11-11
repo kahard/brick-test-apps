@@ -20,8 +20,9 @@ brick_test_apps/
 ```
 
 Logic shared by the applications of several boards lives in `apps/shared`
-(for now the network test, `apps/shared/network`); each board still has its
-own application with `src/app`, `src/target` and `pc/`.
+(the network test, `apps/shared/network`, and the LVGL benchmark demo,
+`apps/shared/benchmark`); each board still has its own application with
+`src/app`, `src/target` and `pc/`.
 
 Use names in the form:
 

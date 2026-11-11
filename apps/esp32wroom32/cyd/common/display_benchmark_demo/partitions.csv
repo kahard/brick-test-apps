@@ -1,0 +1,5 @@
+# Name, Type, SubType, Offset, Size, Flags
+# CYD (ESP32-2432S028R) 2 MB flash: no assets, the rest for the application.
+nvs, data, nvs, 0x9000, 0x6000,
+phy_init, data, phy, 0xf000, 0x1000,
+factory, app, factory, 0x10000, 0x1F0000,

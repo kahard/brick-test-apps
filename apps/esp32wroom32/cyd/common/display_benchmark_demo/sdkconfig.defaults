@@ -1,0 +1,18 @@
+# CYD (ESP32-2432S028R): 2 MB flash layout used by partitions.csv.
+CONFIG_ESPTOOLPY_FLASHSIZE_2MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="2MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+# Optimize for speed (-O2): rendering, pixel copies and drivers run faster.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+# LVGL renders in app_main and needs about 4.5 KB of stack: the default
+# 3.5 KB overflows.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+# Maximum CPU clock: rendering and pixel copies are CPU-bound.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+# Flash in QIO mode at 80 MHz: code and fonts are read from flash.
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+# 1 ms FreeRTOS tick: delay_ms(1) sleeps 1 ms, not one 10 ms tick.
+CONFIG_FREERTOS_HZ=1000
