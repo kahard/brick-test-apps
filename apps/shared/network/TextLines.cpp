@@ -50,6 +50,26 @@ void TextLines::show(std::size_t index, std::uint16_t color, const char* format,
         failure_ = status;
 }
 
+void TextLines::bar(std::size_t index, std::uint16_t color, std::uint32_t permille)
+{
+    if (index >= count_)
+        return;
+    const auto         size  = screen_.size();
+    const auto         width = static_cast<std::int32_t>(size.width);
+    const std::int32_t done  = static_cast<std::int32_t>((permille > 1000 ? 1000 : permille) * size.width / 1000);
+    if (!drawn_[index] && bars_[index] == done)
+        return;
+    const std::int32_t top = static_cast<std::int32_t>(index) * line_height_;
+    Status             status =
+        done > 0 ? screen_.fill_area({ 0, top, done, line_height_ }, color, pixels_, capacity_) : Status::ok;
+    if (is_ok(status) && done < width)
+        status = screen_.fill_area({ done, top, width - done, line_height_ }, kBackground, pixels_, capacity_);
+    drawn_[index] = false;
+    bars_[index]  = is_ok(status) ? done : -1;
+    if (!is_ok(status) && is_ok(failure_))
+        failure_ = status;
+}
+
 Status TextLines::take_failure()
 {
     const Status failure = failure_;
@@ -69,6 +89,7 @@ Status TextLines::draw_(std::size_t index)
                   brick_network_font_glyphs, brick_network_font_count, colors_[index])
             .present();
     drawn_[index] = is_ok(status);
+    bars_[index]  = -1;
     return status;
 }
 

@@ -69,6 +69,8 @@ std::size_t InternetTest::show_links_(std::size_t line)
     if (state == WifiManagerState::connected && is_ok(services_.wifi.connected_network(joined)))
         lines_.show(line++, kGreen, "WIFI  %s  %d dBm  ch %u", joined.ssid, joined.rssi_dbm,
                     static_cast<unsigned>(joined.channel));
+    else if (wifi_.known_network_count() == 0)
+        lines_.show(line++, kYellow, "WIFI  no network set");
     else if (state == WifiManagerState::waiting)
         lines_.show(line++, kRed, "WIFI  %s (%u)", to_string(wifi_.last_failure()),
                     static_cast<unsigned>(wifi_.failed_attempts()));
@@ -115,7 +117,8 @@ std::size_t InternetTest::show_hotspot_(std::size_t line)
     char address[brick::core::network::kIpv4TextCapacity];
     lines_.show(line++, kCyan, "HOTSPOT  %s", hotspot_.ssid);
     lines_.show(line++, kCyan, "  password %s", hotspot_.password != nullptr ? hotspot_.password : "(none)");
-    lines_.show(line++, kCyan, "  %s  %u clients", address_text(services_.access_point, address, sizeof(address)),
+    lines_.show(line++, kCyan, portal_ && portal_->running() ? "  http://%s  %u clients" : "  %s  %u clients",
+                address_text(services_.access_point, address, sizeof(address)),
                 static_cast<unsigned>(services_.access_point.client_count()));
     return line;
 }

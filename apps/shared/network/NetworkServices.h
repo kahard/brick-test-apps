@@ -10,9 +10,12 @@
 #include "brick/interfaces/logging/ILogger.h"
 #include "brick/interfaces/network/IDnsResolver.h"
 #include "brick/interfaces/network/INetworkInterface.h"
+#include "brick/interfaces/network/ITcpListener.h"
 #include "brick/interfaces/network/ITcpSocket.h"
+#include "brick/interfaces/network/IUdpSocket.h"
 #include "brick/interfaces/network/IWifiAccessPoint.h"
 #include "brick/interfaces/network/IWifiStation.h"
+#include "brick/interfaces/storage/IByteStorage.h"
 #include "brick/interfaces/time/ITimeProvider.h"
 
 namespace network_test
@@ -34,14 +37,20 @@ struct Services
     brick::interfaces::network::ITcpSocket&        socket;
     brick::interfaces::time::ITimeProvider&        time;
     brick::interfaces::logging::ILogger&           logger;
+    /// The Wi-Fi setup page (WifiSetupPortal) needs a listener and storage
+    /// for the chosen network; without either there is no setup page.
+    brick::interfaces::network::ITcpListener* listener = nullptr;
+    /// Captive DNS of the hotspot; nullptr: the page only at its address.
+    brick::interfaces::network::IUdpSocket*   dns_socket = nullptr;
+    brick::interfaces::storage::IByteStorage* settings   = nullptr;
 };
 
 /// The network to join (from the build, see tools/wifi_credentials.py) and
 /// the hotspot opened when that fails or no network is configured.
 struct Settings
 {
-    brick::interfaces::network::WifiCredentials network;  ///< empty SSID: hotspot only
-    const char*                                 hotspot_ssid     = "BRICK-SETUP";
+    brick::interfaces::network::WifiCredentials network;                           ///< empty SSID: hotspot only
+    const char*                                 hotspot_ssid     = "BRICK-SETUP";  ///< also the setup page title
     const char*                                 hotspot_password = "brick-setup";
     /// One text line: line_height (about 1.4 x the font size) and its pixels,
     /// screen width x line_height.

@@ -4,8 +4,11 @@
 #include "../app/Application.h"
 #include "BoardFeatures.h"
 #include "brick/boards/esp32/s3/Panel480Board.h"
+#include "brick/platform/esp32/EspNvsStorage.h"
 #include "brick/platform/esp32/network/EspDnsResolver.h"
+#include "brick/platform/esp32/network/EspTcpListener.h"
 #include "brick/platform/esp32/network/EspTcpSocket.h"
+#include "brick/platform/esp32/network/EspUdpSocket.h"
 #include "generated/wifi_credentials.h"
 
 namespace
@@ -25,8 +28,13 @@ extern "C" void app_main()
     }
     static brick::platform::esp32::EspDnsResolver dns;
     static brick::platform::esp32::EspTcpSocket   socket;
+    // The Wi-Fi setup page, its captive DNS and the network chosen there (NVS).
+    static brick::platform::esp32::EspTcpListener listener;
+    static brick::platform::esp32::EspUdpSocket   dns_socket;
+    static brick::platform::esp32::EspNvsStorage  settings("brick", "wifi");
     static Application application({ board.display(), &board.touch(), nullptr, board.wifi().station(),
-                                     board.wifi().access_point(), nullptr, dns, socket, board.time(), board.logger() },
+                                     board.wifi().access_point(), nullptr, dns, socket, board.time(), board.logger(),
+                                     &listener, &dns_socket, &settings },
                                    { kWifiSsid, kWifiPassword });
     if (const brick::Status status = application.initialize(); !is_ok(status))
     {

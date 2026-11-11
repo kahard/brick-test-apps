@@ -30,6 +30,9 @@ public:
     /// Shows text on line index (printf format, a constant). Lines past
     /// count() are ignored; a drawing failure is kept for take_failure().
     void show(std::size_t index, std::uint16_t color, const char* format, ...) __attribute__((format(printf, 4, 5)));
+    /// Fills line index with a progress bar: permille / 1000 of the width in
+    /// color, the rest background. The next show() on it draws text again.
+    void bar(std::size_t index, std::uint16_t color, std::uint32_t permille);
     /// The first drawing failure since the last call (Status::ok: none).
     Status take_failure();
 
@@ -44,6 +47,7 @@ private:
     std::array<std::array<char, kLineLength>, kMaxLines> texts_{};
     std::array<std::uint16_t, kMaxLines>                 colors_{};
     std::array<bool, kMaxLines>                          drawn_{};
+    std::array<std::int32_t, kMaxLines>                  bars_{};  ///< bar width shown, -1: text
     Status                                               failure_ = Status::ok;
 };
 

@@ -12,9 +12,11 @@ make upload PORT=COMx
 make monitor PORT=COMx
 ```
 
-Credentials come from `BRICK_WIFI_SSID` / `BRICK_WIFI_PASSWORD` or from
-`wifi-credentials.txt` in the repository root; without them only the hotspot
-`BRICK-ESP12F` (password `brick-setup`) runs.
+Credentials come from the setup page (join the hotspot `BRICK-ESP12F`,
+password `brick-setup`; saved in the EEPROM sector), from `BRICK_WIFI_SSID` /
+`BRICK_WIFI_PASSWORD` or from `wifi-credentials.txt` in the repository root.
+Holding the button for 5 s forgets the network saved on the setup page.
+Free heap after the start is about 23 KB.
 
 PC simulator: `make sim` (SDL window) or `make sim-web` (web browser,
 http://localhost:8080/). It joins the simulated "BRICK-LAB";

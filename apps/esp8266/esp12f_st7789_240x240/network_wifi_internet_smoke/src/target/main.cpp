@@ -6,8 +6,11 @@
 #include "../app/Application.h"
 #include "BoardFeatures.h"
 #include "brick/boards/esp8266/Esp12fSt7789Board.h"
+#include "brick/platform/esp8266/Esp8266EepromStorage.h"
 #include "brick/platform/esp8266/network/Esp8266DnsResolver.h"
+#include "brick/platform/esp8266/network/Esp8266TcpListener.h"
 #include "brick/platform/esp8266/network/Esp8266TcpSocket.h"
+#include "brick/platform/esp8266/network/Esp8266UdpSocket.h"
 #include "generated/wifi_credentials.h"
 
 namespace
@@ -31,9 +34,13 @@ void setup()
     }
     static brick::platform::esp8266::Esp8266DnsResolver dns;
     static brick::platform::esp8266::Esp8266TcpSocket   socket;
+    // The Wi-Fi setup page, its captive DNS and the network chosen there (EEPROM sector).
+    static brick::platform::esp8266::Esp8266TcpListener   listener;
+    static brick::platform::esp8266::Esp8266UdpSocket     dns_socket;
+    static brick::platform::esp8266::Esp8266EepromStorage settings;
     static Application test({ instance.display(), nullptr, &instance.button(), instance.wifi().station(),
-                              instance.wifi().access_point(), nullptr, dns, socket, instance.time(),
-                              instance.logger() },
+                              instance.wifi().access_point(), nullptr, dns, socket, instance.time(), instance.logger(),
+                              &listener, &dns_socket, &settings },
                             { kWifiSsid, kWifiPassword });
     if (const brick::Status status = test.initialize(); !is_ok(status))
     {

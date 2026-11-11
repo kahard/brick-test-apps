@@ -12,6 +12,8 @@ namespace
     constexpr char          kTag[]     = "network_test";
     constexpr std::uint32_t kScreenMs  = 250;
     constexpr std::uint16_t kWhite     = 0xFFFF;
+    constexpr std::uint16_t kRed       = 0xF800;
+    constexpr char          kTitle[]   = "BRICK NETWORK TEST";
     constexpr std::size_t   kTitleLine = 0;
 
     bool configured(const brick::interfaces::network::WifiCredentials& network)
@@ -29,17 +31,24 @@ InternetTest::InternetTest(const Services& services, const Settings& settings)
 {
     hotspot_.ssid     = settings.hotspot_ssid;
     hotspot_.password = settings.hotspot_password;
+    if (services.listener != nullptr && services.settings != nullptr)
+    {
+        store_.emplace(*services.settings);
+        portal_.emplace(wifi_, *store_, services.wifi, services.access_point, *services.listener, services.dns_socket,
+                        services.time, services.logger);
+    }
 }
 
 Status InternetTest::initialize()
 {
     if (const Status status = lines_.clear(); !is_ok(status))
         return status;
-    lines_.show(kTitleLine, kWhite, "BRICK NETWORK TEST");
+    lines_.show(kTitleLine, kWhite, kTitle);
     if (const Status status = lines_.take_failure(); !is_ok(status))
         return status;
     if (const Status status = start_wifi_(); !is_ok(status))
         return status;
+    start_portal_();
     screen_timer_.start(kScreenMs);
     show_();
     return Status::ok;
@@ -48,7 +57,18 @@ Status InternetTest::initialize()
 Status InternetTest::start_wifi_()
 {
     brick::core::network::WifiManagerConfig config;
-    if (configured(settings_.network))
+    const Status                            loaded = store_ ? store_->load() : Status::not_found;
+    if (is_ok(loaded))
+    {
+        // Chosen on the setup page; it replaces the network from the build.
+        config.networks      = store_->network();
+        config.network_count = config.networks != nullptr ? 1 : 0;
+        if (config.networks != nullptr)
+            services_.logger.info(kTag, "Joining %s (saved on the setup page)", config.networks->ssid);
+        else
+            services_.logger.info(kTag, "Network forgotten on the setup page: hotspot %s only", hotspot_.ssid);
+    }
+    else if (configured(settings_.network))
     {
         config.networks      = &settings_.network;
         config.network_count = 1;
@@ -59,6 +79,8 @@ Status InternetTest::start_wifi_()
     {
         services_.logger.info(kTag, "No network configured: hotspot %s only", hotspot_.ssid);
     }
+    if (!is_ok(loaded) && loaded != Status::not_found)
+        services_.logger.warning(kTag, "Reading the saved network failed: %s", to_string(loaded));
     config.fallback_access_point = &hotspot_;
     const Status status          = wifi_.start(config);
     if (!is_ok(status))
@@ -66,13 +88,29 @@ Status InternetTest::start_wifi_()
     return status;
 }
 
+void InternetTest::start_portal_()
+{
+    if (!portal_)
+        return;
+    brick::core::network::WifiSetupPortalConfig config;
+    config.title = hotspot_.ssid;
+    if (const Status status = portal_->start(config); !is_ok(status))
+        services_.logger.warning(kTag, "Setup page not started: %s", to_string(status));
+    else
+        services_.logger.info(kTag, "Setup page on port %u", static_cast<unsigned>(config.http_port));
+}
+
 void InternetTest::update()
 {
     wifi_.update();
+    if (portal_)
+        portal_->update();
     if (const Status status = network_.update(); !is_ok(status))
         services_.logger.error(kTag, "Switching the default route failed: %s", to_string(status));
     log_changes_();
-    if (pressed_())
+    const bool pressed = pressed_();
+    update_hold_(pressed);
+    if (pressed)
     {
         if (const Status status = wifi_.request_scan(); !is_ok(status) && status != Status::busy)
             services_.logger.warning(kTag, "Scan request failed: %s", to_string(status));
@@ -143,6 +181,34 @@ void InternetTest::log_changes_()
         address[0] = '\0';
     services_.logger.info(kTag, "Traffic goes through: %s (%s)", network_.name(), address);
     restart_probe_();
+}
+
+void InternetTest::update_hold_(bool pressed)
+{
+    const std::uint32_t now = services_.time.millis();
+    if (pressed)
+    {
+        hold_started_ms_ = now;
+        hold_done_       = false;
+    }
+    const bool          holding = portal_ && was_pressed_ && !hold_done_;
+    const std::uint32_t held    = holding ? now - hold_started_ms_ : 0;
+    if (holding && held >= kHoldBarDelayMs)
+    {
+        lines_.bar(kTitleLine, kRed, held >= kForgetHoldMs ? 1000 : held * 1000 / kForgetHoldMs);
+        bar_shown_ = true;
+    }
+    else if (bar_shown_)
+    {
+        lines_.show(kTitleLine, kWhite, kTitle);
+        bar_shown_ = false;
+    }
+    if (!holding || held < kForgetHoldMs)
+        return;
+    hold_done_ = true;
+    services_.logger.info(kTag, "Held for %lu ms: forgetting the network", static_cast<unsigned long>(kForgetHoldMs));
+    if (const Status status = portal_->forget_network(); !is_ok(status))
+        services_.logger.error(kTag, "Forgetting the network failed: %s", to_string(status));
 }
 
 bool InternetTest::pressed_()
