@@ -22,9 +22,14 @@
 # JC8012 build descriptions are maintained project sources.
 !apps/esp32p4/jc8012_10/**/CMakeLists.txt
 
-# CYD network test build descriptions are maintained project sources.
+# CYD network test and benchmark demo build descriptions are maintained project sources.
 !apps/esp32wroom32/cyd/common/network_*/CMakeLists.txt
 !apps/esp32wroom32/cyd/common/network_*/src/CMakeLists.txt
+!apps/esp32wroom32/cyd/common/display_benchmark_demo/CMakeLists.txt
+!apps/esp32wroom32/cyd/common/display_benchmark_demo/src/CMakeLists.txt
+
+# The ESP32-P4 co-processor update application.
+!apps/esp32p4/common/**/CMakeLists.txt
 
 # Wi-Fi credentials compiled into the network tests (tools/wifi_credentials.py).
 /wifi-credentials.txt
