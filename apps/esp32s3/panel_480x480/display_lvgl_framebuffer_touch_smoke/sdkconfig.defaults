@@ -12,3 +12,17 @@ CONFIG_SPIRAM_USE_CAPS_ALLOC=y
 CONFIG_SPIRAM_USE_MALLOC=y
 CONFIG_LCD_RGB_ISR_IRAM_SAFE=y
 CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+# Optimize for speed (-O2): rendering, pixel copies and drivers run faster.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+# LVGL renders in app_main and needs about 4.5 KB of stack: the default
+# 3.5 KB overflows.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+# Maximum CPU clock: rendering and pixel copies are CPU-bound.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+# Flash in QIO mode: four data lines double the read speed of DIO (assets).
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+# 64 KB data cache with 64-byte lines: fewer flash and PSRAM commands per byte.
+CONFIG_ESP32S3_DATA_CACHE_64KB=y
+CONFIG_ESP32S3_DATA_CACHE_LINE_64B=y
+# 1 ms FreeRTOS tick: delay_ms(1) sleeps 1 ms, not one 10 ms tick.
+CONFIG_FREERTOS_HZ=1000

@@ -9,12 +9,21 @@ namespace
 {
 using Board           = brick::boards::Panel480BoardTemplate<asset_stream_smoke::Features>;
 constexpr char kTag[] = "brick_st7701s_asset_api_fb";
+
+brick::platform::esp32::s3::St7701sRgbPanelConfig display_config()
+{
+    // Assets stream from flash at full speed, and flash shares the bus with
+    // the PSRAM frame buffers: bounce buffers keep the scan-out supplied.
+    brick::platform::esp32::s3::St7701sRgbPanelConfig config = Board::double_buffered_config();
+    config.bounce_buffer_lines                               = 10;
+    return config;
+}
 }  // namespace
 
 extern "C" void app_main()
 {
     using namespace asset_stream_smoke;
-    static Board                                        board{ Board::double_buffered_config() };
+    static Board                                        board{ display_config() };
     static brick::platform::esp32::PartitionAssetSource flash_assets{ "assets" };
     board.logger().info(kTag, "Starting partition AssetStreamer framebuffer test");
     static Application application({ board.display(), board.display(), board.touch(), flash_assets, board.sd(),

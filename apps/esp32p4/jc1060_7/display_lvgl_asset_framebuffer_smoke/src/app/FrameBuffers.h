@@ -22,5 +22,7 @@ public:
 private:
     brick::core::display::Screen     screen_;
     brick::core::memory::MemoryBlock pixels_[2];
+    /// Cache-line alignment: the PPA and the cache sync work on whole lines.
+    std::size_t alignment_;
 };
 }  // namespace lvgl_asset_smoke

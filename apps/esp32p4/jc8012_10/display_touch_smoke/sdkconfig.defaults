@@ -1,2 +1,27 @@
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
 CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHFREQ="80m"
+# Match the standard esp32-p4-evboard PlatformIO board (ES rev >= 1); without
+# these ESP-IDF 5.5 builds for chip revision 3 and a v1.x chip does not boot.
+# CONFIG_ESP32P4_REV_MIN_0 is not set
+CONFIG_ESP32P4_REV_MIN_1=y
+CONFIG_ESP32P4_REV_MIN_FULL=1
+CONFIG_ESP32P4_REV_MAX_FULL=199
+# Use the ECO2 split SRAM layout (sram_low/sram_high).
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_HEX=y
+CONFIG_SPIRAM_SPEED_200M=y
+CONFIG_SPIRAM_USE_CAPS_ALLOC=y
+# CONFIG_SPIRAM_USE_MALLOC is not set
+# Optimize for speed (-O2): rendering, pixel copies and drivers run faster.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+# 1 ms FreeRTOS tick: delay_ms(1) sleeps 1 ms, not one 10 ms tick.
+CONFIG_FREERTOS_HZ=1000
+# 256 KB L2 cache with 128-byte lines: CPU work on PSRAM frame buffers runs
+# about twice as fast (an 800x1280 fill: 33.2 -> 15.7 ms).
+CONFIG_CACHE_L2_CACHE_256KB=y
+CONFIG_CACHE_L2_CACHE_LINE_128B=y
+# Flash in QIO mode: four data lines read assets faster than DIO.
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y

@@ -6,3 +6,14 @@ CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 # PSRAM variant: CydBoard requires CONFIG_SPIRAM when Features::requires_psram.
 CONFIG_SPIRAM=y
 CONFIG_SPIRAM_USE_MALLOC=y
+# Optimize for speed (-O2): rendering, pixel copies and drivers run faster.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+# Maximum CPU clock: rendering and pixel copies are CPU-bound.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+# Flash in QIO mode at 80 MHz: code, fonts and assets are read from flash.
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+# PSRAM at 80 MHz (needs the 80 MHz flash clock).
+CONFIG_SPIRAM_SPEED_80M=y
+# 1 ms FreeRTOS tick: delay_ms(1) sleeps 1 ms, not one 10 ms tick.
+CONFIG_FREERTOS_HZ=1000
