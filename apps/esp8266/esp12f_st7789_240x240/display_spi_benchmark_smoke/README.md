@@ -18,7 +18,9 @@ Git Bash/MSYS variables during tool installation.
 # ESP-12F ST7789 SPI frequency benchmark
 
 This is a separate low-RAM benchmark for the ESP-12F and 240x240 ST7789.
-Two RGB565 images are stored in flash and are sent in 40-row stripes. The
+Two RGB565 images are stored in flash and are sent in two 20-row half
+stripes: one half is read from flash while the display still sends the
+other (`submit_buffer()`, the driver feeds the SPI from its interrupt). The
 variants differ only in SPI clock frequency.
 
 Available variants:
@@ -38,3 +40,14 @@ make monitor
 ```
 
 The benchmark reports the number of frames, elapsed time, and effective FPS.
+
+## Results (2026-11, CPU 160 MHz, flash QIO 80 MHz)
+
+| Variant | fps |
+|---|---|
+| 40 MHz | 31.8 (SPI alone: 23.7 ms per frame) |
+| 60 MHz | the ESP8266 divides 80 MHz by whole numbers: runs at 40 MHz |
+| 80 MHz | this panel shows no image |
+
+Before (TFT_eSPI `pushImage()`, one stripe copied and then sent, flash DOUT
+40 MHz) the 40 MHz variant reached 15.9 fps.
