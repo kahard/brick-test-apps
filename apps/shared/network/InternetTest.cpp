@@ -213,11 +213,17 @@ void InternetTest::update_hold_(bool pressed)
 
 bool InternetTest::pressed_()
 {
-    std::size_t count   = 0;
-    const bool  touched = services_.touch != nullptr
-                         && is_ok(services_.touch->read(touch_points_.data(), touch_points_.size(), count))
-                         && count > 0;
-    const bool down    = touched || (services_.button != nullptr && services_.button->is_pressed());
+    if (services_.touch != nullptr)
+    {
+        std::size_t  count  = 0;
+        const Status status = services_.touch->read(touch_points_.data(), touch_points_.size(), count);
+        // no_data: no new sample since the last read (a GT911 samples about
+        // every 10 ms), so the finger is where it was.
+        if (status != Status::no_data)
+            touched_ = is_ok(status) && count > 0
+                       && touch_points_[0].state != brick::interfaces::display::TouchState::released;
+    }
+    const bool down    = touched_ || (services_.button != nullptr && services_.button->is_pressed());
     const bool pressed = down && !was_pressed_;
     was_pressed_       = down;
     return pressed;

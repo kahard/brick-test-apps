@@ -74,6 +74,7 @@ private:
     brick::interfaces::network::INetworkInterface* logged_link_       = nullptr;
     std::array<brick::interfaces::display::TouchPoint, 1> touch_points_{};
     bool                                                  was_pressed_     = false;
+    bool                                                  touched_         = false;  ///< the last touch sample
     bool                                                  hold_done_       = false;
     bool                                                  bar_shown_       = false;
     std::uint32_t                                         hold_started_ms_ = 0;
