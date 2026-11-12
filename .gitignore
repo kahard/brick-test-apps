@@ -27,6 +27,8 @@
 !apps/esp32wroom32/cyd/common/network_*/src/CMakeLists.txt
 !apps/esp32wroom32/cyd/common/display_benchmark_demo/CMakeLists.txt
 !apps/esp32wroom32/cyd/common/display_benchmark_demo/src/CMakeLists.txt
+!apps/esp32wroom32/cyd/common/audio_smoke/CMakeLists.txt
+!apps/esp32wroom32/cyd/common/audio_smoke/src/CMakeLists.txt
 
 # The ESP32-P4 co-processor update application.
 !apps/esp32p4/common/**/CMakeLists.txt
